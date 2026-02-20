@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2019",
+    "verbatimModuleSyntax": false,
+    "isolatedModules": false,
+    "strict": true,
+    "skipLibCheck": true,
+     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  }
+}
