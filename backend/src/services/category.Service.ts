@@ -1,5 +1,11 @@
 import { CategoryRepository } from '../repositories/category.Repository';
-import { CreateCategoryDTO, UpdateCategoryDTO, PaginationParams, PaginatedResult, Category } from '../types/types';
+import {
+    CreateCategoryDTO,
+    UpdateCategoryDTO,
+    PaginationParams,
+    PaginatedResult,
+    Category
+} from '../types/types';
 
 export class CategoryService {
     private repository: CategoryRepository;
@@ -7,6 +13,10 @@ export class CategoryService {
     constructor() {
         this.repository = new CategoryRepository();
     }
+
+    // ========================================
+    // MÉTODOS BÁSICOS
+    // ========================================
 
     async getAll(pagination: PaginationParams): Promise<PaginatedResult<Category>> {
         const { categories, total } = await this.repository.findAll(pagination);
@@ -44,6 +54,14 @@ export class CategoryService {
             throw new Error(`Category with name '${data.name}' already exists`);
         }
 
+        // Validación: si tiene parent_id, verificar que exista
+        if (data.parent_id) {
+            const parent = await this.repository.findById(data.parent_id);
+            if (!parent) {
+                throw new Error(`Parent category with id ${data.parent_id} not found`);
+            }
+        }
+
         const id = await this.repository.create(data);
         return this.getById(id);
     }
@@ -57,6 +75,21 @@ export class CategoryService {
             const existing = await this.repository.findByName(data.name);
             if (existing && existing.id !== id) {
                 throw new Error(`Category with name '${data.name}' already exists`);
+            }
+        }
+
+        // Validación: si se actualiza parent_id
+        if (data.parent_id !== undefined) {
+            if (data.parent_id === id) {
+                throw new Error('Category cannot be its own parent');
+            }
+
+            if (data.parent_id !== null) {
+                const parent = await this.repository.findById(data.parent_id);
+                if (!parent) {
+                    throw new Error(`Parent category with id ${data.parent_id} not found`);
+                }
+
             }
         }
 
@@ -79,4 +112,21 @@ export class CategoryService {
             throw new Error(`Failed to delete category with id ${id}`);
         }
     }
+
+    // ========================================
+    // MÉTODOS ESPECÍFICOS PARA SUBCATEGORÍAS
+    // ========================================
+
+    // Obtener solo categorías padre
+    async getParentCategories(): Promise<Category[]> {
+        return this.repository.findParentCategories();
+    }
+
+    // Obtener subcategorías de una categoría
+    async getSubcategories(parentId: number): Promise<Category[]> {
+        // Verificar que el padre existe
+        await this.getById(parentId);
+        return this.repository.findSubcategories(parentId);
+    }
+
 }

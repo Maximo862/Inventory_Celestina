@@ -8,6 +8,7 @@ export class CategoryController {
         this.service = new CategoryService();
     }
 
+    // Obtener todas (plano con paginación)
     getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const page = parseInt(req.query.page as string) || 1;
@@ -16,6 +17,30 @@ export class CategoryController {
             const result = await this.service.getAll({ page, limit });
 
             res.status(200).json(result);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    // Obtener solo categorías padre
+    getParents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const parents = await this.service.getParentCategories();
+
+            res.status(200).json(parents);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    // Obtener subcategorías de una categoría
+    getSubcategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const parentId = Number(req.params.id);
+
+            const subcategories = await this.service.getSubcategories(parentId);
+
+            res.status(200).json(subcategories);
         } catch (err) {
             next(err);
         }

@@ -1,8 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FormLayout } from "@/components/FormLayout";
 import { Input } from "@/components/Input";
 import { useCategories } from "@/features/categories/context/CategoryContext";
-import type { Product, CreateProductDTO, UpdateProductDTO } from "@/types/types";
+import type {
+  Product,
+  CreateProductDTO,
+  UpdateProductDTO,
+} from "@/types/types";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -27,7 +31,18 @@ export function ProductFormModal({
     category_id: "",
   });
 
+  // NUEVO: Estado para categoría padre seleccionada
+  const [selectedParentId, setSelectedParentId] = useState<string>("");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // NUEVO: Filtrar subcategorías según categoría padre
+  const availableSubcategories = useMemo(() => {
+    if (!selectedParentId) return [];
+    return categories.filter(
+      (cat) => cat.parent_id === Number(selectedParentId),
+    );
+  }, [categories, selectedParentId]);
 
   useEffect(() => {
     if (product) {
@@ -38,6 +53,20 @@ export function ProductFormModal({
         price: product.price.toString(),
         category_id: product.category_id?.toString() || "",
       });
+
+      // NUEVO: Si el producto tiene categoría, encontrar su padre
+      if (product.category_id) {
+        const category = categories.find(
+          (cat) => cat.id === product.category_id,
+        );
+        if (category?.parent_id) {
+          // Es subcategoría
+          setSelectedParentId(category.parent_id.toString());
+        } else if (category) {
+          // Es categoría padre
+          setSelectedParentId(category.id.toString());
+        }
+      }
     } else {
       setFormData({
         name: "",
@@ -46,8 +75,9 @@ export function ProductFormModal({
         price: "",
         category_id: "",
       });
+      setSelectedParentId("");
     }
-  }, [product, isOpen]);
+  }, [product, categories, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,18 +117,36 @@ export function ProductFormModal({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // NUEVO: Handler para cambio de categoría padre
+  const handleParentChange = (value: string) => {
+    setSelectedParentId(value);
+
+    const hasSubcategories = categories.some(
+      (cat) => cat.parent_id === Number(value),
+    );
+
+    if (hasSubcategories) {
+      // Tiene subcategorías, limpiar selección
+      setFormData((prev) => ({ ...prev, category_id: "" }));
+    } else {
+      // No tiene subcategorías, usar directamente
+      setFormData((prev) => ({ ...prev, category_id: value }));
+    }
+  };
+
   if (!isOpen) return null;
 
   const isEdit = !!product;
-  const isFormValid =
-    !!(formData.name.trim() &&
+  const isFormValid = !!(
+    formData.name.trim() &&
     formData.quantity.trim() &&
     !isNaN(parseInt(formData.quantity)) &&
     parseInt(formData.quantity) >= 0 &&
     formData.price.trim() &&
     !isNaN(parseFloat(formData.price)) &&
     parseFloat(formData.price) > 0 &&
-    formData.category_id.trim()); // Validación de categoría obligatoria
+    formData.category_id.trim()
+  );
 
   return (
     <FormLayout
@@ -114,7 +162,6 @@ export function ProductFormModal({
       isSubmitting={isSubmitting}
       isValid={isFormValid}
     >
-      {/* Campos obligatorios */}
       <div className="space-y-6">
         <h3 className="text-2xl font-bold text-[#0F172A] border-b-2 border-[#E2E8F0] pb-3">
           📋 Datos obligatorios
@@ -131,28 +178,63 @@ export function ProductFormModal({
           autoFocus
         />
 
-        {/* Categoría ahora es obligatoria */}
-        <div>
-          <label
-            htmlFor="product-category"
-            className="block text-[#0F172A] text-lg font-semibold mb-2"
-          >
-            Categoría *
-          </label>
-          <select
-            id="product-category"
-            value={formData.category_id}
-            onChange={(e) => handleChange("category_id", e.target.value)}
-            required
-            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
-          >
-            <option value="">Seleccione una categoría</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+        {/* NUEVO: Selects duales para categorías */}
+        <div className="space-y-4">
+          {/* Select 1: Categoría principal */}
+          <div>
+            <label
+              htmlFor="parent-category"
+              className="block text-[#0F172A] text-lg font-semibold mb-2"
+            >
+              Categoría principal *
+            </label>
+            <select
+              id="parent-category"
+              value={selectedParentId}
+              onChange={(e) => handleParentChange(e.target.value)}
+              required
+              className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+            >
+              <option value="">Seleccione una categoría</option>
+              {categories
+                .filter((cat) => cat.parent_id === null)
+                .map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    🏷️ {cat.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Select 2: Subcategoría (solo si la categoría tiene subcategorías) */}
+          {selectedParentId && availableSubcategories.length > 0 && (
+            <div>
+              <label
+                htmlFor="product-category"
+                className="block text-[#0F172A] text-lg font-semibold mb-2"
+              >
+                Subcategoría *
+              </label>
+              <select
+                id="product-category"
+                value={formData.category_id}
+                onChange={(e) => handleChange("category_id", e.target.value)}
+                required
+                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+              >
+                <option value="">Seleccione una subcategoría</option>
+                {availableSubcategories.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    └─ {sub.name}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-base text-[#475569]">
+                💡 Esta categoría tiene subcategorías. Debe elegir una.
+              </p>
+            </div>
+          )}
+
           {categories.length === 0 && (
             <p className="mt-2 text-[#F59E0B] text-base font-medium">
               ⚠️ Debe crear al menos una categoría primero
@@ -160,6 +242,7 @@ export function ProductFormModal({
           )}
         </div>
 
+        {/* Resto de campos (quantity, price) igual que antes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <Input
             id="product-quantity"
@@ -186,7 +269,7 @@ export function ProductFormModal({
         </div>
       </div>
 
-      {/* Campos opcionales */}
+      {/* Descripción (opcional) igual que antes */}
       <div className="space-y-6 pt-4">
         <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3">
           📝 Datos opcionales

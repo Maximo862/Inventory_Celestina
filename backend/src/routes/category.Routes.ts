@@ -6,6 +6,8 @@ const categoryRouter = Router();
 const controller = new CategoryController();
 
 categoryRouter.get('/', controller.getAll);
+categoryRouter.get('/parents', controller.getParents);
+categoryRouter.get('/:id/subcategories', controller.getSubcategories);
 categoryRouter.get('/:id', authRequired, controller.getById);
 categoryRouter.post('/', authRequired, controller.create);
 categoryRouter.patch('/:id', authRequired, controller.update);

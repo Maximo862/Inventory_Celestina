@@ -54,6 +54,16 @@ export function ProductsPage() {
     return map;
   }, [categories]);
 
+  // NUEVO: Obtener categorías padre
+  const parentCategories = useMemo(() => {
+    return categories.filter((cat) => cat.parent_id === null);
+  }, [categories]);
+
+  // NUEVO: Función para obtener subcategorías de un padre
+  const getSubcategories = (parentId: number) => {
+    return categories.filter((cat) => cat.parent_id === parentId);
+  };
+
   // Filtrado y ordenamiento
   const filteredAndSortedProducts = useMemo(() => {
     let result = products.filter((product) => {
@@ -63,13 +73,11 @@ export function ProductsPage() {
 
       const matchesCategory =
         filterCategory === "all" ||
-        (filterCategory === "none" && !product.category_id) ||
         product.category_id?.toString() === filterCategory;
 
       return matchesSearch && matchesCategory;
     });
 
-    // Ordenamiento
     result.sort((a, b) => {
       switch (sortBy) {
         case "name-asc":
@@ -148,7 +156,7 @@ export function ProductsPage() {
             onClick={handleCreate}
             className="flex items-center justify-center gap-3"
           >
-            <FaPlus className="text-2xl " />
+            <FaPlus className="text-2xl" />
             Nuevo producto
           </Button>
         }
@@ -164,9 +172,7 @@ export function ProductsPage() {
         />
       ) : (
         <>
-          {/* Barra de búsqueda y filtros */}
           <div className="mb-6 space-y-4">
-            {/* Búsqueda */}
             <div>
               <input
                 type="text"
@@ -177,9 +183,8 @@ export function ProductsPage() {
               />
             </div>
 
-            {/* Filtros y ordenamiento */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Filtro por categoría */}
+              {/* NUEVO: Select con jerarquía visual usando optgroup */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Filtrar por categoría
@@ -190,15 +195,29 @@ export function ProductsPage() {
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
                   <option value="all">📁 Todas las categorías</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
+
+                  {/* Renderizar jerarquía con optgroup */}
+                  {parentCategories.map((parent) => {
+                    const subs = getSubcategories(parent.id);
+
+                    return (
+                      <optgroup key={parent.id} label={`🏷️ ${parent.name}`}>
+                        {/* Subcategorías con indentación */}
+                        {subs.length > 0 ? (
+                          subs.map((sub) => (
+                            <option key={sub.id} value={sub.id}>
+                              &nbsp;&nbsp;└─ {sub.name}
+                            </option>
+                          ))
+                        ) : (
+                          <option value={parent.id}>{parent.name}</option>
+                        )}
+                      </optgroup>
+                    );
+                  })}
                 </select>
               </div>
 
-              {/* Ordenar por */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Ordenar por
@@ -218,7 +237,6 @@ export function ProductsPage() {
               </div>
             </div>
 
-            {/* Contador de resultados */}
             <div className="flex items-center justify-between text-lg text-[#475569]">
               <p>
                 Mostrando {filteredAndSortedProducts.length} de{" "}
@@ -241,7 +259,6 @@ export function ProductsPage() {
             </div>
           </div>
 
-          {/* Lista de productos */}
           {filteredAndSortedProducts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#475569] mb-4">

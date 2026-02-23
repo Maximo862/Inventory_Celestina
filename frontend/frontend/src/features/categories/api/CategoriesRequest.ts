@@ -11,9 +11,15 @@ export const getAllCategoriesRequest = (params?: PaginationParams) => {
   const queryString = params
     ? `?page=${params.page || 1}&limit=${params.limit || 10}`
     : "";
-  
+
   return fetchAPI<PaginatedResponse<Category>>(`/categories${queryString}`);
 };
+
+export const getParentCategoriesRequest = () =>
+  fetchAPI<Category[]>("/categories/parents");
+
+export const getSubcategoriesRequest = (parentId: number) =>
+  fetchAPI<Category[]>(`/categories/${parentId}/subcategories`);
 
 export const getCategoryByIdRequest = (id: number) =>
   fetchAPI<Category>(`/categories/${id}`);

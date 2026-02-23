@@ -5,22 +5,77 @@ export interface User {
   created_at?: string;
 }
 
+
+// Order Types
+export type OrderType = 'entry' | 'exit';
+
+export interface Order {
+  id: number;
+  type: OrderType;
+  client_id: number | null;
+  notes: string | null;
+  total_amount: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderItem {
+  id: number;
+  order_id: number;
+  product_id: number;
+  quantity: number;
+  price: number;
+  subtotal: number;
+}
+
+// DTOs para crear órdenes
+export interface CreateOrderDTO {
+  type: OrderType;
+  client_id?: number | null;
+  notes?: string;
+  items: CreateOrderItemDTO[];
+}
+
+export interface CreateOrderItemDTO {
+  product_id: number;
+  quantity: number;
+  price: number;
+}
+
+export interface UpdateOrderDTO {
+  client_id?: number | null;
+  notes?: string;
+}
+
+// Para visualización con detalles expandidos
+export interface OrderWithDetails extends Order {
+  client_name?: string;
+  items: OrderItemWithProduct[];
+}
+
+export interface OrderItemWithProduct extends OrderItem {
+  product_name: string;
+}
+
 // ============================================
 // CATEGORY TYPES
 // ============================================
 export interface Category {
   id: number;
   name: string;
+  parent_id: number | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface CreateCategoryDTO {
   name: string;
+  parent_id?: number | null;
 }
 
 export interface UpdateCategoryDTO {
   name?: string;
+  parent_id?: number | null;
 }
 
 // ============================================

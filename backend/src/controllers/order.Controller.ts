@@ -1,0 +1,86 @@
+import { Request, Response, NextFunction } from 'express';
+import { OrderService } from '../services/order.Service';
+
+export class OrderController {
+    private service: OrderService;
+
+    constructor() {
+        this.service = new OrderService();
+    }
+
+    // Obtener todas las órdenes con paginación y filtro opcional por tipo
+    getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const type = req.query.type as 'entry' | 'exit' | undefined;
+
+            const result = await this.service.getAll(page, limit, type);
+
+            res.status(200).json(result);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    // Obtener una orden por ID con sus items
+    getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = Number(req.params.id);
+
+            const order = await this.service.getById(id);
+
+            res.status(200).json(order);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    // Crear una nueva orden (entrada o salida)
+    create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const order = await this.service.create(req.body);
+
+            res.status(201).json(order);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    // Actualizar orden (solo client_id y notes, no items)
+    update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = Number(req.params.id);
+
+            const order = await this.service.update(id, req.body);
+
+            res.status(200).json(order);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    // Eliminar orden (revierte stock automáticamente)
+    delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = Number(req.params.id);
+
+            await this.service.delete(id);
+
+            res.status(204).send();
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    // Obtener estadísticas de órdenes
+    getStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const stats = await this.service.getStats();
+
+            res.status(200).json(stats);
+        } catch (err) {
+            next(err);
+        }
+    };
+}

@@ -8,6 +8,7 @@ import routerAuth from "./routes/auth.Routes";
 import clientRouter from "./routes/client.Routes";
 import productRouter from "./routes/product.Routes";
 import categoryRouter from "./routes/category.Routes";
+import orderRouter from "./routes/order.Routes";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/auth", routerAuth)
 app.use("/clients", clientRouter)
 app.use("/products", productRouter)
 app.use("/categories", categoryRouter)
+app.use("/orders", orderRouter)
 app.use(errorHandler)
 
 app.listen(4000, () => console.log("Server running on port 4000"));
