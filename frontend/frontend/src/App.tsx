@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import { ClientsPage } from "./features/clients/pages/ClientsPage";
 import { ProductsPage } from "./features/products/pages/ProductsPage";
 import { SubcategoriesPage } from "./features/categories/pages/SubcategoriesPage";
+import { OrdersPage } from "./features/orders/pages/OrdersPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/clients" element={<ClientsPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
             </Route>
           </Route>
         </Routes>

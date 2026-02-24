@@ -1,5 +1,6 @@
 import { OrderRepository } from '../repositories/order.Repository';
 import { ProductRepository } from '../repositories/product.Repository';
+import { ValidationError, NotFoundError, InsufficientStockError } from '../utils/appError';
 import type { CreateOrderDTO, UpdateOrderDTO, PaginatedResult, Order } from '../types/types';
 
 export class OrderService {
@@ -14,17 +15,17 @@ export class OrderService {
   async create(data: CreateOrderDTO) {
     // Validaciones
     if (!data.type || (data.type !== 'entry' && data.type !== 'exit')) {
-      throw new Error('Order type must be "entry" or "exit"');
+      throw new ValidationError('Order type must be "entry" or "exit"');
     }
 
     if (!data.items || data.items.length === 0) {
-      throw new Error('Order must have at least one item');
+      throw new ValidationError('Order must have at least one item');
     }
 
     // Validar que todos los items tengan datos válidos
     for (const item of data.items) {
       if (!item.product_id || item.quantity <= 0 || item.price <= 0) {
-        throw new Error('All items must have valid product_id, quantity and price');
+        throw new ValidationError('All items must have valid product_id, quantity and price');
       }
     }
 
@@ -34,12 +35,14 @@ export class OrderService {
         const product = await this.productRepo.findById(item.product_id);
 
         if (!product) {
-          throw new Error(`Product with id ${item.product_id} not found`);
+          throw new NotFoundError('Product', item.product_id);
         }
 
         if (product.quantity < item.quantity) {
-          throw new Error(
-            `Insufficient stock for "${product.name}". Available: ${product.quantity}, requested: ${item.quantity}`
+          throw new InsufficientStockError(
+            product.name,
+            product.quantity,
+            item.quantity
           );
         }
       }
@@ -50,7 +53,7 @@ export class OrderService {
       for (const item of data.items) {
         const product = await this.productRepo.findById(item.product_id);
         if (!product) {
-          throw new Error(`Product with id ${item.product_id} not found`);
+          throw new NotFoundError('Product', item.product_id);
         }
       }
     }
@@ -64,7 +67,7 @@ export class OrderService {
     const order = await this.orderRepo.findByIdWithItems(id);
 
     if (!order) {
-      throw new Error(`Order with id ${id} not found`);
+      throw new NotFoundError('Order', id);
     }
 
     return order;
@@ -91,7 +94,7 @@ export class OrderService {
     const updated = await this.orderRepo.update(id, data);
 
     if (!updated) {
-      throw new Error('No changes were made');
+      throw new ValidationError('No changes were made');
     }
 
     return this.getById(id);

@@ -1,4 +1,5 @@
 import { ClientRepository } from '../repositories/client.Repository';
+import { ValidationError, NotFoundError, DuplicateError } from '../utils/appError';
 import { CreateClientDTO, UpdateClientDTO, PaginationParams, PaginatedResult, Client } from '../types/types';
 
 export class ClientService {
@@ -26,7 +27,7 @@ export class ClientService {
         const client = await this.repository.findById(id);
 
         if (!client) {
-            throw new Error(`Client with id ${id} not found`);
+            throw new NotFoundError('Client', id);
         }
 
         return client;
@@ -35,26 +36,26 @@ export class ClientService {
     async create(data: CreateClientDTO): Promise<Client> {
         // Validaciones
         if (!data.name || data.name.trim() === '') {
-            throw new Error('Client name is required');
+            throw new ValidationError('Client name is required');
         }
 
         if (!data.cuil || data.cuil.trim() === '') {
-            throw new Error('CUIL is required');
+            throw new ValidationError('CUIL is required');
         }
 
         if (!data.tax_condition || data.tax_condition.trim() === '') {
-            throw new Error('Tax condition is required');
+            throw new ValidationError('Tax condition is required');
         }
 
         // Validación: CUIL único
         const existing = await this.repository.findByCuil(data.cuil);
         if (existing) {
-            throw new Error(`Client with CUIL '${data.cuil}' already exists`);
+            throw new DuplicateError('Client', 'CUIL', data.cuil);
         }
 
         // Validación de email si existe
         if (data.email && !this.isValidEmail(data.email)) {
-            throw new Error('Invalid email format');
+            throw new ValidationError('Invalid email format');
         }
 
         const id = await this.repository.create(data);
@@ -69,19 +70,19 @@ export class ClientService {
         if (data.cuil) {
             const existing = await this.repository.findByCuil(data.cuil);
             if (existing && existing.id !== id) {
-                throw new Error(`Client with CUIL '${data.cuil}' already exists`);
+                throw new DuplicateError('Client', 'CUIL', data.cuil);
             }
         }
 
         // Validación de email si existe
         if (data.email && !this.isValidEmail(data.email)) {
-            throw new Error('Invalid email format');
+            throw new ValidationError('Invalid email format');
         }
 
         const updated = await this.repository.update(id, data);
 
         if (!updated) {
-            throw new Error('No changes were made');
+            throw new ValidationError('No changes were made');
         }
 
         return this.getById(id);
@@ -94,7 +95,7 @@ export class ClientService {
         const deleted = await this.repository.delete(id);
 
         if (!deleted) {
-            throw new Error(`Failed to delete client with id ${id}`);
+            throw new ValidationError('Failed to delete client');
         }
     }
 

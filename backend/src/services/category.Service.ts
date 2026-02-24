@@ -1,4 +1,5 @@
 import { CategoryRepository } from '../repositories/category.Repository';
+import { ValidationError, NotFoundError, DuplicateError, AppError } from '../utils/appError';
 import {
     CreateCategoryDTO,
     UpdateCategoryDTO,
@@ -13,10 +14,6 @@ export class CategoryService {
     constructor() {
         this.repository = new CategoryRepository();
     }
-
-    // ========================================
-    // MÉTODOS BÁSICOS
-    // ========================================
 
     async getAll(pagination: PaginationParams): Promise<PaginatedResult<Category>> {
         const { categories, total } = await this.repository.findAll(pagination);
@@ -36,7 +33,7 @@ export class CategoryService {
         const category = await this.repository.findById(id);
 
         if (!category) {
-            throw new Error(`Category with id ${id} not found`);
+            throw new NotFoundError('Category', id);
         }
 
         return category;
@@ -45,20 +42,20 @@ export class CategoryService {
     async create(data: CreateCategoryDTO): Promise<Category> {
         // Validación: nombre requerido
         if (!data.name || data.name.trim() === '') {
-            throw new Error('Category name is required');
+            throw new ValidationError('Category name is required');
         }
 
         // Validación: nombre único
         const existing = await this.repository.findByName(data.name);
         if (existing) {
-            throw new Error(`Category with name '${data.name}' already exists`);
+            throw new DuplicateError('Category', 'name', data.name);
         }
 
         // Validación: si tiene parent_id, verificar que exista
         if (data.parent_id) {
             const parent = await this.repository.findById(data.parent_id);
             if (!parent) {
-                throw new Error(`Parent category with id ${data.parent_id} not found`);
+                throw new NotFoundError('Parent category', data.parent_id);
             }
         }
 
@@ -74,29 +71,28 @@ export class CategoryService {
         if (data.name) {
             const existing = await this.repository.findByName(data.name);
             if (existing && existing.id !== id) {
-                throw new Error(`Category with name '${data.name}' already exists`);
+                throw new DuplicateError('Category', 'name', data.name);
             }
         }
 
         // Validación: si se actualiza parent_id
         if (data.parent_id !== undefined) {
             if (data.parent_id === id) {
-                throw new Error('Category cannot be its own parent');
+                throw new AppError('Category cannot be its own parent', 400, 'SELF_REFERENCE');
             }
 
             if (data.parent_id !== null) {
                 const parent = await this.repository.findById(data.parent_id);
                 if (!parent) {
-                    throw new Error(`Parent category with id ${data.parent_id} not found`);
+                    throw new NotFoundError('Parent category', data.parent_id);
                 }
-
             }
         }
 
         const updated = await this.repository.update(id, data);
 
         if (!updated) {
-            throw new Error('No changes were made');
+            throw new ValidationError('No changes were made');
         }
 
         return this.getById(id);
@@ -109,24 +105,17 @@ export class CategoryService {
         const deleted = await this.repository.delete(id);
 
         if (!deleted) {
-            throw new Error(`Failed to delete category with id ${id}`);
+            throw new ValidationError('Failed to delete category');
         }
     }
 
-    // ========================================
-    // MÉTODOS ESPECÍFICOS PARA SUBCATEGORÍAS
-    // ========================================
-
-    // Obtener solo categorías padre
     async getParentCategories(): Promise<Category[]> {
         return this.repository.findParentCategories();
     }
 
-    // Obtener subcategorías de una categoría
     async getSubcategories(parentId: number): Promise<Category[]> {
         // Verificar que el padre existe
         await this.getById(parentId);
         return this.repository.findSubcategories(parentId);
     }
-
 }
