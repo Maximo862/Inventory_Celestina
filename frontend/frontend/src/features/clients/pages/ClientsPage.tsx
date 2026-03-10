@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react"; // ← AGREGAR useContext
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/Button";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -8,6 +8,7 @@ import { ClientCard } from "../components/ClientCard";
 import { ClientFormModal } from "../components/ClientFormModal";
 import { useClients } from "../context/ClientContext";
 import { useClientActions } from "../hooks/useClientActions";
+import { AuthContext } from "@/features/auth/context/AuthContext"; // ← AGREGAR
 import { IoMdPerson } from "react-icons/io";
 import { FaPlus } from "react-icons/fa6";
 import type { Client } from "@/types/types";
@@ -17,6 +18,9 @@ type SortOption = "name-asc" | "name-desc" | "cuil-asc" | "cuil-desc";
 export function ClientsPage() {
   const { clients, loading } = useClients()!;
   const { createClient, updateClient, deleteClient } = useClientActions();
+  const { user } = useContext(AuthContext)!; // ← AGREGAR
+
+  const isAdmin = user?.role === "admin"; // ← AGREGAR
 
   const [formModal, setFormModal] = useState<{
     isOpen: boolean;
@@ -40,7 +44,6 @@ export function ClientsPage() {
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Filtrado y ordenamiento
   const filteredAndSortedClients = useMemo(() => {
     let result = clients.filter((client) => {
       const searchLower = searchTerm.toLowerCase();
@@ -120,15 +123,18 @@ export function ClientsPage() {
         title="Clientes"
         subtitle="Gestión de clientes de la maderería"
         action={
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleCreate}
-            className="flex items-center justify-center gap-3"
-          >
-            <FaPlus className="text-2xl " />
-            Nuevo cliente
-          </Button>
+          // ← CONDICIONAL: Solo mostrar botón si es admin
+          isAdmin ? (
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleCreate}
+              className="flex items-center justify-center gap-3"
+            >
+              <FaPlus className="text-2xl" />
+              Nuevo cliente
+            </Button>
+          ) : undefined
         }
       />
 
@@ -142,9 +148,7 @@ export function ClientsPage() {
         />
       ) : (
         <>
-          {/* Barra de búsqueda y filtros */}
           <div className="mb-6 space-y-4">
-            {/* Búsqueda */}
             <div>
               <input
                 type="text"
@@ -155,7 +159,6 @@ export function ClientsPage() {
               />
             </div>
 
-            {/* Ordenar por */}
             <div>
               <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                 Ordenar por
@@ -172,7 +175,6 @@ export function ClientsPage() {
               </select>
             </div>
 
-            {/* Contador de resultados */}
             <div className="flex items-center justify-between text-lg text-[#475569]">
               <p>
                 Mostrando {filteredAndSortedClients.length} de {clients.length}{" "}
@@ -192,7 +194,6 @@ export function ClientsPage() {
             </div>
           </div>
 
-          {/* Lista de clientes */}
           {filteredAndSortedClients.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#475569] mb-4">
@@ -215,6 +216,7 @@ export function ClientsPage() {
                 <ClientCard
                   key={client.id}
                   client={client}
+                  isAdmin={isAdmin} // ← PASAR prop
                   onEdit={() => handleEdit(client)}
                   onDelete={handleDeleteClick}
                 />
@@ -224,22 +226,28 @@ export function ClientsPage() {
         </>
       )}
 
-      <ClientFormModal
-        isOpen={formModal.isOpen}
-        client={formModal.client}
-        onClose={handleFormClose}
-        onSubmit={handleFormSubmit}
-      />
+      {/* ← CONDICIONAL: Solo mostrar modal si es admin */}
+      {isAdmin && (
+        <ClientFormModal
+          isOpen={formModal.isOpen}
+          client={formModal.client}
+          onClose={handleFormClose}
+          onSubmit={handleFormSubmit}
+        />
+      )}
 
-      <DeleteConfirmModal
-        isOpen={deleteModal.isOpen}
-        title="¿Eliminar cliente?"
-        message="Está por eliminar el cliente:"
-        itemName={deleteModal.name}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-        isDeleting={isDeleting}
-      />
+      {/* ← CONDICIONAL: Solo mostrar modal de eliminación si es admin */}
+      {isAdmin && (
+        <DeleteConfirmModal
+          isOpen={deleteModal.isOpen}
+          title="¿Eliminar cliente?"
+          message="Está por eliminar el cliente:"
+          itemName={deleteModal.name}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 }

@@ -50,7 +50,7 @@ export class ClientService {
         // Validación: CUIL único
         const existing = await this.repository.findByCuil(data.cuil);
         if (existing) {
-            throw new DuplicateError('Client', 'CUIL', data.cuil);
+            throw new DuplicateError('Cliente', 'CUIL', data.cuil);
         }
 
         // Validación de email si existe
@@ -70,7 +70,7 @@ export class ClientService {
         if (data.cuil) {
             const existing = await this.repository.findByCuil(data.cuil);
             if (existing && existing.id !== id) {
-                throw new DuplicateError('Client', 'CUIL', data.cuil);
+                throw new DuplicateError('Cliente', 'CUIL', data.cuil);
             }
         }
 

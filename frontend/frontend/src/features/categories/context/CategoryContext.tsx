@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState, useMemo, useContext } from "react";
 import { getAllCategoriesRequest } from "../api/CategoriesRequest";
 import type { Category } from "@/types/types";
+import { useAuth } from "@/features/auth/context/AuthContext";
 
 interface CategoryContextType {
   categories: Category[];
@@ -15,10 +16,13 @@ export const CategoryContext = createContext<CategoryContextType | null>(null);
 export function CategoryProvider({ children }: { children: React.ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    loadCategories();
-  }, []);
+    if (user && !authLoading) {
+      loadCategories();
+    }
+  }, [authLoading, user]);
 
   async function loadCategories() {
     try {
@@ -62,11 +66,11 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useCategories() {
-   const context = useContext(CategoryContext);
-  
-    if (!context) {
-      throw new Error("useCategories must be used within CategoriesProvider");
-    }
-  
-    return context;
+  const context = useContext(CategoryContext);
+
+  if (!context) {
+    throw new Error("useCategories must be used within CategoriesProvider");
+  }
+
+  return context;
 }

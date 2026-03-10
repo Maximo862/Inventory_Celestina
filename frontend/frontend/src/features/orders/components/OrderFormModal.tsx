@@ -5,6 +5,7 @@ import { useClients } from "@/features/clients/context/ClientContext";
 import { useProducts } from "@/features/products/context/ProductContext";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import type { Order, CreateOrderDTO, UpdateOrderDTO } from "@/types/types";
+import { formatARS } from "@/utils/formatCurrency";
 
 interface OrderFormModalProps {
   isOpen: boolean;
@@ -106,14 +107,20 @@ export function OrderFormModal({
     value: string,
   ) => {
     const newItems = [...items];
-    newItems[index][field] = value;
 
-    // Auto-completar precio cuando se selecciona un producto
-    if (field === "product_id" && value) {
-      const product = products.find((p) => p.id === parseInt(value));
-      if (product) {
-        newItems[index].price = product.price.toString();
-      }
+    const cleanValue =
+      field === "price" ? value.replace(/\D/g, "") : value;
+
+    newItems[index][field] = cleanValue;
+
+    if (field === "product_id") {
+      const product = products.find(
+        (p) => p.id === Number(cleanValue)
+      );
+
+      newItems[index].price = product
+        ? String(Number(product.price))
+        : "";
     }
 
     setItems(newItems);
@@ -130,13 +137,13 @@ export function OrderFormModal({
   const isFormValid = order
     ? true // Edición siempre válida
     : type &&
-      items.length > 0 &&
-      items.every(
-        (item) =>
-          item.product_id &&
-          parseFloat(item.quantity) > 0 &&
-          parseFloat(item.price) > 0,
-      );
+    items.length > 0 &&
+    items.every(
+      (item) =>
+        item.product_id &&
+        parseFloat(item.quantity) > 0 &&
+        parseFloat(item.price) > 0,
+    );
 
   if (!isOpen) return null;
 
@@ -167,22 +174,20 @@ export function OrderFormModal({
               <button
                 type="button"
                 onClick={() => setType("entry")}
-                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all ${
-                  type === "entry"
+                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all ${type === "entry"
                     ? "bg-[#16A34A]/10 border-[#16A34A] text-[#16A34A]"
                     : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]"
-                }`}
+                  }`}
               >
                 📥 Entrada
               </button>
               <button
                 type="button"
                 onClick={() => setType("exit")}
-                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all ${
-                  type === "exit"
+                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all ${type === "exit"
                     ? "bg-[#DC2626]/10 border-[#DC2626] text-[#DC2626]"
                     : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]"
-                }`}
+                  }`}
               >
                 📤 Salida
               </button>
@@ -300,13 +305,11 @@ export function OrderFormModal({
                         Precio Unitario
                       </label>
                       <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
+                        type="text"
                         value={item.price}
-                        onChange={(e) =>
-                          handleItemChange(index, "price", e.target.value)
-                        }
+                        onChange={(e) => {
+                          handleItemChange(index, "price", e.target.value);
+                        }}
                         required
                         className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition duration-200"
                       />
@@ -333,9 +336,8 @@ export function OrderFormModal({
                         Subtotal:{" "}
                       </span>
                       <span className="text-xl font-bold text-[#0F172A]">
-                        $
-                        {(
-                          parseFloat(item.quantity) * parseFloat(item.price)
+                        {formatARS(
+                          parseFloat(item.quantity) * parseFloat(item.price),
                         )}
                       </span>
                     </div>
@@ -352,7 +354,7 @@ export function OrderFormModal({
                     TOTAL:
                   </span>
                   <span className="text-3xl font-bold text-[#2563EB]">
-                    ${calculateTotal}
+                    {formatARS(calculateTotal)}
                   </span>
                 </div>
               </div>

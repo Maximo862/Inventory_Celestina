@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { ClientController } from '../controllers/client.Controller';
 import { authRequired } from '../middlewares/auth.Middleware';
+import { requireRole } from '../middlewares/requireRolre.Middleware';
 
 const clientRouter = Router();
 const controller = new ClientController();
 
-clientRouter.get('/',controller.getAll);
-clientRouter.get('/:id', authRequired,controller.getById);
-clientRouter.post('/', authRequired,controller.create);
-clientRouter.patch('/:id', authRequired,controller.update);
-clientRouter.delete('/:id', authRequired,controller.delete);
+clientRouter.get('/', authRequired, requireRole(['admin', 'employee']), controller.getAll);
+clientRouter.get('/:id', authRequired, requireRole(['admin', 'employee']), controller.getById);
+clientRouter.post('/', authRequired, requireRole('admin'),controller.create);
+clientRouter.patch('/:id', authRequired, requireRole('admin'),controller.update);
+clientRouter.delete('/:id', authRequired, requireRole('admin'),controller.delete);
 
 export default clientRouter;

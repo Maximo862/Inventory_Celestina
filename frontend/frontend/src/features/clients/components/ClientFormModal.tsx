@@ -19,7 +19,7 @@ export function ClientFormModal({
   const [formData, setFormData] = useState({
     name: "",
     cuil: "",
-    tax_condition: "",
+    tax_condition: "" as "responsable_inscripto" | "monotributo" | "", 
     phone: "",
     email: "",
     address: "",
@@ -57,12 +57,13 @@ export function ClientFormModal({
       const dataToSubmit: any = {
         name: formData.name.trim(),
         cuil: formData.cuil.trim(),
-        tax_condition: formData.tax_condition.trim(),
+        tax_condition: formData.tax_condition, // Ya no trim porque es enum
       };
 
       if (formData.phone.trim()) dataToSubmit.phone = formData.phone.trim();
       if (formData.email.trim()) dataToSubmit.email = formData.email.trim();
-      if (formData.address.trim()) dataToSubmit.address = formData.address.trim();
+      if (formData.address.trim())
+        dataToSubmit.address = formData.address.trim();
 
       await onSubmit(dataToSubmit);
       handleClose();
@@ -90,10 +91,11 @@ export function ClientFormModal({
   if (!isOpen) return null;
 
   const isEdit = !!client;
-  const isFormValid =
-    !!(formData.name.trim() &&
+  const isFormValid = !!(
+    formData.name.trim() &&
     formData.cuil.trim() &&
-    formData.tax_condition.trim())
+    formData.tax_condition // ← Ya no necesita trim
+  );
 
   return (
     <FormLayout
@@ -134,15 +136,26 @@ export function ClientFormModal({
           required
         />
 
-        <Input
-          id="client-tax"
-          label="Condición fiscal *"
-          type="text"
-          placeholder="Ej: Responsable Inscripto"
-          value={formData.tax_condition}
-          onChange={(e) => handleChange("tax_condition", e.target.value)}
-          required
-        />
+        {/* ← NUEVO: Select para Tax Condition */}
+        <div>
+          <label
+            htmlFor="client-tax"
+            className="block text-[#0F172A] text-lg font-semibold mb-2"
+          >
+            Condición fiscal *
+          </label>
+          <select
+            id="client-tax"
+            value={formData.tax_condition}
+            onChange={(e) => handleChange("tax_condition", e.target.value)}
+            required
+            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+          >
+            <option value="">Seleccione una opción</option>
+            <option value="responsable_inscripto">Responsable Inscripto</option>
+            <option value="monotributo">Monotributo</option>
+          </select>
+        </div>
       </div>
 
       {/* Campos opcionales */}

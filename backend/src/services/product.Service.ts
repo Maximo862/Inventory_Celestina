@@ -66,11 +66,6 @@ export class ProductService {
         // Verificar que existe
         await this.getById(id);
 
-        // Validaciones
-        if (data.quantity !== undefined && data.quantity < 0) {
-            throw new ValidationError('Quantity cannot be negative');
-        }
-
         if (data.price !== undefined && data.price <= 0) {
             throw new ValidationError('Price must be greater than zero');
         }

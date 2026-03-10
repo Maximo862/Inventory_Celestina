@@ -42,28 +42,34 @@ export function CategoriesPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Filtrado y ordenamiento
-  const filteredAndSortedCategories = useMemo(() => {
-    let result = categories.filter((category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+ // Solo mostrar categorías PADRE (parent_id === null)
+const filteredAndSortedCategories = useMemo(() => {
+  // ← CAMBIAR: Solo categorías padre
+  let result = categories.filter((cat) => cat.parent_id === null);
 
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "name-asc":
-          return a.name.localeCompare(b.name);
-        case "name-desc":
-          return b.name.localeCompare(a.name);
-        case "id-asc":
-          return a.id - b.id;
-        case "id-desc":
-          return b.id - a.id;
-        default:
-          return 0;
-      }
-    });
+  // Aplicar búsqueda
+  result = result.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    return result;
-  }, [categories, searchTerm, sortBy]);
+  // Ordenar
+  result.sort((a, b) => {
+    switch (sortBy) {
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      case "id-asc":
+        return a.id - b.id;
+      case "id-desc":
+        return b.id - a.id;
+      default:
+        return 0;
+    }
+  });
+
+  return result;
+}, [categories, searchTerm, sortBy]);
 
   const handleCreate = () => {
     setFormModal({ isOpen: true, category: null });

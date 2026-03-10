@@ -6,7 +6,7 @@ export function ProtectedRoutes() {
   const { isAuthenticated, loading } = useContext(AuthContext)!;
 
   if (loading === true) return <p>loading...</p>;
-  if (isAuthenticated === false) return <Navigate to={"/"} replace />;
+  if (isAuthenticated === false) return <Navigate to={"/login"} replace />;
 
   return <Outlet />;
 }

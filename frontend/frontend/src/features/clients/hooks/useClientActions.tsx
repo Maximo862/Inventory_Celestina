@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import { ClientContext } from "../context/ClientContext";
+import { useClients } from "../context/ClientContext";
 import {
   createClientRequest,
   updateClientRequest,
@@ -11,13 +10,7 @@ import toast from "react-hot-toast";
 import { handleError } from "@/utils/errorHandler";
 
 export function useClientActions() {
-  const context = useContext(ClientContext);
-
-  if (!context) {
-    throw new Error("useClientActions must be used within ClientProvider");
-  }
-
-  const { refreshClients } = context;
+  const { refreshClients } = useClients();
 
   async function getClientById(id: number): Promise<Client> {
     try {

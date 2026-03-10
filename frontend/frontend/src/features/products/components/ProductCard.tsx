@@ -1,10 +1,13 @@
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
+import { FiEdit2, FiTrash2 } from "react-icons/fi"; // ← AGREGAR
 import type { Product } from "@/types/types";
+import { formatARS } from "@/utils/formatCurrency";
 
 interface ProductCardProps {
   product: Product;
   categoryName?: string;
+  isAdmin: boolean; // ← AGREGAR
   onEdit: () => void;
   onDelete: (id: number, name: string) => void;
 }
@@ -12,6 +15,7 @@ interface ProductCardProps {
 export function ProductCard({
   product,
   categoryName,
+  isAdmin, // ← AGREGAR
   onEdit,
   onDelete,
 }: ProductCardProps) {
@@ -27,7 +31,6 @@ export function ProductCard({
               <h3 className="text-2xl font-bold text-[#0F172A] mb-3">
                 {product.name}
               </h3>
-              {/* Categoría más grande y visible */}
               {categoryName && (
                 <div className="inline-block px-5 py-3 bg-[#2563EB]/10 border-2 border-[#2563EB]/30 rounded-xl">
                   <span className="text-xl font-bold text-[#2563EB]">
@@ -70,42 +73,39 @@ export function ProductCard({
 
             <div className="bg-[#F8FAFC] p-4 rounded-lg border-2 border-[#E2E8F0]">
               <p className="text-sm font-semibold text-[#475569] mb-1">
-                Precio unitario
+                Precio unitario apoximado
               </p>
               <p className="text-2xl font-bold text-[#0F172A]">
-                ${product.price}
+                {formatARS(product.price)}
               </p>
             </div>
 
-            <div className="bg-[#F8FAFC] p-4 rounded-lg border-2 border-[#E2E8F0]">
-              <p className="text-sm font-semibold text-[#475569] mb-1">
-                Valor total
-              </p>
-              <p className="text-2xl font-bold text-[#0F172A]">
-                ${(product.quantity * product.price)}
-              </p>
-            </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:w-48">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={onEdit}
-            className="w-full"
-          >
-            ✏️ Editar
-          </Button>
-          <Button
-            variant="danger"
-            size="md"
-            onClick={() => onDelete(product.id, product.name)}
-            className="w-full"
-          >
-            🗑️ Eliminar
-          </Button>
-        </div>
+        {/* ← CONDICIONAL: Solo mostrar botones si es admin */}
+        {isAdmin && (
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:w-48">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={onEdit}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <FiEdit2 className="text-xl" />
+              Editar
+            </Button>
+            <Button
+              variant="danger"
+              size="md"
+              onClick={() => onDelete(product.id, product.name)}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <FiTrash2 className="text-xl" />
+              Eliminar
+            </Button>
+          </div>
+        )}
       </div>
     </Card>
   );

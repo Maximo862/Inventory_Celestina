@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { FiEdit2, FiTrash2, FiEye, FiArrowDown, FiArrowUp, FiUser } from "react-icons/fi";
 import type { Order } from "@/types/types";
+import { formatARS } from "@/utils/formatCurrency";
 
 interface OrderCardProps {
   order: Order;
@@ -81,7 +82,7 @@ export function OrderCard({
                 Total:{" "}
               </span>
               <span className="text-2xl font-bold text-[#0F172A]">
-                ${order.total_amount}
+                {formatARS(order.total_amount)}
               </span>
             </div>
           </div>

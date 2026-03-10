@@ -2,6 +2,7 @@ import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { FiX, FiArrowDown, FiArrowUp, FiUser, FiPackage } from "react-icons/fi";
 import type { OrderWithDetails } from "@/types/types";
+import { formatARS } from "@/utils/formatCurrency";
 
 interface OrderDetailModalProps {
   isOpen: boolean;
@@ -111,9 +112,7 @@ export function OrderDetailModal({
                   {order.items.map((item, index) => (
                     <tr
                       key={item.id}
-                      className={
-                        index % 2 === 0 ? "bg-white" : "bg-[#F8FAFC]"
-                      }
+                      className={index % 2 === 0 ? "bg-white" : "bg-[#F8FAFC]"}
                     >
                       <td className="p-4 text-lg text-[#0F172A] border-b border-[#E2E8F0]">
                         {item.product_name}
@@ -122,10 +121,10 @@ export function OrderDetailModal({
                         {item.quantity}
                       </td>
                       <td className="p-4 text-lg text-[#0F172A] text-right border-b border-[#E2E8F0]">
-                        ${item.price}
+                        {formatARS(item.price)}
                       </td>
                       <td className="p-4 text-lg font-semibold text-[#0F172A] text-right border-b border-[#E2E8F0]">
-                        ${item.subtotal}
+                        {formatARS(item.subtotal)}
                       </td>
                     </tr>
                   ))}
@@ -139,7 +138,7 @@ export function OrderDetailModal({
                       TOTAL:
                     </td>
                     <td className="p-4 text-2xl font-bold text-[#2563EB] text-right">
-                      ${order.total_amount}
+                      {formatARS(order.total_amount)}
                     </td>
                   </tr>
                 </tfoot>

@@ -48,7 +48,7 @@ export class CategoryService {
         // Validación: nombre único
         const existing = await this.repository.findByName(data.name);
         if (existing) {
-            throw new DuplicateError('Category', 'name', data.name);
+            throw new DuplicateError('Categoria', 'nombre', data.name);
         }
 
         // Validación: si tiene parent_id, verificar que exista

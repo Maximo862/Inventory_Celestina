@@ -2,10 +2,6 @@ import toast from "react-hot-toast";
 
 export function handleError(error: any, action: string, itemName?: string) {
   console.error(`Error al ${action}:`, error);
-  console.error(`Error2 :`, error.code);
-  console.error(`Error3 :`, error.status);
-  console.error(`Error4 :`, error.statusCode);
-  console.error(`Error5 :`, error.error);
 
   if (error.code === "DUPLICATE_NAME") {
     toast.error(
@@ -28,14 +24,18 @@ export function handleError(error: any, action: string, itemName?: string) {
     toast.error("Referencia inválida", { icon: "❌" });
   } else if (error.code === "NOT_FOUND") {
     toast.error(`Elemento no encontrado`);
+  } else if (error.code === "CATEGORY_REQUIRED") {
+    toast.error("Debes seleccionar una categoría");
+  } else if (error.code === "DUPLICATE_ENTRY") {
+    toast.error(`${error.message}`);
+  } else if (error.code === "INSUFFICIENT_STOCK") {
+    toast.error(`${error.message}`);
   } else if (error.statusCode === 400) {
     toast.error("Datos inválidos");
   } else if (error.statusCode === 403) {
     toast.error("No tienes permisos para esta acción");
   } else if (error.statusCode >= 500) {
     toast.error("Error del servidor. Intenta nuevamente");
-  } else if (error.code === "CATEGORY_REQUIRED") {
-    toast.error("Debes seleccionar una categoría");
   } else {
     toast.error(`Error al ${action} el elemento`);
   }

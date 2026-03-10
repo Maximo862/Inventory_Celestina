@@ -1,5 +1,5 @@
 import type { User } from "@/types/types";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { verifyRequest } from "../api/authRequest";
 
 interface AuthContextType {
@@ -53,4 +53,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
+}
+
+
+export function useAuth() {
+   const context = useContext(AuthContext);
+  
+    if (!context) {
+      throw new Error("useAuth must be used within AuthProvider");
+    }
+  
+    return context;
 }

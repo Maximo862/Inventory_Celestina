@@ -7,6 +7,7 @@ import type {
   CreateProductDTO,
   UpdateProductDTO,
 } from "@/types/types";
+import { parsePrice } from "@/utils/parsePrice";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -50,7 +51,7 @@ export function ProductFormModal({
         name: product.name,
         description: product.description || "",
         quantity: product.quantity.toString(),
-        price: product.price.toString(),
+        price: String(Number(product.price)),
         category_id: product.category_id?.toString() || "",
       });
 
@@ -87,7 +88,7 @@ export function ProductFormModal({
       const dataToSubmit: any = {
         name: formData.name.trim(),
         quantity: parseInt(formData.quantity),
-        price: parseFloat(formData.price),
+        price: parsePrice(formData.price),
         category_id: parseInt(formData.category_id), // Ahora es obligatorio
       };
 
@@ -114,7 +115,12 @@ export function ProductFormModal({
   };
 
   const handleChange = (field: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+     let sanitized = value;
+
+  if (field === "price") {
+    sanitized = value.replace(/\D/g, "");
+  }
+    setFormData((prev) => ({ ...prev, [field]: sanitized }));
   };
 
   // NUEVO: Handler para cambio de categoría padre
@@ -242,34 +248,37 @@ export function ProductFormModal({
           )}
         </div>
 
-        {/* Resto de campos (quantity, price) igual que antes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <Input
-            id="product-quantity"
-            label="Cantidad en stock *"
-            type="number"
-            min="0"
-            placeholder="Ej: 50"
-            value={formData.quantity}
-            onChange={(e) => handleChange("quantity", e.target.value)}
-            required
-          />
+        <div
+          className={`grid grid-cols-1 ${isEdit ? "sm:grid-cols-1" : "sm:grid-cols-2"} gap-6`}
+        >
+          {!isEdit && (
+            <Input
+              id="product-quantity"
+              label="Cantidad en stock *"
+              type="number"
+              min="0"
+              placeholder="Ej: 50"
+              value={formData.quantity}
+              onChange={(e) => handleChange("quantity", e.target.value)}
+              required
+            />
+          )}
 
           <Input
             id="product-price"
-            label="Precio unitario ($) *"
-            type="number"
-            min="0.01"
-            step="0.01"
-            placeholder="Ej: 1500.00"
+            label="Precio unitario apoximado($) *"
+            type="text"
+            placeholder="Ej: 1.500 o 1500,50"
             value={formData.price}
-            onChange={(e) => handleChange("price", e.target.value)}
+            onChange={(e) => {
+              handleChange("price", e.target.value);
+            }}
             required
           />
         </div>
       </div>
 
-      {/* Descripción (opcional) igual que antes */}
+      {/* Descripción (opcional)*/}
       <div className="space-y-6 pt-4">
         <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3">
           📝 Datos opcionales

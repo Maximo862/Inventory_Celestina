@@ -1,20 +1,17 @@
-import { useContext, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { loginRequest, logoutRequest, registerRequest } from "../api/authRequest";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import {
+  loginRequest,
+  logoutRequest,
+  registerRequest,
+} from "../api/authRequest";
 import toast from "react-hot-toast";
 import { handleError } from "@/utils/errorHandler";
 import type { User } from "@/types/types";
 
-
 export function useAuthActions() {
-  const context = useContext(AuthContext);
-  const [errors, setErrors] = useState<string | null>(null)
-
-  if (!context) {
-    throw new Error("useAuthActions must be used within AuthProvider");
-  }
-
-  const { setUser, setIsAuthenticated } = context;
+  const [errors, setErrors] = useState<string | null>(null);
+  const { setUser, setIsAuthenticated } = useAuth();
 
   async function login(userData: User) {
     try {
@@ -24,7 +21,7 @@ export function useAuthActions() {
     } catch (error: any) {
       setUser(null);
       setIsAuthenticated(false);
-      setErrors(error.message)
+      setErrors(error.message);
       handleError(error, "iniciar sesión");
       throw error;
     }
@@ -54,7 +51,6 @@ export function useAuthActions() {
       handleError(error, "cerrar sesión");
     }
   }
-  
 
-  return { login, register, logout, errors};
+  return { login, register, logout, errors };
 }

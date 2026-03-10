@@ -1,5 +1,17 @@
 import { RowDataPacket } from 'mysql2';
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: number;
+        role: 'admin' | 'employee';
+        email?: string;
+      };
+    }
+  }
+}
+export {};
 // Order Types
 export type OrderType = 'entry' | 'exit';
 
@@ -55,10 +67,12 @@ export interface UserDB {
   id: number;
   email: string;
   password?: string;
+  role: 'admin' | 'employee';
 }
 
 export type DecodedToken = {
   id: number;
+  role: 'admin' | 'employee';
 };
 
 // Category Types

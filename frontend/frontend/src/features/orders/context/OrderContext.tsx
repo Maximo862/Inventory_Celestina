@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAllOrdersRequest } from "../api/OrderRequests";
 import type { Order } from "@/types/types";
+import { useAuth } from "@/features/auth/context/AuthContext";
 
 interface OrderContextType {
   orders: Order[];
@@ -13,10 +14,13 @@ export const OrderContext = createContext<OrderContextType | null>(null);
 export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    loadOrders();
-  }, []);
+    if (user && !authLoading) {
+      loadOrders();
+    }
+  }, [authLoading, user]);
 
   async function loadOrders() {
     try {

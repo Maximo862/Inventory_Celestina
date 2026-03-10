@@ -10,23 +10,36 @@ import { UserDB, DecodedToken } from "../types/types";
 interface RegisterProps {
   email: string;
   password: string;
+  role?: 'admin' | 'employee';  
 }
 
 export async function registerUser({
   email,
   password,
+  role  
 }: RegisterProps) {
   const existing = await findUserByEmail(email);
   if (existing) throw new Error("User already exists");
+  
   const hashed = await hashPassword(password);
   const userId = await createUser({
     email,
     password: hashed,
+    role  
   });
 
-  const token = generateToken({ id: userId });
+  // Obtener usuario completo con role
+  const user = await findUserById(userId);
+  if (!user) throw new Error("Failed to create user");
 
-  return { id: userId, email, token };
+  const token = generateToken({ id: userId, role: user.role });  
+
+  return { 
+    id: userId, 
+    email, 
+    role: user.role,  
+    token 
+  };
 }
 
 interface LoginProps {
@@ -40,6 +53,7 @@ export async function loginUser({
 }: LoginProps): Promise<{
   id: number;
   email: string;
+  role: 'admin' | 'employee';  
   token: string;
 }> {
   const user = await findUserByEmail(email);
@@ -48,11 +62,12 @@ export async function loginUser({
   const valid = await comparePassword(password, user.password!);
   if (!valid) throw new Error("Incorrect password");
 
-  const token = generateToken({ id: user.id });
+  const token = generateToken({ id: user.id, role: user.role });  
 
   return {
     id: user.id,
     email,
+    role: user.role,  
     token
   };
 }
@@ -63,5 +78,5 @@ export async function verifyUser(token: string): Promise<UserDB> {
 
   if (!user) throw new Error("User not found");
 
-  return user;
+  return user;  
 }

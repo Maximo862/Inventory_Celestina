@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import { CategoryContext } from "../context/CategoryContext";
+import { useCategories } from "../context/CategoryContext";
 import {
   createCategoryRequest,
   updateCategoryRequest,
@@ -15,13 +14,7 @@ import toast from "react-hot-toast";
 import { handleError } from "@/utils/errorHandler";
 
 export function useCategoryActions() {
-  const context = useContext(CategoryContext);
-
-  if (!context) {
-    throw new Error("useCategoryActions must be used within CategoryProvider");
-  }
-
-  const { refreshCategories } = context;
+  const { refreshCategories } = useCategories();
 
   async function getCategoryById(id: number): Promise<Category> {
     try {

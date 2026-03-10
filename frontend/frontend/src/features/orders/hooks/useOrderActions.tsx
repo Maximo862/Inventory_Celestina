@@ -1,23 +1,22 @@
-import { useContext } from "react";
-import { OrderContext } from "../context/OrderContext";
+import { useOrders } from "../context/OrderContext";
 import {
   createOrderRequest,
   updateOrderRequest,
   deleteOrderRequest,
   getOrderByIdRequest,
 } from "../api/OrderRequests";
-import type { CreateOrderDTO, UpdateOrderDTO, OrderWithDetails } from "@/types/types";
+import type {
+  CreateOrderDTO,
+  UpdateOrderDTO,
+  OrderWithDetails,
+} from "@/types/types";
 import toast from "react-hot-toast";
 import { handleError } from "@/utils/errorHandler";
+import { useProducts } from "@/features/products/context/ProductContext";
 
 export function useOrderActions() {
-  const context = useContext(OrderContext);
-
-  if (!context) {
-    throw new Error("useOrderActions must be used within OrderProvider");
-  }
-
-  const { refreshOrders } = context;
+  const { refreshOrders } = useOrders();
+  const { refreshProducts } = useProducts()
 
   async function getOrderById(id: number): Promise<OrderWithDetails> {
     try {
@@ -33,11 +32,13 @@ export function useOrderActions() {
     try {
       await createOrderRequest(order);
       await refreshOrders();
-      
-      const message = order.type === 'entry' 
-        ? "Entrada registrada exitosamente" 
-        : "Salida registrada exitosamente";
-      
+      await refreshProducts();
+
+      const message =
+        order.type === "entry"
+          ? "Entrada registrada exitosamente"
+          : "Salida registrada exitosamente";
+
       toast.success(message);
     } catch (error) {
       handleError(error, "crear");
@@ -49,6 +50,7 @@ export function useOrderActions() {
     try {
       await updateOrderRequest(id, order);
       await refreshOrders();
+      await refreshProducts();
       toast.success("Orden actualizada exitosamente");
     } catch (error) {
       handleError(error, "actualizar");
@@ -60,6 +62,7 @@ export function useOrderActions() {
     try {
       await deleteOrderRequest(id);
       await refreshOrders();
+      await refreshProducts();
       toast.success("Orden eliminada exitosamente");
     } catch (error) {
       handleError(error, "eliminar");

@@ -1,14 +1,27 @@
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
+import { FiEdit2, FiTrash2 } from "react-icons/fi"; // ← AGREGAR
 import type { Client } from "@/types/types";
 
 interface ClientCardProps {
   client: Client;
-  onEdit: () => void; // Cambio: ahora ejecuta directamente
+  isAdmin: boolean; // ← AGREGAR
+  onEdit: () => void;
   onDelete: (id: number, name: string) => void;
 }
 
-export function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
+const getTaxConditionLabel = (condition: string) => {
+  return condition === "responsable_inscripto"
+    ? "Responsable Inscripto"
+    : "Monotributo";
+};
+
+export function ClientCard({
+  client,
+  isAdmin, // ← AGREGAR
+  onEdit,
+  onDelete,
+}: ClientCardProps) {
   return (
     <Card className="hover:shadow-xl transition-shadow">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -23,7 +36,9 @@ export function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
 
             <div>
               <span className="font-semibold text-[#475569]">Condición: </span>
-              <span className="text-[#0F172A]">{client.tax_condition}</span>
+              <span className="text-[#0F172A]">
+                {getTaxConditionLabel(client.tax_condition)}
+              </span>
             </div>
 
             {client.phone && (
@@ -49,24 +64,29 @@ export function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:w-48">
-          <Button
-            variant="primary"
-            size="md"
-            onClick={onEdit}
-            className="w-full"
-          >
-            ✏️ Editar
-          </Button>
-          <Button
-            variant="danger"
-            size="md"
-            onClick={() => onDelete(client.id, client.name)}
-            className="w-full"
-          >
-            🗑️ Eliminar
-          </Button>
-        </div>
+        {/* ← CONDICIONAL: Solo mostrar botones si es admin */}
+        {isAdmin && (
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:w-48">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={onEdit}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <FiEdit2 className="text-xl" />
+              Editar
+            </Button>
+            <Button
+              variant="danger"
+              size="md"
+              onClick={() => onDelete(client.id, client.name)}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <FiTrash2 className="text-xl" />
+              Eliminar
+            </Button>
+          </div>
+        )}
       </div>
     </Card>
   );

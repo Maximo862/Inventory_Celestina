@@ -3,11 +3,12 @@ import { Request, Response, NextFunction } from "express";
 
 export async function registerAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;  
 
     const userData = await registerUser({
       email,
-      password
+      password,
+      role  
     });
 
     res
@@ -19,7 +20,11 @@ export async function registerAuth(req: Request, res: Response, next: NextFuncti
       })
       .json({
         message: "User Created",
-        user: { id: userData.id, email },
+        user: {
+          id: userData.id,
+          email,
+          role: userData.role  
+        },
       });
   } catch (err) {
     next(err);
@@ -43,7 +48,8 @@ export async function loginAuth(req: Request, res: Response, next: NextFunction)
         message: "Successful login",
         user: {
           id: userData.id,
-          email
+          email,
+          role: userData.role  
         },
       });
   } catch (err) {
@@ -57,7 +63,7 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
     if (!token) return res.status(401).json({ error: "No token" });
 
     const user = await verifyUser(token);
-    res.json({ user });
+    res.json({ user });  
   } catch (err) {
     next(err);
   }
@@ -75,4 +81,3 @@ export async function logoutAuth(req: Request, res: Response, next: NextFunction
     next(err);
   }
 }
-

@@ -1,10 +1,12 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react"; // ← AGREGAR useContext
+import { AuthContext } from "@/features/auth/context/AuthContext"; // ← NUEVO
 import { useAuthActions } from "@/features/auth/hooks/useAuthActions";
 import { Button } from "@/components/Button";
-import { IoMdPerson, IoIosHome   } from "react-icons/io";
+import { IoMdPerson, IoIosHome } from "react-icons/io";
 import { FaBox } from "react-icons/fa6";
 import { GiTicket } from "react-icons/gi";
+import { FiFileText } from "react-icons/fi";
 import { CiLogout } from "react-icons/ci";
 
 export function DashboardLayout() {
@@ -13,18 +15,50 @@ export function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { logout } = useAuthActions();
+  const { user } = useContext(AuthContext)!; // ← NUEVO
 
+  const isAdmin = user?.role === "admin"; // ← NUEVO
+
+  // Definir items con roles requeridos
   const menuItems = [
-    { path: "/", label: "Inicio", icon: <IoIosHome/> },
-    { path: "/products", label: "Productos", icon: <IoMdPerson/> },
-    { path: "/clients", label: "Clientes", icon: <FaBox/> },
-    { path: "/categories", label: "Categorías", icon: <GiTicket/> },
+    {
+      path: "/home",
+      label: "Inicio",
+      icon: <IoIosHome />,
+      roles: ["admin"], // ← NUEVO: Todos pueden ver
+    },
+    {
+      path: "/orders",
+      label: "Remitos",
+      icon: <FiFileText />,
+      roles: ["admin", "employee"], // ← NUEVO: Todos pueden ver
+    },
+    {
+      path: "/products",
+      label: "Productos",
+      icon: <FaBox />,
+      roles: ["admin", "employee"], // ← NUEVO: Todos pueden ver
+    },
+    {
+      path: "/clients",
+      label: "Clientes",
+      icon: <IoMdPerson />,
+      roles: ["admin", "employee"], // ← NUEVO: Todos pueden ver
+    },
+    {
+      path: "/categories",
+      label: "Categorías",
+      icon: <GiTicket />,
+      roles: ["admin"], // ← NUEVO: Solo admin
+    },
   ];
 
+  // Filtrar items según rol del usuario
+  const filteredMenuItems = menuItems.filter((item) =>
+    item.roles.includes(user?.role || "employee"),
+  );
+
   const isActive = (path: string) => {
-    if (path === "/") {
-      return location.pathname === "/";
-    }
     return location.pathname.startsWith(path);
   };
 
@@ -36,12 +70,11 @@ export function DashboardLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/login");
   };
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
-      {/* Botón hamburguesa móvil */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="fixed top-4 left-4 z-50 lg:hidden bg-white p-3 rounded-xl shadow-lg border-2 border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors"
@@ -54,7 +87,6 @@ export function DashboardLayout() {
         )}
       </button>
 
-      {/* Overlay oscuro en móvil */}
       {isSidebarOpen && (
         <div
           onClick={() => setIsSidebarOpen(false)}
@@ -63,7 +95,6 @@ export function DashboardLayout() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-40
@@ -76,7 +107,6 @@ export function DashboardLayout() {
           }
         `}
       >
-        {/* Logo y título */}
         <div className="p-6 border-b-2 border-[#E2E8F0]">
           <Link
             to="/"
@@ -93,9 +123,26 @@ export function DashboardLayout() {
           </Link>
         </div>
 
-        {/* Menú de navegación */}
+        {/* Info del usuario con badge de rol */}
+        {user && (
+          <div className="px-6 py-4 border-b-2 border-[#E2E8F0] bg-[#F8FAFC]">
+            <p className="text-base font-semibold text-[#0F172A] mb-1">
+              {user.email}
+            </p>
+            <span
+              className={`inline-block px-3 py-1 rounded-lg text-sm font-bold ${
+                isAdmin
+                  ? "bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/30"
+                  : "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/30"
+              }`}
+            >
+              {isAdmin ? "👑 Administrador" : "👤 Empleado"}
+            </span>
+          </div>
+        )}
+
         <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const active = isActive(item.path);
             return (
               <Link
@@ -115,7 +162,6 @@ export function DashboardLayout() {
           })}
         </nav>
 
-        {/* Botón de cerrar sesión */}
         <div className="p-4 border-t-2 border-[#E2E8F0]">
           <Button
             variant="danger"
@@ -123,12 +169,11 @@ export function DashboardLayout() {
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-3"
           >
-             <CiLogout className="text-2xl" /> Cerrar sesión
+            <CiLogout className="text-2xl" /> Cerrar sesión
           </Button>
         </div>
       </aside>
 
-      {/* Contenido principal */}
       <main className="flex-1 overflow-auto">
         <div className="p-6 lg:p-8 pt-20 lg:pt-8">
           <div className="max-w-7xl mx-auto">

@@ -1,28 +1,43 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAllProductsRequest } from "../api/ProductsRequest";
-import type { Product } from "@/types/types";
+import type { Product, PaginationParams } from "@/types/types";
+import { useAuth } from "@/features/auth/context/AuthContext";
+
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 interface ProductContextType {
   products: Product[];
   loading: boolean;
-  refreshProducts: () => Promise<void>;
+  pagination: PaginationInfo | null;
+  loadProducts: (params: PaginationParams) => Promise<void>;
+  refreshProducts: (params: PaginationParams) => Promise<void>;
 }
 
 export const ProductContext = createContext<ProductContextType | null>(null);
 
 export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    if (user && !authLoading) {
+      loadProducts({ page: 1, limit: 10 });
+    }
+  }, [authLoading, user]);
 
-  async function loadProducts() {
+  async function loadProducts(params: PaginationParams) {
     try {
       setLoading(true);
-      const res = await getAllProductsRequest();
+      const res = await getAllProductsRequest(params);
       setProducts(res.data);
+      setPagination(res.pagination);
     } catch (error) {
       console.error("Error loading products:", error);
     } finally {
@@ -30,8 +45,8 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function refreshProducts() {
-    await loadProducts();
+  async function refreshProducts(params: PaginationParams) {
+    await loadProducts(params);
   }
 
   return (
@@ -39,6 +54,8 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       value={{
         products,
         loading,
+        pagination,
+        loadProducts,
         refreshProducts,
       }}
     >
@@ -56,3 +73,5 @@ export function useProducts() {
 
   return context;
 }
+
+

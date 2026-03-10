@@ -2,6 +2,7 @@ export interface User {
   id?: number;
   email: string;
   password: string;
+  role: "employee" | "admin";
   created_at?: string;
 }
 
@@ -118,7 +119,7 @@ export interface Client {
   email: string | null;
   address: string | null;
   cuil: string;
-  tax_condition: string;
+  tax_condition: "responsable_inscripto" | "monotributo";
   created_at: string;
   updated_at: string;
 }

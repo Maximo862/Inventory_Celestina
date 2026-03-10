@@ -3,7 +3,9 @@ import jwt from "jsonwebtoken";
 
 interface TokenPayload {
   id: number;
+  role: 'admin' | 'employee';  
 }
+
 
 export function authRequired(req: Request, res: Response, next: NextFunction) {
   try {
@@ -12,7 +14,11 @@ export function authRequired(req: Request, res: Response, next: NextFunction) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
 
-    (req as any).user = decoded;
+    // Ahora decoded incluye { id, role }
+    req.user = {
+      id: decoded.id,
+      role: decoded.role  // ← AGREGAR
+    };
 
     next();
   } catch (error: any) {

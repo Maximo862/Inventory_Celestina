@@ -14,8 +14,8 @@ export class AppError extends Error {
 export class NotFoundError extends AppError {
     constructor(resource: string, id?: number | string) {
         const message = id
-            ? `${resource} with id ${id} not found`
-            : `${resource} not found`;
+            ? `${resource} con el id ${id} no se ha encontrado`
+            : `${resource} no se encontro`;
         super(message, 404, 'NOT_FOUND');
     }
 }
@@ -29,7 +29,7 @@ export class ValidationError extends AppError {
 export class DuplicateError extends AppError {
     constructor(resource: string, field: string, value: string) {
         super(
-            `${resource} with ${field} '${value}' already exists`,
+            `${resource} con ${field} '${value}' ya existe`,
             409,
             'DUPLICATE_ENTRY'
         );
@@ -39,7 +39,7 @@ export class DuplicateError extends AppError {
 export class InsufficientStockError extends AppError {
     constructor(productName: string, available: number, requested: number) {
         super(
-            `Insufficient stock for "${productName}". Available: ${available}, requested: ${requested}`,
+            `Stock insuficiente para "${productName}". Disponible: ${available}, requerido: ${requested}`,
             400,
             'INSUFFICIENT_STOCK'
         );

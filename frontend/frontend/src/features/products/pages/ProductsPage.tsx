@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext, useEffect } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/Button";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -9,7 +9,9 @@ import { ProductFormModal } from "../components/ProductFormModal";
 import { useProducts } from "../context/ProductContext";
 import { useProductActions } from "../hooks/useProductActions";
 import { useCategories } from "@/features/categories/context/CategoryContext";
+import { AuthContext } from "@/features/auth/context/AuthContext";
 import { FaBox, FaPlus } from "react-icons/fa6";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import type { Product } from "@/types/types";
 
 type SortOption =
@@ -21,9 +23,12 @@ type SortOption =
   | "stock-desc";
 
 export function ProductsPage() {
-  const { products, loading } = useProducts()!;
+  const { products, loading, pagination, loadProducts } = useProducts()!;
   const { createProduct, updateProduct, deleteProduct } = useProductActions();
   const { categories } = useCategories()!;
+  const { user } = useContext(AuthContext)!;
+
+  const isAdmin = user?.role === "admin";
 
   const [formModal, setFormModal] = useState<{
     isOpen: boolean;
@@ -48,23 +53,34 @@ export function ProductsPage() {
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // ← PAGINACIÓN: Estado de página actual
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+  setCurrentPage(1)
+}, [searchTerm, filterCategory, sortBy])
+
+  // ← Cargar productos cuando cambia la página
+  useEffect(() => {
+    loadProducts({ page: currentPage, limit: itemsPerPage });
+  }, [currentPage]);
+
   const categoryMap = useMemo(() => {
     const map = new Map<number, string>();
     categories.forEach((cat) => map.set(cat.id, cat.name));
     return map;
   }, [categories]);
 
-  // NUEVO: Obtener categorías padre
   const parentCategories = useMemo(() => {
     return categories.filter((cat) => cat.parent_id === null);
   }, [categories]);
 
-  // NUEVO: Función para obtener subcategorías de un padre
   const getSubcategories = (parentId: number) => {
     return categories.filter((cat) => cat.parent_id === parentId);
   };
 
-  // Filtrado y ordenamiento
+  // ← Filtrado y ordenamiento CLIENT-SIDE de la página actual
   const filteredAndSortedProducts = useMemo(() => {
     let result = products.filter((product) => {
       const matchesSearch = product.name
@@ -96,7 +112,6 @@ export function ProductsPage() {
           return 0;
       }
     });
-
     return result;
   }, [products, searchTerm, filterCategory, sortBy]);
 
@@ -114,6 +129,8 @@ export function ProductsPage() {
     } else {
       await createProduct(data);
     }
+    // ← Recargar página actual después de crear/editar
+    loadProducts({ page: currentPage, limit: itemsPerPage });
   };
 
   const handleFormClose = () => {
@@ -131,6 +148,8 @@ export function ProductsPage() {
     try {
       await deleteProduct(deleteModal.id);
       setDeleteModal({ isOpen: false, id: null, name: "" });
+      // ← Recargar página actual después de eliminar
+      loadProducts({ page: currentPage, limit: itemsPerPage });
     } finally {
       setIsDeleting(false);
     }
@@ -138,6 +157,26 @@ export function ProductsPage() {
 
   const handleCancelDelete = () => {
     setDeleteModal({ isOpen: false, id: null, name: "" });
+  };
+
+  // ← Handlers de paginación
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pagination && currentPage < pagination.totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {
@@ -150,19 +189,21 @@ export function ProductsPage() {
         title="Productos"
         subtitle="Gestión del inventario de productos"
         action={
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleCreate}
-            className="flex items-center justify-center gap-3"
-          >
-            <FaPlus className="text-2xl" />
-            Nuevo producto
-          </Button>
+          isAdmin ? (
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleCreate}
+              className="flex items-center justify-center gap-3"
+            >
+              <FaPlus className="text-2xl" />
+              Nuevo producto
+            </Button>
+          ) : undefined
         }
       />
 
-      {products.length === 0 ? (
+      {pagination && pagination.total === 0 ? (
         <EmptyState
           icon={<FaBox />}
           title="No hay productos"
@@ -184,7 +225,6 @@ export function ProductsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* NUEVO: Select con jerarquía visual usando optgroup */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Filtrar por categoría
@@ -196,13 +236,11 @@ export function ProductsPage() {
                 >
                   <option value="all">📁 Todas las categorías</option>
 
-                  {/* Renderizar jerarquía con optgroup */}
                   {parentCategories.map((parent) => {
                     const subs = getSubcategories(parent.id);
 
                     return (
                       <optgroup key={parent.id} label={`🏷️ ${parent.name}`}>
-                        {/* Subcategorías con indentación */}
                         {subs.length > 0 ? (
                           subs.map((sub) => (
                             <option key={sub.id} value={sub.id}>
@@ -237,26 +275,29 @@ export function ProductsPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-lg text-[#475569]">
-              <p>
-                Mostrando {filteredAndSortedProducts.length} de{" "}
-                {products.length} productos
-              </p>
-              {(searchTerm ||
-                filterCategory !== "all" ||
-                sortBy !== "name-asc") && (
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setFilterCategory("all");
-                    setSortBy("name-asc");
-                  }}
-                  className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
-                >
-                  ✕ Limpiar filtros
-                </button>
-              )}
-            </div>
+            {pagination && (
+              <div className="flex items-center justify-between text-lg text-[#475569]">
+                <p>
+                  Mostrando {filteredAndSortedProducts.length} de{" "}
+                  {pagination.total} productos totales (Página {currentPage} de{" "}
+                  {pagination.totalPages})
+                </p>
+                {(searchTerm ||
+                  filterCategory !== "all" ||
+                  sortBy !== "name-asc") && (
+                    <button
+                      onClick={() => {
+                        setSearchTerm("");
+                        setFilterCategory("all");
+                        setSortBy("name-asc");
+                      }}
+                      className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
+                    >
+                      ✕ Limpiar filtros
+                    </button>
+                  )}
+              </div>
+            )}
           </div>
 
           {filteredAndSortedProducts.length === 0 ? (
@@ -277,41 +318,116 @@ export function ProductsPage() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredAndSortedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  categoryName={
-                    product.category_id
-                      ? categoryMap.get(product.category_id)
-                      : undefined
-                  }
-                  onEdit={() => handleEdit(product)}
-                  onDelete={handleDeleteClick}
-                />
-              ))}
-            </div>
+            <>
+              {/* ← Lista de productos */}
+              <div className="space-y-4">
+                {filteredAndSortedProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    categoryName={
+                      product.category_id
+                        ? categoryMap.get(product.category_id)
+                        : undefined
+                    }
+                    isAdmin={isAdmin}
+                    onEdit={() => handleEdit(product)}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+              </div>
+
+              {/* ← CONTROLES DE PAGINACIÓN BACKEND */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
+                  {/* Info de página */}
+                  <p className="text-lg text-[#475569] font-semibold">
+                    Página {currentPage} de {pagination.totalPages}
+                  </p>
+
+                  {/* Botones */}
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                      className="flex items-center gap-2"
+                    >
+                      <FiChevronLeft className="text-xl" />
+                      Anterior
+                    </Button>
+
+                    {/* Números de página */}
+                    <div className="hidden sm:flex gap-2">
+                      {Array.from(
+                        { length: Math.min(pagination.totalPages, 5) },
+                        (_, i) => {
+                          let pageNumber;
+                          if (pagination.totalPages <= 5) {
+                            pageNumber = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNumber = i + 1;
+                          } else if (currentPage >= pagination.totalPages - 2) {
+                            pageNumber = pagination.totalPages - 4 + i;
+                          } else {
+                            pageNumber = currentPage - 2 + i;
+                          }
+
+                          return (
+                            <button
+                              key={pageNumber}
+                              onClick={() => handlePageClick(pageNumber)}
+                              className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
+                                ? "bg-[#2563EB] text-white"
+                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                }`}
+                            >
+                              {pageNumber}
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handleNextPage}
+                      disabled={currentPage === pagination.totalPages}
+                      className="flex items-center gap-2"
+                    >
+                      Siguiente
+                      <FiChevronRight className="text-xl" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </>
       )}
 
-      <ProductFormModal
-        isOpen={formModal.isOpen}
-        product={formModal.product}
-        onClose={handleFormClose}
-        onSubmit={handleFormSubmit}
-      />
+      {isAdmin && (
+        <ProductFormModal
+          isOpen={formModal.isOpen}
+          product={formModal.product}
+          onClose={handleFormClose}
+          onSubmit={handleFormSubmit}
+        />
+      )}
 
-      <DeleteConfirmModal
-        isOpen={deleteModal.isOpen}
-        title="¿Eliminar producto?"
-        message="Está por eliminar el producto:"
-        itemName={deleteModal.name}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-        isDeleting={isDeleting}
-      />
+      {isAdmin && (
+        <DeleteConfirmModal
+          isOpen={deleteModal.isOpen}
+          title="¿Eliminar producto?"
+          message="Está por eliminar el producto:"
+          itemName={deleteModal.name}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 }

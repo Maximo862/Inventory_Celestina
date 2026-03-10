@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAllClientsRequest } from "../api/clientsRequest";
 import type { Client } from "@/types/types";
+import { useAuth } from "@/features/auth/context/AuthContext";
 
 interface ClientContextType {
   clients: Client[];
@@ -13,10 +14,13 @@ export const ClientContext = createContext<ClientContextType | null>(null);
 export function ClientProvider({ children }: { children: React.ReactNode }) {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    loadClients();
-  }, []);
+    if (user && !authLoading) {
+      loadClients();
+    }
+  }, [authLoading, user]);
 
   async function loadClients() {
     try {
@@ -48,11 +52,11 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useClients() {
-     const context = useContext(ClientContext);
-      
-        if (!context) {
-          throw new Error("useClients must be used within ClientsProvider");
-        }
-      
-        return context;
+  const context = useContext(ClientContext);
+
+  if (!context) {
+    throw new Error("useClients must be used within ClientsProvider");
+  }
+
+  return context;
 }

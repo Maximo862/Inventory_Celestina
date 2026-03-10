@@ -52,10 +52,6 @@ export class ProductRepository {
       fields.push('description = ?');
       values.push(data.description);
     }
-    if (data.quantity !== undefined) {
-      fields.push('quantity = ?');
-      values.push(data.quantity);
-    }
     if (data.price !== undefined) {
       fields.push('price = ?');
       values.push(data.price);
