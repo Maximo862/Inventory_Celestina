@@ -13,9 +13,17 @@ export class OrderController {
         try {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
-            const type = req.query.type as 'entry' | 'exit' | undefined;
 
-            const result = await this.service.getAll(page, limit, type);
+            // ← Extraer filtros opcionales
+            const type = req.query.type as 'entry' | 'exit' | undefined;
+            const search = req.query.search as string | undefined;
+
+            const filters = {
+                ...(type && { type }),
+                ...(search && { search })
+            };
+
+            const result = await this.service.getAll({ page, limit }, filters);
 
             res.status(200).json(result);
         } catch (err) {

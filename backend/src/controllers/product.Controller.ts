@@ -13,7 +13,17 @@ export class ProductController {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
 
-            const result = await this.service.getAll({ page, limit });
+            const search = req.query.search as string | undefined;
+            const category_id = req.query.category_id
+                ? parseInt(req.query.category_id as string)
+                : undefined;
+
+            const filters = {
+                ...(search && { search }),
+                ...(category_id && { category_id })
+            };
+
+            const result = await this.service.getAll({ page, limit }, filters);
 
             res.status(200).json(result);
         } catch (err) {

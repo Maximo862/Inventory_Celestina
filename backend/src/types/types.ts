@@ -159,6 +159,17 @@ export interface PaginationParams {
   limit: number;
 }
 
+export interface ProductFilters {
+  search?: string;
+  category_id?: number;
+}
+
+// Actualizar PaginationParams para incluir filtros
+export interface ProductPaginationParams extends PaginationParams {
+  search?: string;
+  category_id?: number;
+}
+
 export interface PaginatedResult<T> {
   data: T[];
   pagination: {

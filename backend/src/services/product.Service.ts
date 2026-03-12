@@ -12,8 +12,11 @@ export class ProductService {
         this.categoryRepository = new CategoryRepository();
     }
 
-    async getAll(pagination: PaginationParams): Promise<PaginatedResult<Product>> {
-        const { products, total } = await this.repository.findAll(pagination);
+    async getAll(
+        pagination: PaginationParams,
+        filters?: { search?: string; category_id?: number }
+    ): Promise<PaginatedResult<Product>> {
+        const { products, total } = await this.repository.findAll(pagination, filters);
 
         return {
             data: products,

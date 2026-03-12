@@ -46,21 +46,25 @@ export function OrdersPage() {
     type: "",
   });
 
+  // ← ESTADOS: Búsqueda y filtro (SERVER-SIDE)
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<FilterOption>("all");
+
+  // ← ESTADOS: Ordenamiento (CLIENT-SIDE) y paginación
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const [isDeleting, setIsDeleting] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Cargar orders cuando cambia la página o el filtro de tipo
+  // ← CARGAR orders cuando cambian: página, búsqueda o filtro
   useEffect(() => {
     loadOrders({
       page: currentPage,
       limit: itemsPerPage,
-      type: filterType !== "all" ? filterType : undefined,
+      ...(searchTerm && { search: searchTerm }),
+      ...(filterType !== "all" && { type: filterType }),
     });
-  }, [currentPage, filterType]);
+  }, [currentPage, searchTerm, filterType]);
 
   // Crear mapa de nombres de clientes
   const clientMap = useMemo(() => {
@@ -73,7 +77,7 @@ export function OrdersPage() {
     return map;
   }, [orders]);
 
-  // Ordenamiento CLIENT-SIDE de la página actual
+  // ← ORDENAMIENTO CLIENT-SIDE (solo sobre los orders de la página actual)
   const sortedOrders = useMemo(() => {
     let result = [...orders];
 
@@ -122,10 +126,12 @@ export function OrdersPage() {
     } else {
       await createOrder(data);
     }
+    // Recargar con filtros actuales
     loadOrders({
       page: currentPage,
       limit: itemsPerPage,
-      type: filterType !== "all" ? filterType : undefined,
+      ...(searchTerm && { search: searchTerm }),
+      ...(filterType !== "all" && { type: filterType }),
     });
   };
 
@@ -148,10 +154,12 @@ export function OrdersPage() {
     try {
       await deleteOrder(deleteModal.id);
       setDeleteModal({ isOpen: false, id: null, type: "" });
+      // Recargar con filtros actuales
       loadOrders({
         page: currentPage,
         limit: itemsPerPage,
-        type: filterType !== "all" ? filterType : undefined,
+        ...(searchTerm && { search: searchTerm }),
+        ...(filterType !== "all" && { type: filterType }),
       });
     } finally {
       setIsDeleting(false);
@@ -162,11 +170,18 @@ export function OrdersPage() {
     setDeleteModal({ isOpen: false, id: null, type: "" });
   };
 
-  const handleFilterChange = (newFilter: FilterOption) => {
-    setFilterType(newFilter);
-    setCurrentPage(1); // Reset a página 1 al cambiar filtro
+  // ← Handlers de búsqueda/filtro: Reset a página 1
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
   };
 
+  const handleFilterChange = (newFilter: FilterOption) => {
+    setFilterType(newFilter);
+    setCurrentPage(1);
+  };
+
+  // Handlers de paginación
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -219,8 +234,19 @@ export function OrdersPage() {
       ) : (
         <>
           <div className="mb-6 space-y-4">
+            {/* ← BÚSQUEDA (SERVER-SIDE) */}
+            <div>
+              <input
+                type="text"
+                placeholder="🔍 Buscar por cliente o notas..."
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+              />
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Filtro por tipo (SERVER-SIDE) */}
+              {/* ← FILTRO POR TIPO (SERVER-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Filtrar por tipo
@@ -238,7 +264,7 @@ export function OrdersPage() {
                 </select>
               </div>
 
-              {/* Ordenar (CLIENT-SIDE) */}
+              {/* ← ORDENAR (CLIENT-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Ordenar por
@@ -262,9 +288,10 @@ export function OrdersPage() {
                   Mostrando {sortedOrders.length} de {pagination.total} remitos
                   totales (Página {currentPage} de {pagination.totalPages})
                 </p>
-                {(filterType !== "all" || sortBy !== "date-desc") && (
+                {(searchTerm || filterType !== "all" || sortBy !== "date-desc") && (
                   <button
                     onClick={() => {
+                      setSearchTerm("");
                       setFilterType("all");
                       setSortBy("date-desc");
                       setCurrentPage(1);
@@ -283,6 +310,18 @@ export function OrdersPage() {
               <p className="text-2xl text-[#475569] mb-4">
                 No se encontraron remitos
               </p>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilterType("all");
+                  setSortBy("date-desc");
+                  setCurrentPage(1);
+                }}
+              >
+                Limpiar filtros
+              </Button>
             </div>
           ) : (
             <>

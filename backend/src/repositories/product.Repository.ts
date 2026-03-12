@@ -1,25 +1,64 @@
 import { pool } from '../db/db';
-import { ProductRow, CreateProductDTO, UpdateProductDTO, PaginationParams } from '../types/types';
-import { ResultSetHeader } from 'mysql2/promise';
+import { Product, PaginationParams, CreateProductDTO, UpdateProductDTO } from '../types/types';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
+
+interface ProductRow extends RowDataPacket, Product { }
 
 export class ProductRepository {
-  async findAll(pagination: PaginationParams): Promise<{ products: ProductRow[], total: number }> {
+  // ← ACTUALIZAR: Agregar parámetros de búsqueda y filtro
+  async findAll(
+    pagination: PaginationParams,
+    filters?: { search?: string; category_id?: number }
+  ): Promise<{ products: ProductRow[], total: number }> {
     const offset = (pagination.page - 1) * pagination.limit;
 
+    // ← Construir WHERE dinámicamente según filtros
+    const whereClauses: string[] = [];
+    const params: any[] = [];
+
+    if (filters?.search) {
+      whereClauses.push('name LIKE ?');
+      params.push(`%${filters.search}%`);
+    }
+
+    if (filters?.category_id) {
+      whereClauses.push('category_id = ?');
+      params.push(filters.category_id);
+    }
+
+    const whereSQL = whereClauses.length > 0
+      ? `WHERE ${whereClauses.join(' AND ')}`
+      : '';
+
+    // ← Query para productos con filtros
+    const productsQuery = `
+      SELECT * FROM products 
+      ${whereSQL}
+      ORDER BY id DESC 
+      LIMIT ? OFFSET ?
+    `;
+
     const [products] = await pool.query<ProductRow[]>(
-      'SELECT * FROM products ORDER BY id DESC LIMIT ? OFFSET ?',
-      [pagination.limit, offset]
+      productsQuery,
+      [...params, pagination.limit, offset]
     );
 
-    const [countResult] = await pool.query<any[]>(
-      'SELECT COUNT(*) as total FROM products'
-    );
+    // ← Query para contar total con los MISMOS filtros
+    const countQuery = `
+      SELECT COUNT(*) as total FROM products 
+      ${whereSQL}
+    `;
+
+    const [countResult] = await pool.query<any[]>(countQuery, params);
 
     return {
       products,
       total: countResult[0].total
     };
   }
+
+  // ... resto de métodos sin cambios
+
 
   async findById(id: number): Promise<ProductRow | null> {
     const [rows] = await pool.query<ProductRow[]>(

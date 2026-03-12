@@ -1,7 +1,7 @@
 import { OrderRepository } from '../repositories/order.Repository';
 import { ProductRepository } from '../repositories/product.Repository';
 import { ValidationError, NotFoundError, InsufficientStockError } from '../utils/appError';
-import type { CreateOrderDTO, UpdateOrderDTO, PaginatedResult, Order } from '../types/types';
+import type { CreateOrderDTO, UpdateOrderDTO, PaginatedResult, Order, PaginationParams } from '../types/types';
 
 export class OrderService {
   private orderRepo: OrderRepository;
@@ -73,16 +73,19 @@ export class OrderService {
     return order;
   }
 
-  async getAll(page: number, limit: number, type?: 'entry' | 'exit'): Promise<PaginatedResult<Order>> {
-    const { orders, total } = await this.orderRepo.findAll(page, limit, type);
+  async getAll(
+    pagination: PaginationParams,
+    filters?: { type?: 'entry' | 'exit'; search?: string }
+  ): Promise<PaginatedResult<Order>> {
+    const { orders, total } = await this.orderRepo.findAll(pagination, filters);
 
     return {
       data: orders,
       pagination: {
-        page,
-        limit,
+        page: pagination.page,
+        limit: pagination.limit,
         total,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / pagination.limit)
       }
     };
   }

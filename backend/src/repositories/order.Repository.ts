@@ -1,6 +1,6 @@
 import { pool } from '../db/db';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import type { Order, OrderItem, CreateOrderDTO, UpdateOrderDTO } from '../types/types';
+import type { Order, OrderItem, CreateOrderDTO, UpdateOrderDTO, PaginationParams } from '../types/types';
 
 interface OrderRow extends RowDataPacket, Order { }
 interface OrderItemRow extends RowDataPacket, OrderItem { }
@@ -86,42 +86,64 @@ export class OrderRepository {
     }
 
     // Listar órdenes con paginación y filtro
-    async findAll(page: number, limit: number, type?: 'entry' | 'exit') {
-        const offset = (page - 1) * limit;
+    async findAll(
+        pagination: PaginationParams,
+        filters?: { type?: 'entry' | 'exit'; search?: string }
+    ): Promise<{ orders: OrderRow[], total: number }> {
+        const offset = (pagination.page - 1) * pagination.limit;
 
-        let query = `
-            SELECT o.*, c.name as client_name 
-            FROM orders o 
-            LEFT JOIN clients c ON o.client_id = c.id
-        `;
-
+        // ← Construir WHERE dinámicamente según filtros
+        const whereClauses: string[] = [];
         const params: any[] = [];
 
-        if (type) {
-            query += ' WHERE o.type = ?';
-            params.push(type);
+        if (filters?.type) {
+            whereClauses.push('o.type = ?');
+            params.push(filters.type);
         }
 
-        query += ' ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
-        params.push(limit, offset);
-
-        const [orders] = await pool.query<OrderRow[]>(query, params);
-
-        let countQuery = 'SELECT COUNT(*) as total FROM orders';
-        if (type) {
-            countQuery += ' WHERE type = ?';
+        if (filters?.search) {
+            // ← Buscar por nombre de cliente o notas
+            whereClauses.push('(c.name LIKE ? OR o.notes LIKE ?)');
+            params.push(`%${filters.search}%`, `%${filters.search}%`);
         }
 
-        const [countResult] = await pool.query<any[]>(
-            countQuery,
-            type ? [type] : []
+        const whereSQL = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(' AND ')}`
+            : '';
+
+        // ← Query para órdenes con filtros
+        const ordersQuery = `
+      SELECT 
+        o.*,
+        c.name as client_name
+      FROM orders o
+      LEFT JOIN clients c ON o.client_id = c.id
+      ${whereSQL}
+      ORDER BY o.created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+        const [orders] = await pool.query<OrderRow[]>(
+            ordersQuery,
+            [...params, pagination.limit, offset]
         );
+
+        // ← Query para contar total con los MISMOS filtros
+        const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM orders o
+      LEFT JOIN clients c ON o.client_id = c.id
+      ${whereSQL}
+    `;
+
+        const [countResult] = await pool.query<any[]>(countQuery, params);
 
         return {
             orders,
             total: countResult[0].total
         };
     }
+
 
     // Actualizar orden (solo client_id y notes)
     async update(id: number, data: UpdateOrderDTO): Promise<boolean> {

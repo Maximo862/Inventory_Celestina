@@ -10,15 +10,24 @@ import type {
 
 // Obtener todas las órdenes con filtro opcional
 export const getAllOrdersRequest = (
-  params?: PaginationParams & { type?: 'entry' | 'exit' }
+  params?: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
 ) => {
-  let queryString = `?page=${params?.page || 1}&limit=${params?.limit || 10}`;
-  
+  const queryParams = new URLSearchParams();
+
+  queryParams.append("page", (params?.page || 1).toString());
+  queryParams.append("limit", (params?.limit || 10).toString());
+
   if (params?.type) {
-    queryString += `&type=${params.type}`;
+    queryParams.append("type", params.type);
   }
-  
-  return fetchAPI<PaginatedResponse<Order>>(`/orders${queryString}`);
+
+  if (params?.search) {
+    queryParams.append("search", params.search);
+  }
+
+  return fetchAPI<PaginatedResponse<Order>>(
+    `/orders?${queryParams.toString()}`
+  );
 };
 
 // Obtener orden por ID con detalles

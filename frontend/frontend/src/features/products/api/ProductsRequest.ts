@@ -7,12 +7,25 @@ import type {
     PaginationParams,
 } from "@/types/types";
 
-export const getAllProductsRequest = (params?: PaginationParams) => {
-    const queryString = params
-        ? `?page=${params.page || 1}&limit=${params.limit || 10}`
-        : "";
+export const getAllProductsRequest = (
+    params?: PaginationParams & { search?: string; category_id?: number }
+) => {
+    const queryParams = new URLSearchParams();
 
-    return fetchAPI<PaginatedResponse<Product>>(`/products${queryString}`);
+    queryParams.append("page", (params?.page || 1).toString());
+    queryParams.append("limit", (params?.limit || 10).toString());
+
+    if (params?.search) {
+        queryParams.append("search", params.search);
+    }
+
+    if (params?.category_id) {
+        queryParams.append("category_id", params.category_id.toString());
+    }
+
+    return fetchAPI<PaginatedResponse<Product>>(
+        `/products?${queryParams.toString()}`
+    );
 };
 
 export const getProductByIdRequest = (id: number) =>

@@ -14,8 +14,12 @@ interface ProductContextType {
   products: Product[];
   loading: boolean;
   pagination: PaginationInfo | null;
-  loadProducts: (params: PaginationParams) => Promise<void>;
-  refreshProducts: (params: PaginationParams) => Promise<void>;
+  loadProducts: (
+    params: PaginationParams & { search?: string; category_id?: number }
+  ) => Promise<void>;
+  refreshProducts: (
+    params: PaginationParams & { search?: string; category_id?: number }
+  ) => Promise<void>;
 }
 
 export const ProductContext = createContext<ProductContextType | null>(null);
@@ -32,7 +36,9 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authLoading, user]);
 
-  async function loadProducts(params: PaginationParams) {
+  async function loadProducts(
+    params: PaginationParams & { search?: string; category_id?: number }
+  ) {
     try {
       setLoading(true);
       const res = await getAllProductsRequest(params);
@@ -45,7 +51,9 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function refreshProducts(params: PaginationParams) {
+  async function refreshProducts(
+    params: PaginationParams & { search?: string; category_id?: number }
+  ) {
     await loadProducts(params);
   }
 

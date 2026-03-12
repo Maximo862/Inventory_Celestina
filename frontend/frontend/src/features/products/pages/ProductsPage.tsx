@@ -48,23 +48,25 @@ export function ProductsPage() {
     name: "",
   });
 
+  // ← ESTADOS: Búsqueda y filtro (SERVER-SIDE)
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+
+  // ← ESTADOS: Ordenamiento (CLIENT-SIDE) y paginación
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // ← PAGINACIÓN: Estado de página actual
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // ← CARGAR productos cuando cambian: página, búsqueda o filtro
   useEffect(() => {
-  setCurrentPage(1)
-}, [searchTerm, filterCategory, sortBy])
-
-  // ← Cargar productos cuando cambia la página
-  useEffect(() => {
-    loadProducts({ page: currentPage, limit: itemsPerPage });
-  }, [currentPage]);
+    loadProducts({
+      page: currentPage,
+      limit: itemsPerPage,
+      ...(searchTerm && { search: searchTerm }),
+      ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
+    });
+  }, [currentPage, searchTerm, filterCategory]);
 
   const categoryMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -80,19 +82,9 @@ export function ProductsPage() {
     return categories.filter((cat) => cat.parent_id === parentId);
   };
 
-  // ← Filtrado y ordenamiento CLIENT-SIDE de la página actual
-  const filteredAndSortedProducts = useMemo(() => {
-    let result = products.filter((product) => {
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      const matchesCategory =
-        filterCategory === "all" ||
-        product.category_id?.toString() === filterCategory;
-
-      return matchesSearch && matchesCategory;
-    });
+  // ← ORDENAMIENTO CLIENT-SIDE (solo sobre los productos de la página actual)
+  const sortedProducts = useMemo(() => {
+    let result = [...products];
 
     result.sort((a, b) => {
       switch (sortBy) {
@@ -112,8 +104,9 @@ export function ProductsPage() {
           return 0;
       }
     });
+
     return result;
-  }, [products, searchTerm, filterCategory, sortBy]);
+  }, [products, sortBy]);
 
   const handleCreate = () => {
     setFormModal({ isOpen: true, product: null });
@@ -129,8 +122,13 @@ export function ProductsPage() {
     } else {
       await createProduct(data);
     }
-    // ← Recargar página actual después de crear/editar
-    loadProducts({ page: currentPage, limit: itemsPerPage });
+    // Recargar con filtros actuales
+    loadProducts({
+      page: currentPage,
+      limit: itemsPerPage,
+      ...(searchTerm && { search: searchTerm }),
+      ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
+    });
   };
 
   const handleFormClose = () => {
@@ -148,8 +146,13 @@ export function ProductsPage() {
     try {
       await deleteProduct(deleteModal.id);
       setDeleteModal({ isOpen: false, id: null, name: "" });
-      // ← Recargar página actual después de eliminar
-      loadProducts({ page: currentPage, limit: itemsPerPage });
+      // Recargar con filtros actuales
+      loadProducts({
+        page: currentPage,
+        limit: itemsPerPage,
+        ...(searchTerm && { search: searchTerm }),
+        ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -159,7 +162,18 @@ export function ProductsPage() {
     setDeleteModal({ isOpen: false, id: null, name: "" });
   };
 
-  // ← Handlers de paginación
+  // ← Handlers de búsqueda/filtro: Reset a página 1
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setFilterCategory(value);
+    setCurrentPage(1);
+  };
+
+  // Handlers de paginación
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -214,24 +228,26 @@ export function ProductsPage() {
       ) : (
         <>
           <div className="mb-6 space-y-4">
+            {/* ← BÚSQUEDA (SERVER-SIDE) */}
             <div>
               <input
                 type="text"
                 placeholder="🔍 Buscar producto por nombre..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* ← FILTRO POR CATEGORÍA (SERVER-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Filtrar por categoría
                 </label>
                 <select
                   value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
                   <option value="all">📁 Todas las categorías</option>
@@ -256,6 +272,7 @@ export function ProductsPage() {
                 </select>
               </div>
 
+              {/* ← ORDENAR (CLIENT-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Ordenar por
@@ -278,8 +295,8 @@ export function ProductsPage() {
             {pagination && (
               <div className="flex items-center justify-between text-lg text-[#475569]">
                 <p>
-                  Mostrando {filteredAndSortedProducts.length} de{" "}
-                  {pagination.total} productos totales (Página {currentPage} de{" "}
+                  Mostrando {sortedProducts.length} de {pagination.total}{" "}
+                  productos totales (Página {currentPage} de{" "}
                   {pagination.totalPages})
                 </p>
                 {(searchTerm ||
@@ -290,6 +307,7 @@ export function ProductsPage() {
                         setSearchTerm("");
                         setFilterCategory("all");
                         setSortBy("name-asc");
+                        setCurrentPage(1);
                       }}
                       className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
                     >
@@ -300,7 +318,7 @@ export function ProductsPage() {
             )}
           </div>
 
-          {filteredAndSortedProducts.length === 0 ? (
+          {sortedProducts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#475569] mb-4">
                 No se encontraron productos
@@ -312,6 +330,7 @@ export function ProductsPage() {
                   setSearchTerm("");
                   setFilterCategory("all");
                   setSortBy("name-asc");
+                  setCurrentPage(1);
                 }}
               >
                 Limpiar filtros
@@ -319,9 +338,8 @@ export function ProductsPage() {
             </div>
           ) : (
             <>
-              {/* ← Lista de productos */}
               <div className="space-y-4">
-                {filteredAndSortedProducts.map((product) => (
+                {sortedProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -337,15 +355,12 @@ export function ProductsPage() {
                 ))}
               </div>
 
-              {/* ← CONTROLES DE PAGINACIÓN BACKEND */}
               {pagination && pagination.totalPages > 1 && (
                 <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
-                  {/* Info de página */}
                   <p className="text-lg text-[#475569] font-semibold">
                     Página {currentPage} de {pagination.totalPages}
                   </p>
 
-                  {/* Botones */}
                   <div className="flex items-center gap-3">
                     <Button
                       variant="secondary"
@@ -358,7 +373,6 @@ export function ProductsPage() {
                       Anterior
                     </Button>
 
-                    {/* Números de página */}
                     <div className="hidden sm:flex gap-2">
                       {Array.from(
                         { length: Math.min(pagination.totalPages, 5) },
@@ -379,8 +393,8 @@ export function ProductsPage() {
                               key={pageNumber}
                               onClick={() => handlePageClick(pageNumber)}
                               className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                ? "bg-[#2563EB] text-white"
-                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                  ? "bg-[#2563EB] text-white"
+                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
                                 }`}
                             >
                               {pageNumber}

@@ -14,8 +14,12 @@ interface OrderContextType {
   orders: Order[];
   loading: boolean;
   pagination: PaginationInfo | null;
-  loadOrders: (params: PaginationParams & { type?: 'entry' | 'exit' }) => Promise<void>;
-  refreshOrders: (params: PaginationParams & { type?: 'entry' | 'exit' }) => Promise<void>;
+  loadOrders: (
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+  ) => Promise<void>;
+  refreshOrders: (
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+  ) => Promise<void>;
 }
 
 export const OrderContext = createContext<OrderContextType | null>(null);
@@ -32,7 +36,9 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authLoading, user]);
 
-  async function loadOrders(params: PaginationParams & { type?: 'entry' | 'exit' }) {
+  async function loadOrders(
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+  ) {
     try {
       setLoading(true);
       const res = await getAllOrdersRequest(params);
@@ -45,7 +51,9 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function refreshOrders(params: PaginationParams & { type?: 'entry' | 'exit' }) {
+  async function refreshOrders(
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+  ) {
     await loadOrders(params);
   }
 
