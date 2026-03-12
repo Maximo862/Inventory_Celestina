@@ -100,10 +100,9 @@ export function DashboardLayout() {
           fixed lg:static inset-y-0 left-0 z-40
           w-80 bg-white border-r-2 border-[#E2E8F0] shadow-lg flex flex-col
           transform transition-transform duration-300 ease-in-out
-          ${
-            isSidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
+          ${isSidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
           }
         `}
       >
@@ -113,9 +112,6 @@ export function DashboardLayout() {
             className="flex items-center space-x-4"
             onClick={handleLinkClick}
           >
-            <div className="w-16 h-16 bg-[#2563EB] rounded-2xl flex items-center justify-center text-4xl">
-              🪵
-            </div>
             <div>
               <h1 className="text-2xl font-bold text-[#0F172A]">LaCelestina</h1>
               <p className="text-base text-[#475569]">Maderera</p>
@@ -130,11 +126,10 @@ export function DashboardLayout() {
               {user.email}
             </p>
             <span
-              className={`inline-block px-3 py-1 rounded-lg text-sm font-bold ${
-                isAdmin
+              className={`inline-block px-3 py-1 rounded-lg text-sm font-bold ${isAdmin
                   ? "bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/30"
                   : "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/30"
-              }`}
+                }`}
             >
               {isAdmin ? "👑 Administrador" : "👤 Empleado"}
             </span>
@@ -149,11 +144,10 @@ export function DashboardLayout() {
                 key={item.path}
                 to={item.path}
                 onClick={handleLinkClick}
-                className={`flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-200 ${
-                  active
+                className={`flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-200 ${active
                     ? "bg-[#2563EB] text-white shadow-lg"
                     : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                }`}
+                  }`}
               >
                 <span className="text-3xl">{item.icon}</span>
                 <span className="text-xl font-semibold">{item.label}</span>

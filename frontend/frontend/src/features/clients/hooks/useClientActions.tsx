@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { handleError } from "@/utils/errorHandler";
 
 export function useClientActions() {
-  const { refreshClients } = useClients();
+  const { refreshClients, pagination } = useClients();
 
   async function getClientById(id: number): Promise<Client> {
     try {
@@ -25,7 +25,10 @@ export function useClientActions() {
   async function createClient(client: CreateClientDTO) {
     try {
       await createClientRequest(client);
-      await refreshClients();
+      await refreshClients({
+        page: pagination?.page || 1,
+        limit: pagination?.limit || 10,
+      });
       toast.success("Cliente creado exitosamente");
     } catch (error) {
       handleError(error, "crear");
@@ -36,7 +39,10 @@ export function useClientActions() {
   async function updateClient(id: number, client: UpdateClientDTO) {
     try {
       await updateClientRequest(id, client);
-      await refreshClients();
+      await refreshClients({
+        page: pagination?.page || 1,
+        limit: pagination?.limit || 10,
+      });
       toast.success("Cliente actualizado exitosamente");
     } catch (error) {
       handleError(error, "actualizar");
@@ -47,7 +53,10 @@ export function useClientActions() {
   async function deleteClient(id: number) {
     try {
       await deleteClientRequest(id);
-      await refreshClients();
+      await refreshClients({
+        page: pagination?.page || 1,
+        limit: pagination?.limit || 10,
+      });
       toast.success("Cliente eliminado exitosamente");
     } catch (error) {
       handleError(error, "eliminar");

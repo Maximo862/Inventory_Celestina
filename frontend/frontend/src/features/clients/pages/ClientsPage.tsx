@@ -1,4 +1,4 @@
-import { useState, useMemo, useContext } from "react"; // ← AGREGAR useContext
+import { useState, useMemo, useContext, useEffect } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/Button";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -8,19 +8,20 @@ import { ClientCard } from "../components/ClientCard";
 import { ClientFormModal } from "../components/ClientFormModal";
 import { useClients } from "../context/ClientContext";
 import { useClientActions } from "../hooks/useClientActions";
-import { AuthContext } from "@/features/auth/context/AuthContext"; // ← AGREGAR
+import { AuthContext } from "@/features/auth/context/AuthContext";
 import { IoMdPerson } from "react-icons/io";
 import { FaPlus } from "react-icons/fa6";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import type { Client } from "@/types/types";
 
 type SortOption = "name-asc" | "name-desc" | "cuil-asc" | "cuil-desc";
 
 export function ClientsPage() {
-  const { clients, loading } = useClients()!;
+  const { clients, loading, pagination, loadClients } = useClients()!;
   const { createClient, updateClient, deleteClient } = useClientActions();
-  const { user } = useContext(AuthContext)!; // ← AGREGAR
+  const { user } = useContext(AuthContext)!;
 
-  const isAdmin = user?.role === "admin"; // ← AGREGAR
+  const isAdmin = user?.role === "admin";
 
   const [formModal, setFormModal] = useState<{
     isOpen: boolean;
@@ -43,6 +44,13 @@ export function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    loadClients({ page: currentPage, limit: itemsPerPage });
+  }, [currentPage]);
 
   const filteredAndSortedClients = useMemo(() => {
     let result = clients.filter((client) => {
@@ -87,6 +95,7 @@ export function ClientsPage() {
     } else {
       await createClient(data);
     }
+    loadClients({ page: currentPage, limit: itemsPerPage });
   };
 
   const handleFormClose = () => {
@@ -104,6 +113,7 @@ export function ClientsPage() {
     try {
       await deleteClient(deleteModal.id);
       setDeleteModal({ isOpen: false, id: null, name: "" });
+      loadClients({ page: currentPage, limit: itemsPerPage });
     } finally {
       setIsDeleting(false);
     }
@@ -111,6 +121,25 @@ export function ClientsPage() {
 
   const handleCancelDelete = () => {
     setDeleteModal({ isOpen: false, id: null, name: "" });
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pagination && currentPage < pagination.totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {
@@ -123,7 +152,6 @@ export function ClientsPage() {
         title="Clientes"
         subtitle="Gestión de clientes de la maderería"
         action={
-          // ← CONDICIONAL: Solo mostrar botón si es admin
           isAdmin ? (
             <Button
               variant="primary"
@@ -138,7 +166,7 @@ export function ClientsPage() {
         }
       />
 
-      {clients.length === 0 ? (
+      {pagination && pagination.total === 0 ? (
         <EmptyState
           icon={<IoMdPerson />}
           title="No hay clientes"
@@ -175,23 +203,26 @@ export function ClientsPage() {
               </select>
             </div>
 
-            <div className="flex items-center justify-between text-lg text-[#475569]">
-              <p>
-                Mostrando {filteredAndSortedClients.length} de {clients.length}{" "}
-                clientes
-              </p>
-              {(searchTerm || sortBy !== "name-asc") && (
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setSortBy("name-asc");
-                  }}
-                  className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
-                >
-                  ✕ Limpiar filtros
-                </button>
-              )}
-            </div>
+            {pagination && (
+              <div className="flex items-center justify-between text-lg text-[#475569]">
+                <p>
+                  Mostrando {filteredAndSortedClients.length} de{" "}
+                  {pagination.total} clientes totales (Página {currentPage} de{" "}
+                  {pagination.totalPages})
+                </p>
+                {(searchTerm || sortBy !== "name-asc") && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSortBy("name-asc");
+                    }}
+                    className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
+                  >
+                    ✕ Limpiar filtros
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {filteredAndSortedClients.length === 0 ? (
@@ -211,22 +242,86 @@ export function ClientsPage() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredAndSortedClients.map((client) => (
-                <ClientCard
-                  key={client.id}
-                  client={client}
-                  isAdmin={isAdmin} // ← PASAR prop
-                  onEdit={() => handleEdit(client)}
-                  onDelete={handleDeleteClick}
-                />
-              ))}
-            </div>
+            <>
+              <div className="space-y-4">
+                {filteredAndSortedClients.map((client) => (
+                  <ClientCard
+                    key={client.id}
+                    client={client}
+                    isAdmin={isAdmin}
+                    onEdit={() => handleEdit(client)}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+              </div>
+
+              {pagination && pagination.totalPages > 1 && (
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
+                  <p className="text-lg text-[#475569] font-semibold">
+                    Página {currentPage} de {pagination.totalPages}
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                      className="flex items-center gap-2"
+                    >
+                      <FiChevronLeft className="text-xl" />
+                      Anterior
+                    </Button>
+
+                    <div className="hidden sm:flex gap-2">
+                      {Array.from(
+                        { length: Math.min(pagination.totalPages, 5) },
+                        (_, i) => {
+                          let pageNumber;
+                          if (pagination.totalPages <= 5) {
+                            pageNumber = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNumber = i + 1;
+                          } else if (currentPage >= pagination.totalPages - 2) {
+                            pageNumber = pagination.totalPages - 4 + i;
+                          } else {
+                            pageNumber = currentPage - 2 + i;
+                          }
+
+                          return (
+                            <button
+                              key={pageNumber}
+                              onClick={() => handlePageClick(pageNumber)}
+                              className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
+                                  ? "bg-[#2563EB] text-white"
+                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                }`}
+                            >
+                              {pageNumber}
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handleNextPage}
+                      disabled={currentPage === pagination.totalPages}
+                      className="flex items-center gap-2"
+                    >
+                      Siguiente
+                      <FiChevronRight className="text-xl" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </>
       )}
 
-      {/* ← CONDICIONAL: Solo mostrar modal si es admin */}
       {isAdmin && (
         <ClientFormModal
           isOpen={formModal.isOpen}
@@ -236,7 +331,6 @@ export function ClientsPage() {
         />
       )}
 
-      {/* ← CONDICIONAL: Solo mostrar modal de eliminación si es admin */}
       {isAdmin && (
         <DeleteConfirmModal
           isOpen={deleteModal.isOpen}

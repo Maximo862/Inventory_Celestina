@@ -45,7 +45,7 @@ export default App;
 
 //CODE en CATEGORIAS
 
-// EXTRAS :
+// EXTRAS : 
 
 //- Filtrado con paginacion en el frontend, porque solo filtra con esos que traj el backend osea con esa page  
 

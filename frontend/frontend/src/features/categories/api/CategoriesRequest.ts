@@ -4,15 +4,10 @@ import type {
   CreateCategoryDTO,
   UpdateCategoryDTO,
   PaginatedResponse,
-  PaginationParams,
 } from "@/types/types";
 
-export const getAllCategoriesRequest = (params?: PaginationParams) => {
-  const queryString = params
-    ? `?page=${params.page || 1}&limit=${params.limit || 10}`
-    : "";
-
-  return fetchAPI<PaginatedResponse<Category>>(`/categories${queryString}`);
+export const getAllCategoriesRequest = () => {
+  return fetchAPI<PaginatedResponse<Category>>(`/categories`);
 };
 
 export const getParentCategoriesRequest = () =>

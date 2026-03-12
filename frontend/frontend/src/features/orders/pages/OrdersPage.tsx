@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/Button";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -9,14 +9,14 @@ import { OrderFormModal } from "../components/OrderFormModal";
 import { OrderDetailModal } from "../components/OrderDetailModal";
 import { useOrders } from "../context/OrderContext";
 import { useOrderActions } from "../hooks/useOrderActions";
-import { FiPlus, FiFileText } from "react-icons/fi";
+import { FiPlus, FiFileText, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import type { Order, OrderWithDetails } from "@/types/types";
 
 type FilterOption = "all" | "entry" | "exit";
 type SortOption = "date-desc" | "date-asc" | "amount-desc" | "amount-asc";
 
 export function OrdersPage() {
-  const { orders, loading } = useOrders();
+  const { orders, loading, pagination, loadOrders } = useOrders();
   const { createOrder, updateOrder, deleteOrder, getOrderById } =
     useOrderActions();
 
@@ -50,6 +50,18 @@ export function OrdersPage() {
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Cargar orders cuando cambia la página o el filtro de tipo
+  useEffect(() => {
+    loadOrders({
+      page: currentPage,
+      limit: itemsPerPage,
+      type: filterType !== "all" ? filterType : undefined,
+    });
+  }, [currentPage, filterType]);
+
   // Crear mapa de nombres de clientes
   const clientMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -61,12 +73,9 @@ export function OrdersPage() {
     return map;
   }, [orders]);
 
-  // Filtrado y ordenamiento
-  const filteredAndSortedOrders = useMemo(() => {
-    let result = orders.filter((order) => {
-      if (filterType === "all") return true;
-      return order.type === filterType;
-    });
+  // Ordenamiento CLIENT-SIDE de la página actual
+  const sortedOrders = useMemo(() => {
+    let result = [...orders];
 
     result.sort((a, b) => {
       switch (sortBy) {
@@ -88,7 +97,7 @@ export function OrdersPage() {
     });
 
     return result;
-  }, [orders, filterType, sortBy]);
+  }, [orders, sortBy]);
 
   const handleCreate = () => {
     setFormModal({ isOpen: true, order: null });
@@ -113,6 +122,11 @@ export function OrdersPage() {
     } else {
       await createOrder(data);
     }
+    loadOrders({
+      page: currentPage,
+      limit: itemsPerPage,
+      type: filterType !== "all" ? filterType : undefined,
+    });
   };
 
   const handleFormClose = () => {
@@ -134,6 +148,11 @@ export function OrdersPage() {
     try {
       await deleteOrder(deleteModal.id);
       setDeleteModal({ isOpen: false, id: null, type: "" });
+      loadOrders({
+        page: currentPage,
+        limit: itemsPerPage,
+        type: filterType !== "all" ? filterType : undefined,
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -141,6 +160,30 @@ export function OrdersPage() {
 
   const handleCancelDelete = () => {
     setDeleteModal({ isOpen: false, id: null, type: "" });
+  };
+
+  const handleFilterChange = (newFilter: FilterOption) => {
+    setFilterType(newFilter);
+    setCurrentPage(1); // Reset a página 1 al cambiar filtro
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pagination && currentPage < pagination.totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {
@@ -165,7 +208,7 @@ export function OrdersPage() {
         }
       />
 
-      {orders.length === 0 ? (
+      {pagination && pagination.total === 0 ? (
         <EmptyState
           icon={<FiFileText />}
           title="No hay remitos"
@@ -175,10 +218,9 @@ export function OrdersPage() {
         />
       ) : (
         <>
-          {/* Filtros */}
           <div className="mb-6 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Filtro por tipo */}
+              {/* Filtro por tipo (SERVER-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Filtrar por tipo
@@ -186,7 +228,7 @@ export function OrdersPage() {
                 <select
                   value={filterType}
                   onChange={(e) =>
-                    setFilterType(e.target.value as FilterOption)
+                    handleFilterChange(e.target.value as FilterOption)
                   }
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
@@ -196,7 +238,7 @@ export function OrdersPage() {
                 </select>
               </div>
 
-              {/* Ordenar */}
+              {/* Ordenar (CLIENT-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Ordenar por
@@ -214,39 +256,113 @@ export function OrdersPage() {
               </div>
             </div>
 
-            {/* Contador */}
-            <div className="flex items-center justify-between text-lg text-[#475569]">
-              <p>
-                Mostrando {filteredAndSortedOrders.length} de {orders.length}{" "}
-                remitos
-              </p>
-              {(filterType !== "all" || sortBy !== "date-desc") && (
-                <button
-                  onClick={() => {
-                    setFilterType("all");
-                    setSortBy("date-desc");
-                  }}
-                  className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
-                >
-                  ✕ Limpiar filtros
-                </button>
-              )}
-            </div>
+            {pagination && (
+              <div className="flex items-center justify-between text-lg text-[#475569]">
+                <p>
+                  Mostrando {sortedOrders.length} de {pagination.total} remitos
+                  totales (Página {currentPage} de {pagination.totalPages})
+                </p>
+                {(filterType !== "all" || sortBy !== "date-desc") && (
+                  <button
+                    onClick={() => {
+                      setFilterType("all");
+                      setSortBy("date-desc");
+                      setCurrentPage(1);
+                    }}
+                    className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
+                  >
+                    ✕ Limpiar filtros
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Lista de órdenes */}
-          <div className="space-y-4">
-            {filteredAndSortedOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                clientName={clientMap.get(order.id)}
-                onView={() => handleView(order)}
-                onEdit={() => handleEdit(order)}
-                onDelete={handleDeleteClick}
-              />
-            ))}
-          </div>
+          {sortedOrders.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-2xl text-[#475569] mb-4">
+                No se encontraron remitos
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                {sortedOrders.map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    clientName={clientMap.get(order.id)}
+                    onView={() => handleView(order)}
+                    onEdit={() => handleEdit(order)}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+              </div>
+
+              {pagination && pagination.totalPages > 1 && (
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
+                  <p className="text-lg text-[#475569] font-semibold">
+                    Página {currentPage} de {pagination.totalPages}
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                      className="flex items-center gap-2"
+                    >
+                      <FiChevronLeft className="text-xl" />
+                      Anterior
+                    </Button>
+
+                    <div className="hidden sm:flex gap-2">
+                      {Array.from(
+                        { length: Math.min(pagination.totalPages, 5) },
+                        (_, i) => {
+                          let pageNumber;
+                          if (pagination.totalPages <= 5) {
+                            pageNumber = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNumber = i + 1;
+                          } else if (currentPage >= pagination.totalPages - 2) {
+                            pageNumber = pagination.totalPages - 4 + i;
+                          } else {
+                            pageNumber = currentPage - 2 + i;
+                          }
+
+                          return (
+                            <button
+                              key={pageNumber}
+                              onClick={() => handlePageClick(pageNumber)}
+                              className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
+                                  ? "bg-[#2563EB] text-white"
+                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                }`}
+                            >
+                              {pageNumber}
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handleNextPage}
+                      disabled={currentPage === pagination.totalPages}
+                      className="flex items-center gap-2"
+                    >
+                      Siguiente
+                      <FiChevronRight className="text-xl" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
 

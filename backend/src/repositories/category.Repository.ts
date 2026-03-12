@@ -4,21 +4,14 @@ import { ResultSetHeader } from 'mysql2';
 
 export class CategoryRepository {
 
-    async findAll(pagination: PaginationParams): Promise<{ categories: CategoryRow[], total: number }> {
-        const offset = (pagination.page - 1) * pagination.limit;
+    async findAll(): Promise<{ categories: CategoryRow[] }> {
 
         const [categories] = await pool.query<CategoryRow[]>(
-            'SELECT * FROM categories ORDER BY parent_id ASC, name ASC LIMIT ? OFFSET ?',
-            [pagination.limit, offset]
-        );
-
-        const [countResult] = await pool.query<any[]>(
-            'SELECT COUNT(*) as total FROM categories'
+            'SELECT * FROM categories ORDER BY parent_id ASC, name ASC',
         );
 
         return {
             categories,
-            total: countResult[0].total
         };
     }
 

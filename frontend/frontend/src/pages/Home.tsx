@@ -1,47 +1,60 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { useProducts } from "@/features/products/context/ProductContext";
 import { useClients } from "@/features/clients/context/ClientContext";
 import { useCategories } from "@/features/categories/context/CategoryContext";
-import { useOrders } from "@/features/orders/context/OrderContext";
+import { getOrderStatsRequest } from "@/features/orders/api/OrderRequests";
 import { IoMdPerson } from "react-icons/io";
 import { FaBox } from "react-icons/fa6";
 import { GiTicket } from "react-icons/gi";
-import { FiFileText, FiArrowDown, FiArrowUp } from "react-icons/fi";  // ← AGREGAR
+import { FiFileText, FiArrowDown, FiArrowUp } from "react-icons/fi";
 import { formatARS } from "@/utils/formatCurrency";
 
 export function Home() {
   const navigate = useNavigate();
-  const { products } = useProducts()!;
-  const { clients } = useClients()!;
+  const { products, pagination: paginationProducts } = useProducts()!;
+  const { pagination: paginationClients } = useClients()!;
   const { categories } = useCategories()!;
-  const { orders } = useOrders();
 
-  // Estadísticas
+  // ← Estado para stats de orders
+  const [orderStats, setOrderStats] = useState({
+    total_orders: 0,
+    total_entries: 0,
+    total_exits: 0,
+    total_entries_amount: 0,
+    total_exits_amount: 0,
+  });
+
+  // ← Cargar stats al montar
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const stats = await getOrderStatsRequest();
+        setOrderStats(stats);
+      } catch (error) {
+        console.error("Error loading order stats:", error);
+      }
+    }
+    loadStats();
+  }, []);
+
+  // Estadísticas de productos (client-side de la página actual)
   const lowStockProducts = products.filter((p) => p.quantity < 10).length;
   const outOfStockProducts = products.filter((p) => p.quantity === 0).length;
-
-  // ← NUEVO: Calcular totales de entradas y salidas
-  const totalEntries = orders
-    .filter((order) => order.type === "entry")
-    .reduce((sum, order) => sum + order.total_amount, 0);
-
-  const totalExits = orders
-    .filter((order) => order.type === "exit")
-    .reduce((sum, order) => sum + order.total_amount, 0);
 
   const stats = [
     {
       label: "Productos",
-      value: products.length,
+      value: paginationProducts?.total || 0,
       icon: <FaBox />,
       color: "bg-[#2563EB]",
     },
     {
       label: "Clientes",
-      value: clients.length,
+      value: paginationClients?.total || 0,
       icon: <IoMdPerson />,
       color: "bg-[#16A34A]",
     },
@@ -53,7 +66,7 @@ export function Home() {
     },
     {
       label: "Remitos",
-      value: orders.length,
+      value: orderStats.total_orders,
       icon: <FiFileText />,
       color: "bg-[#DC2626]",
     },
@@ -114,23 +127,10 @@ export function Home() {
         ))}
       </div>
 
-      {/* ← NUEVO: Cards de Entradas y Salidas */}
+      {/* Cards de Entradas y Salidas (desde backend stats) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Card de Entradas */}
-        <Card className="bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white">
-          <div className="text-center py-4">
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <FiArrowDown className="text-5xl" />
-              <p className="text-2xl font-semibold opacity-90">
-                Gasto Total en Entradas
-              </p>
-            </div>
-            <p className="text-5xl font-bold">{formatARS(totalEntries)}</p>
-          </div>
-        </Card>
 
-        {/* Card de Salidas */}
-        <Card className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] text-white">
+        <Card className="bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white">
           <div className="text-center py-4">
             <div className="flex items-center justify-center gap-3 mb-3">
               <FiArrowUp className="text-5xl" />
@@ -138,9 +138,26 @@ export function Home() {
                 Ganancia Total de Salidas
               </p>
             </div>
-            <p className="text-5xl font-bold">{formatARS(totalExits)}</p>
+            <p className="text-5xl font-bold">
+              {formatARS(orderStats.total_exits_amount)}
+            </p>
           </div>
         </Card>
+
+        <Card className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] text-white">
+          <div className="text-center py-4">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <FiArrowDown className="text-5xl" />
+              <p className="text-2xl font-semibold opacity-90">
+                Gasto Total en Entradas
+              </p>
+            </div>
+            <p className="text-5xl font-bold">
+              {formatARS(orderStats.total_entries_amount)}
+            </p>
+          </div>
+        </Card>
+
       </div>
 
       {/* Alertas de inventario */}
@@ -177,7 +194,7 @@ export function Home() {
         </Card>
       )}
 
-      {/* Accesos rápidos - CON ALTURA FIJA */}
+      {/* Accesos rápidos */}
       <div>
         <h2 className="text-3xl font-bold text-[#0F172A] mb-6">
           Accesos rápidos
@@ -188,7 +205,6 @@ export function Home() {
               key={section.path}
               className="hover:shadow-xl transition-shadow flex flex-col"
             >
-              {/* ← CAMBIAR estructura para alinear botón al fondo */}
               <div className="text-center flex-1 flex flex-col">
                 <div className="mb-4 flex justify-center">
                   <span className="text-6xl flex items-center justify-center">
@@ -206,11 +222,10 @@ export function Home() {
                   </span>
                 )}
 
-                <p className="text-lg text-[#475569] mb-6 flex-1">  {/* ← AGREGAR flex-1 */}
+                <p className="text-lg text-[#475569] mb-6 flex-1">
                   {section.description}
                 </p>
 
-                {/* ← Botón siempre al fondo */}
                 <Button
                   variant="primary"
                   size="lg"

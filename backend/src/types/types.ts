@@ -11,7 +11,7 @@ declare global {
     }
   }
 }
-export {};
+export { };
 // Order Types
 export type OrderType = 'entry' | 'exit';
 

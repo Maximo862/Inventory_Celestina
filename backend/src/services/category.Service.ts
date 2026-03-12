@@ -3,9 +3,8 @@ import { ValidationError, NotFoundError, DuplicateError, AppError } from '../uti
 import {
     CreateCategoryDTO,
     UpdateCategoryDTO,
-    PaginationParams,
-    PaginatedResult,
-    Category
+    Category,
+    CategoryRow
 } from '../types/types';
 
 export class CategoryService {
@@ -15,17 +14,11 @@ export class CategoryService {
         this.repository = new CategoryRepository();
     }
 
-    async getAll(pagination: PaginationParams): Promise<PaginatedResult<Category>> {
-        const { categories, total } = await this.repository.findAll(pagination);
+    async getAll(): Promise<{data : CategoryRow[]}> {
+        const { categories } = await this.repository.findAll();
 
         return {
             data: categories,
-            pagination: {
-                page: pagination.page,
-                limit: pagination.limit,
-                total,
-                totalPages: Math.ceil(total / pagination.limit)
-            }
         };
     }
 

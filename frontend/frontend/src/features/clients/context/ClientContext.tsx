@@ -1,32 +1,43 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAllClientsRequest } from "../api/clientsRequest";
-import type { Client } from "@/types/types";
+import type { Client, PaginationParams } from "@/types/types";
 import { useAuth } from "@/features/auth/context/AuthContext";
+
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 interface ClientContextType {
   clients: Client[];
   loading: boolean;
-  refreshClients: () => Promise<void>;
+  pagination: PaginationInfo | null;
+  loadClients: (params: PaginationParams) => Promise<void>;
+  refreshClients: (params: PaginationParams) => Promise<void>;
 }
 
 export const ClientContext = createContext<ClientContextType | null>(null);
 
 export function ClientProvider({ children }: { children: React.ReactNode }) {
   const [clients, setClients] = useState<Client[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (user && !authLoading) {
-      loadClients();
+      loadClients({ page: 1, limit: 10 });
     }
   }, [authLoading, user]);
 
-  async function loadClients() {
+  async function loadClients(params: PaginationParams) {
     try {
       setLoading(true);
-      const res = await getAllClientsRequest();
+      const res = await getAllClientsRequest(params);
       setClients(res.data);
+      setPagination(res.pagination);
     } catch (error) {
       console.error("Error loading clients:", error);
     } finally {
@@ -34,8 +45,8 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function refreshClients() {
-    await loadClients();
+  async function refreshClients(params: PaginationParams) {
+    await loadClients(params);
   }
 
   return (
@@ -43,6 +54,8 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
       value={{
         clients,
         loading,
+        pagination,
+        loadClients,
         refreshClients,
       }}
     >

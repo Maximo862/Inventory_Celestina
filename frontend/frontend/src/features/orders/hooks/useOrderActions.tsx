@@ -15,8 +15,8 @@ import { handleError } from "@/utils/errorHandler";
 import { useProducts } from "@/features/products/context/ProductContext";
 
 export function useOrderActions() {
-  const { refreshOrders } = useOrders();
-  const { refreshProducts } = useProducts()
+  const { refreshOrders, pagination } = useOrders();
+  const { refreshProducts, pagination: productsPagination } = useProducts();
 
   async function getOrderById(id: number): Promise<OrderWithDetails> {
     try {
@@ -31,8 +31,18 @@ export function useOrderActions() {
   async function createOrder(order: CreateOrderDTO) {
     try {
       await createOrderRequest(order);
-      await refreshOrders();
-      await refreshProducts();
+
+      // Mantener página actual de orders
+      await refreshOrders({
+        page: pagination?.page || 1,
+        limit: pagination?.limit || 10,
+      });
+
+      // Mantener página actual de products
+      await refreshProducts({
+        page: productsPagination?.page || 1,
+        limit: productsPagination?.limit || 10,
+      });
 
       const message =
         order.type === "entry"
@@ -49,8 +59,17 @@ export function useOrderActions() {
   async function updateOrder(id: number, order: UpdateOrderDTO) {
     try {
       await updateOrderRequest(id, order);
-      await refreshOrders();
-      await refreshProducts();
+
+      await refreshOrders({
+        page: pagination?.page || 1,
+        limit: pagination?.limit || 10,
+      });
+
+      await refreshProducts({
+        page: productsPagination?.page || 1,
+        limit: productsPagination?.limit || 10,
+      });
+
       toast.success("Orden actualizada exitosamente");
     } catch (error) {
       handleError(error, "actualizar");
@@ -61,8 +80,17 @@ export function useOrderActions() {
   async function deleteOrder(id: number) {
     try {
       await deleteOrderRequest(id);
-      await refreshOrders();
-      await refreshProducts();
+
+      await refreshOrders({
+        page: pagination?.page || 1,
+        limit: pagination?.limit || 10,
+      });
+
+      await refreshProducts({
+        page: productsPagination?.page || 1,
+        limit: productsPagination?.limit || 10,
+      });
+
       toast.success("Orden eliminada exitosamente");
     } catch (error) {
       handleError(error, "eliminar");
