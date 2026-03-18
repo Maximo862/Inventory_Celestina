@@ -159,9 +159,21 @@ export interface PaginationParams {
   limit: number;
 }
 
+export interface SortParams {
+  sort: string;
+  order: 'asc' | 'desc';
+}
+
 export interface ProductFilters {
   search?: string;
   category_id?: number;
+}
+
+export interface ProductSortableFields {
+  name: true;
+  price: true;
+  quantity: true;
+  created_at: true;
 }
 
 // Actualizar PaginationParams para incluir filtros

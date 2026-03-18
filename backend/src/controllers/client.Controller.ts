@@ -13,7 +13,18 @@ export class ClientController {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
 
-            const result = await this.service.getAll({ page, limit });
+            // Filtros
+            const search = req.query.search as string | undefined;
+            const filters = {
+                ...(search && { search })
+            };
+
+            // Ordenamiento
+            const sortField = req.query.sortField as string || 'id';
+            const sortOrder = (req.query.sortOrder as string || 'DESC').toUpperCase() as 'ASC' | 'DESC';
+            const sort = { field: sortField, order: sortOrder };
+
+            const result = await this.service.getAll({ page, limit }, filters, sort);
 
             res.status(200).json(result);
         } catch (err) {

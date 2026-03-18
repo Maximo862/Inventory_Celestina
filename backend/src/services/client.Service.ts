@@ -9,8 +9,12 @@ export class ClientService {
         this.repository = new ClientRepository();
     }
 
-    async getAll(pagination: PaginationParams): Promise<PaginatedResult<Client>> {
-        const { clients, total } = await this.repository.findAll(pagination);
+    async getAll(
+        pagination: PaginationParams,
+        filters?: { search?: string },
+        sort?: { field: string; order: 'ASC' | 'DESC' }
+    ): Promise<PaginatedResult<Client>> {
+        const { clients, total } = await this.repository.findAll(pagination, filters, sort);
 
         return {
             data: clients,

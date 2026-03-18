@@ -1,7 +1,7 @@
 import { ProductRepository } from '../repositories/product.Repository';
 import { CategoryRepository } from '../repositories/category.Repository';
 import { ValidationError, NotFoundError } from '../utils/appError';
-import { CreateProductDTO, UpdateProductDTO, PaginationParams, PaginatedResult, Product } from '../types/types';
+import { CreateProductDTO, UpdateProductDTO, PaginationParams, PaginatedResult, Product, SortParams } from '../types/types';
 
 export class ProductService {
     private repository: ProductRepository;
@@ -14,9 +14,10 @@ export class ProductService {
 
     async getAll(
         pagination: PaginationParams,
-        filters?: { search?: string; category_id?: number }
+        filters?: { search?: string; category_id?: number },
+        sortParams?: SortParams
     ): Promise<PaginatedResult<Product>> {
-        const { products, total } = await this.repository.findAll(pagination, filters);
+        const { products, total } = await this.repository.findAll(pagination, filters, sortParams);
 
         return {
             data: products,

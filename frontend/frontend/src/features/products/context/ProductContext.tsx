@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAllProductsRequest } from "../api/ProductsRequest";
-import type { Product, PaginationParams } from "@/types/types";
+import type { Product, PaginationParams, SortParams } from "@/types/types";
 import { useAuth } from "@/features/auth/context/AuthContext";
 
 interface PaginationInfo {
@@ -15,10 +15,10 @@ interface ProductContextType {
   loading: boolean;
   pagination: PaginationInfo | null;
   loadProducts: (
-    params: PaginationParams & { search?: string; category_id?: number }
+    params: PaginationParams & { search?: string; category_id?: number } & SortParams
   ) => Promise<void>;
   refreshProducts: (
-    params: PaginationParams & { search?: string; category_id?: number }
+    params: PaginationParams & { search?: string; category_id?: number } & SortParams
   ) => Promise<void>;
 }
 
@@ -37,7 +37,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
   }, [authLoading, user]);
 
   async function loadProducts(
-    params: PaginationParams & { search?: string; category_id?: number }
+    params: PaginationParams & { search?: string; category_id?: number } & SortParams
   ) {
     try {
       setLoading(true);
@@ -52,7 +52,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function refreshProducts(
-    params: PaginationParams & { search?: string; category_id?: number }
+    params: PaginationParams & { search?: string; category_id?: number } & SortParams
   ) {
     await loadProducts(params);
   }

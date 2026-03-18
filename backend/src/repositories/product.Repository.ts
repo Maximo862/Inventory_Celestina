@@ -1,18 +1,26 @@
 import { pool } from '../db/db';
-import { Product, PaginationParams, CreateProductDTO, UpdateProductDTO } from '../types/types';
+import { Product, PaginationParams, CreateProductDTO, UpdateProductDTO, SortParams, ProductSortableFields } from '../types/types';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 interface ProductRow extends RowDataPacket, Product { }
 
+const ALLOWED_SORT_FIELDS: ProductSortableFields = {
+  name: true,
+  price: true,
+  quantity: true,
+  created_at: true
+};
+
+const ALLOWED_ORDER_VALUES = ['asc', 'desc'];
+
 export class ProductRepository {
-  // ← ACTUALIZAR: Agregar parámetros de búsqueda y filtro
   async findAll(
     pagination: PaginationParams,
-    filters?: { search?: string; category_id?: number }
+    filters?: { search?: string; category_id?: number },
+    sortParams?: SortParams
   ): Promise<{ products: ProductRow[], total: number }> {
     const offset = (pagination.page - 1) * pagination.limit;
 
-    // ← Construir WHERE dinámicamente según filtros
     const whereClauses: string[] = [];
     const params: any[] = [];
 
@@ -30,11 +38,17 @@ export class ProductRepository {
       ? `WHERE ${whereClauses.join(' AND ')}`
       : '';
 
-    // ← Query para productos con filtros
+    const sortField = ALLOWED_SORT_FIELDS[sortParams?.sort as keyof ProductSortableFields]
+      ? sortParams!.sort
+      : 'id';
+    const sortOrder = ALLOWED_ORDER_VALUES.includes(sortParams?.order?.toLowerCase() || '')
+      ? sortParams!.order.toUpperCase()
+      : 'DESC';
+
     const productsQuery = `
       SELECT * FROM products 
       ${whereSQL}
-      ORDER BY id DESC 
+      ORDER BY ${sortField} ${sortOrder}
       LIMIT ? OFFSET ?
     `;
 
@@ -57,7 +71,6 @@ export class ProductRepository {
     };
   }
 
-  // ... resto de métodos sin cambios
 
 
   async findById(id: number): Promise<ProductRow | null> {

@@ -19,8 +19,21 @@ type SortOption =
   | "name-desc"
   | "price-asc"
   | "price-desc"
-  | "stock-asc"
-  | "stock-desc";
+  | "quantity-asc"
+  | "quantity-desc"
+  | "created_at-asc"
+  | "created_at-desc";
+
+const SORT_OPTIONS: Record<SortOption, { sort: string; order: 'asc' | 'desc' }> = {
+  "name-asc": { sort: "name", order: "asc" },
+  "name-desc": { sort: "name", order: "desc" },
+  "price-asc": { sort: "price", order: "asc" },
+  "price-desc": { sort: "price", order: "desc" },
+  "quantity-asc": { sort: "quantity", order: "asc" },
+  "quantity-desc": { sort: "quantity", order: "desc" },
+  "created_at-asc": { sort: "created_at", order: "asc" },
+  "created_at-desc": { sort: "created_at", order: "desc" },
+};
 
 export function ProductsPage() {
   const { products, loading, pagination, loadProducts } = useProducts()!;
@@ -52,21 +65,24 @@ export function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
 
-  // ← ESTADOS: Ordenamiento (CLIENT-SIDE) y paginación
+  // ← ESTADOS: Ordenamiento (SERVER-SIDE) y paginación
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // ← CARGAR productos cuando cambian: página, búsqueda o filtro
+  // ← CARGAR productos cuando cambian: página, búsqueda, filtro o sort
   useEffect(() => {
+    const sortConfig = SORT_OPTIONS[sortBy];
     loadProducts({
       page: currentPage,
       limit: itemsPerPage,
       ...(searchTerm && { search: searchTerm }),
       ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
+      sort: sortConfig.sort,
+      order: sortConfig.order,
     });
-  }, [currentPage, searchTerm, filterCategory]);
+  }, [currentPage, searchTerm, filterCategory, sortBy]);
 
   const categoryMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -82,32 +98,6 @@ export function ProductsPage() {
     return categories.filter((cat) => cat.parent_id === parentId);
   };
 
-  // ← ORDENAMIENTO CLIENT-SIDE (solo sobre los productos de la página actual)
-  const sortedProducts = useMemo(() => {
-    let result = [...products];
-
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "name-asc":
-          return a.name.localeCompare(b.name);
-        case "name-desc":
-          return b.name.localeCompare(a.name);
-        case "price-asc":
-          return a.price - b.price;
-        case "price-desc":
-          return b.price - a.price;
-        case "stock-asc":
-          return a.quantity - b.quantity;
-        case "stock-desc":
-          return b.quantity - a.quantity;
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [products, sortBy]);
-
   const handleCreate = () => {
     setFormModal({ isOpen: true, product: null });
   };
@@ -122,12 +112,14 @@ export function ProductsPage() {
     } else {
       await createProduct(data);
     }
-    // Recargar con filtros actuales
+    const sortConfig = SORT_OPTIONS[sortBy];
     loadProducts({
       page: currentPage,
       limit: itemsPerPage,
       ...(searchTerm && { search: searchTerm }),
       ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
+      sort: sortConfig.sort,
+      order: sortConfig.order,
     });
   };
 
@@ -146,12 +138,14 @@ export function ProductsPage() {
     try {
       await deleteProduct(deleteModal.id);
       setDeleteModal({ isOpen: false, id: null, name: "" });
-      // Recargar con filtros actuales
+      const sortConfig = SORT_OPTIONS[sortBy];
       loadProducts({
         page: currentPage,
         limit: itemsPerPage,
         ...(searchTerm && { search: searchTerm }),
         ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
+        sort: sortConfig.sort,
+        order: sortConfig.order,
       });
     } finally {
       setIsDeleting(false);
@@ -272,22 +266,27 @@ export function ProductsPage() {
                 </select>
               </div>
 
-              {/* ← ORDENAR (CLIENT-SIDE) */}
+              {/* ← ORDENAR (SERVER-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                   Ordenar por
                 </label>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  onChange={(e) => {
+                    setSortBy(e.target.value as SortOption);
+                    setCurrentPage(1);
+                  }}
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
                   <option value="name-asc">🔤 Nombre (A → Z)</option>
                   <option value="name-desc">🔤 Nombre (Z → A)</option>
                   <option value="price-asc">💰 Precio (menor → mayor)</option>
                   <option value="price-desc">💰 Precio (mayor → menor)</option>
-                  <option value="stock-asc">📦 Stock (menor → mayor)</option>
-                  <option value="stock-desc">📦 Stock (mayor → menor)</option>
+                  <option value="quantity-asc">📦 Stock (menor → mayor)</option>
+                  <option value="quantity-desc">📦 Stock (mayor → menor)</option>
+                  <option value="created_at-desc">🕐 Más reciente</option>
+                  <option value="created_at-asc">🕐 Más antiguo</option>
                 </select>
               </div>
             </div>
@@ -295,7 +294,7 @@ export function ProductsPage() {
             {pagination && (
               <div className="flex items-center justify-between text-lg text-[#475569]">
                 <p>
-                  Mostrando {sortedProducts.length} de {pagination.total}{" "}
+                  Mostrando {products.length} de {pagination.total}{" "}
                   productos totales (Página {currentPage} de{" "}
                   {pagination.totalPages})
                 </p>
@@ -318,7 +317,7 @@ export function ProductsPage() {
             )}
           </div>
 
-          {sortedProducts.length === 0 ? (
+          {products.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#475569] mb-4">
                 No se encontraron productos
@@ -339,7 +338,7 @@ export function ProductsPage() {
           ) : (
             <>
               <div className="space-y-4">
-                {sortedProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}

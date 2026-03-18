@@ -7,12 +7,33 @@ import type {
     PaginationParams,
 } from "@/types/types";
 
-export const getAllClientsRequest = (params?: PaginationParams) => {
-    const queryString = params
-        ? `?page=${params.page || 1}&limit=${params.limit || 10}`
-        : "";
+export const getAllClientsRequest = (
+    params?: PaginationParams & {
+        search?: string;
+        sortField?: string;
+        sortOrder?: 'ASC' | 'DESC';
+    }
+) => {
+    const queryParams = new URLSearchParams();
 
-    return fetchAPI<PaginatedResponse<Client>>(`/clients${queryString}`);
+    queryParams.append("page", (params?.page || 1).toString());
+    queryParams.append("limit", (params?.limit || 10).toString());
+
+    if (params?.search) {
+        queryParams.append("search", params.search);
+    }
+
+    if (params?.sortField) {
+        queryParams.append("sortField", params.sortField);
+    }
+
+    if (params?.sortOrder) {
+        queryParams.append("sortOrder", params.sortOrder);
+    }
+
+    return fetchAPI<PaginatedResponse<Client>>(
+        `/clients?${queryParams.toString()}`
+    );
 };
 
 export const getClientByIdRequest = (id: number) =>

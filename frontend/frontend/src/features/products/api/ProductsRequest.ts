@@ -5,10 +5,11 @@ import type {
     UpdateProductDTO,
     PaginatedResponse,
     PaginationParams,
+    SortParams,
 } from "@/types/types";
 
 export const getAllProductsRequest = (
-    params?: PaginationParams & { search?: string; category_id?: number }
+    params?: PaginationParams & { search?: string; category_id?: number } & SortParams
 ) => {
     const queryParams = new URLSearchParams();
 
@@ -21,6 +22,14 @@ export const getAllProductsRequest = (
 
     if (params?.category_id) {
         queryParams.append("category_id", params.category_id.toString());
+    }
+
+    if (params?.sort) {
+        queryParams.append("sort", params.sort);
+    }
+
+    if (params?.order) {
+        queryParams.append("order", params.order);
     }
 
     return fetchAPI<PaginatedResponse<Product>>(

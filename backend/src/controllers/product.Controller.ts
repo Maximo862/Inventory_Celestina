@@ -18,12 +18,20 @@ export class ProductController {
                 ? parseInt(req.query.category_id as string)
                 : undefined;
 
+            const sort = req.query.sort as string | undefined;
+            const order = req.query.order as 'asc' | 'desc' | undefined;
+
             const filters = {
                 ...(search && { search }),
                 ...(category_id && { category_id })
             };
 
-            const result = await this.service.getAll({ page, limit }, filters);
+            const sortParams = {
+                ...(sort && { sort }),
+                ...(order && { order })
+            };
+
+            const result = await this.service.getAll({ page, limit }, filters, sortParams);
 
             res.status(200).json(result);
         } catch (err) {

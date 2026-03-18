@@ -150,6 +150,11 @@ export interface PaginationParams {
   limit?: number;
 }
 
+export interface SortParams {
+  sort?: string;
+  order?: 'asc' | 'desc';
+}
+
 export interface PaginationMeta {
   page: number;
   limit: number;

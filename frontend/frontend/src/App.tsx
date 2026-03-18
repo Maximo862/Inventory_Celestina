@@ -20,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoutes />}>
             <Route element={<DashboardLayout />}>
               <Route element={<ProtectedRoutesRole />}>
@@ -43,25 +44,16 @@ function App() {
 
 export default App;
 
-//CODE en CATEGORIAS
+// Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
+// Que se pueda subir categorias enteras por porcentaje por ej : alambre subieron un 10% 
+// implementar la api de AFIP 
+// Guardar quien creo cada Orden
 
 // EXTRAS : 
 
-//- Filtrado con paginacion en el frontend, porque solo filtra con esos que traj el backend osea con esa page  
-
-//- Que no se pueda crear subcategorias de subcategorias porque ahi ya es un quilombo todo 
-
-// - Si vos pones una entrada de un producto y le pones que entraron 5 a un precio de 100 por ejemplo lo cual tendria que ser 500$ en total, en products toma el precio unitario entonces si el precio unitario era de por ejemplo 10.000, tina un total de 50.000$ en total. 
-
 // - Mirar el tema de la ALERTA DE BAJO STOCK
 
-// - Barra de busqueda por CODE en productos
-
 // - Manejar errores de rango con : 'ER_WARN_DATA_OUT_OF_RANGE'
-
-// - Arreglar lo de la paginacion y hacer que funcione o directamente sacarlo.
-
-// - Arreglar lo del precio para que sea en argentino y no con tofixed o esos puntos que se ponen en cualquier lado y confunden
 
 // Logros de este proyecto :
 

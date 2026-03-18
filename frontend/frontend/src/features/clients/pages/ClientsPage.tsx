@@ -1,4 +1,4 @@
-import { useState, useMemo, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/Button";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -48,38 +48,28 @@ export function ClientsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // ← Mapear sortBy a sortField y sortOrder
+  const getSortParams = (sortOption: SortOption) => {
+    const sortMap: Record<SortOption, { field: string; order: 'ASC' | 'DESC' }> = {
+      'name-asc': { field: 'name', order: 'ASC' },
+      'name-desc': { field: 'name', order: 'DESC' },
+      'cuil-asc': { field: 'cuil', order: 'ASC' },
+      'cuil-desc': { field: 'cuil', order: 'DESC' },
+    };
+    return sortMap[sortOption];
+  };
+
+  // ← Cargar cuando cambian: página, búsqueda u ordenamiento
   useEffect(() => {
-    loadClients({ page: currentPage, limit: itemsPerPage });
-  }, [currentPage]);
-
-  const filteredAndSortedClients = useMemo(() => {
-    let result = clients.filter((client) => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        client.name.toLowerCase().includes(searchLower) ||
-        client.cuil.includes(searchTerm) ||
-        client.email?.toLowerCase().includes(searchLower) ||
-        client.phone?.includes(searchTerm)
-      );
+    const { field, order } = getSortParams(sortBy);
+    loadClients({
+      page: currentPage,
+      limit: itemsPerPage,
+      ...(searchTerm && { search: searchTerm }),
+      sortField: field,
+      sortOrder: order,
     });
-
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "name-asc":
-          return a.name.localeCompare(b.name);
-        case "name-desc":
-          return b.name.localeCompare(a.name);
-        case "cuil-asc":
-          return a.cuil.localeCompare(b.cuil);
-        case "cuil-desc":
-          return b.cuil.localeCompare(a.cuil);
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [clients, searchTerm, sortBy]);
+  }, [currentPage, searchTerm, sortBy]);
 
   const handleCreate = () => {
     setFormModal({ isOpen: true, client: null });
@@ -95,7 +85,14 @@ export function ClientsPage() {
     } else {
       await createClient(data);
     }
-    loadClients({ page: currentPage, limit: itemsPerPage });
+    const { field, order } = getSortParams(sortBy);
+    loadClients({
+      page: currentPage,
+      limit: itemsPerPage,
+      ...(searchTerm && { search: searchTerm }),
+      sortField: field,
+      sortOrder: order,
+    });
   };
 
   const handleFormClose = () => {
@@ -113,7 +110,14 @@ export function ClientsPage() {
     try {
       await deleteClient(deleteModal.id);
       setDeleteModal({ isOpen: false, id: null, name: "" });
-      loadClients({ page: currentPage, limit: itemsPerPage });
+      const { field, order } = getSortParams(sortBy);
+      loadClients({
+        page: currentPage,
+        limit: itemsPerPage,
+        ...(searchTerm && { search: searchTerm }),
+        sortField: field,
+        sortOrder: order,
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -121,6 +125,16 @@ export function ClientsPage() {
 
   const handleCancelDelete = () => {
     setDeleteModal({ isOpen: false, id: null, name: "" });
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (value: SortOption) => {
+    setSortBy(value);
+    setCurrentPage(1);
   };
 
   const handlePreviousPage = () => {
@@ -182,7 +196,7 @@ export function ClientsPage() {
                 type="text"
                 placeholder="🔍 Buscar por nombre, CUIL, email o teléfono..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               />
             </div>
@@ -193,7 +207,7 @@ export function ClientsPage() {
               </label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                onChange={(e) => handleSortChange(e.target.value as SortOption)}
                 className="w-full sm:w-auto bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               >
                 <option value="name-asc">🔤 Nombre (A → Z)</option>
@@ -206,15 +220,15 @@ export function ClientsPage() {
             {pagination && (
               <div className="flex items-center justify-between text-lg text-[#475569]">
                 <p>
-                  Mostrando {filteredAndSortedClients.length} de{" "}
-                  {pagination.total} clientes totales (Página {currentPage} de{" "}
-                  {pagination.totalPages})
+                  Mostrando {clients.length} de {pagination.total} clientes
+                  totales (Página {currentPage} de {pagination.totalPages})
                 </p>
                 {(searchTerm || sortBy !== "name-asc") && (
                   <button
                     onClick={() => {
                       setSearchTerm("");
                       setSortBy("name-asc");
+                      setCurrentPage(1);
                     }}
                     className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
                   >
@@ -225,7 +239,7 @@ export function ClientsPage() {
             )}
           </div>
 
-          {filteredAndSortedClients.length === 0 ? (
+          {clients.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#475569] mb-4">
                 No se encontraron clientes
@@ -236,6 +250,7 @@ export function ClientsPage() {
                 onClick={() => {
                   setSearchTerm("");
                   setSortBy("name-asc");
+                  setCurrentPage(1);
                 }}
               >
                 Limpiar filtros
@@ -244,7 +259,7 @@ export function ClientsPage() {
           ) : (
             <>
               <div className="space-y-4">
-                {filteredAndSortedClients.map((client) => (
+                {clients.map((client) => (
                   <ClientCard
                     key={client.id}
                     client={client}

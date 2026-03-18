@@ -3,17 +3,52 @@ import { ClientRow, CreateClientDTO, UpdateClientDTO, PaginationParams } from '.
 import { ResultSetHeader } from 'mysql2/promise';
 
 export class ClientRepository {
-    async findAll(pagination: PaginationParams): Promise<{ clients: ClientRow[], total: number }> {
+    async findAll(
+        pagination: PaginationParams,
+        filters?: { search?: string },
+        sort?: { field: string; order: 'ASC' | 'DESC' }
+    ): Promise<{ clients: ClientRow[], total: number }> {
         const offset = (pagination.page - 1) * pagination.limit;
 
+        // ← Construir WHERE para búsqueda
+        const whereClauses: string[] = [];
+        const params: any[] = [];
+
+        if (filters?.search) {
+            whereClauses.push('(name LIKE ? OR cuil LIKE ? OR email LIKE ? OR phone LIKE ?)');
+            const searchTerm = `%${filters.search}%`;
+            params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+        }
+
+        const whereSQL = whereClauses.length > 0
+            ? `WHERE ${whereClauses.join(' AND ')}`
+            : '';
+
+        // ← Construir ORDER BY
+        const orderField = sort?.field || 'id';
+        const orderDirection = sort?.order || 'DESC';
+        const orderSQL = `ORDER BY ${orderField} ${orderDirection}`;
+
+        // Query para clientes
+        const clientsQuery = `
+      SELECT * FROM clients 
+      ${whereSQL}
+      ${orderSQL}
+      LIMIT ? OFFSET ?
+    `;
+
         const [clients] = await pool.query<ClientRow[]>(
-            'SELECT * FROM clients ORDER BY id DESC LIMIT ? OFFSET ?',
-            [pagination.limit, offset]
+            clientsQuery,
+            [...params, pagination.limit, offset]
         );
 
-        const [countResult] = await pool.query<any[]>(
-            'SELECT COUNT(*) as total FROM clients'
-        );
+        // Query para contar total
+        const countQuery = `
+      SELECT COUNT(*) as total FROM clients 
+      ${whereSQL}
+    `;
+
+        const [countResult] = await pool.query<any[]>(countQuery, params);
 
         return {
             clients,

@@ -14,8 +14,20 @@ interface ClientContextType {
   clients: Client[];
   loading: boolean;
   pagination: PaginationInfo | null;
-  loadClients: (params: PaginationParams) => Promise<void>;
-  refreshClients: (params: PaginationParams) => Promise<void>;
+  loadClients: (
+    params: PaginationParams & {
+      search?: string;
+      sortField?: string;
+      sortOrder?: 'ASC' | 'DESC';
+    }
+  ) => Promise<void>;
+  refreshClients: (
+    params: PaginationParams & {
+      search?: string;
+      sortField?: string;
+      sortOrder?: 'ASC' | 'DESC';
+    }
+  ) => Promise<void>;
 }
 
 export const ClientContext = createContext<ClientContextType | null>(null);
@@ -32,7 +44,13 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     }
   }, [authLoading, user]);
 
-  async function loadClients(params: PaginationParams) {
+  async function loadClients(
+    params: PaginationParams & {
+      search?: string;
+      sortField?: string;
+      sortOrder?: 'ASC' | 'DESC';
+    }
+  ) {
     try {
       setLoading(true);
       const res = await getAllClientsRequest(params);
@@ -45,7 +63,13 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function refreshClients(params: PaginationParams) {
+  async function refreshClients(
+    params: PaginationParams & {
+      search?: string;
+      sortField?: string;
+      sortOrder?: 'ASC' | 'DESC';
+    }
+  ) {
     await loadClients(params);
   }
 
