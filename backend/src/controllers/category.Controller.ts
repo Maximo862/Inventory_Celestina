@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { CategoryService } from '../services/category.Service';
+import { UpdateCategoryPricesDTO } from '../types/types';
 
 export class CategoryController {
     private service: CategoryService;
@@ -84,6 +85,32 @@ export class CategoryController {
             await this.service.delete(id);
 
             res.status(204).send();
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    previewPrices = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = Number(req.params.id);
+            const data: UpdateCategoryPricesDTO = req.body;
+
+            const result = await this.service.previewPrices(id, data);
+
+            res.status(200).json(result);
+        } catch (err) {
+            next(err);
+        }
+    };
+
+    updatePrices = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const id = Number(req.params.id);
+            const data: UpdateCategoryPricesDTO = req.body;
+
+            const result = await this.service.updatePrices(id, data);
+
+            res.status(200).json(result);
         } catch (err) {
             next(err);
         }

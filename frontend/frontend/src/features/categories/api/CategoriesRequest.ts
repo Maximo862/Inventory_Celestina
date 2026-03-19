@@ -4,6 +4,8 @@ import type {
   CreateCategoryDTO,
   UpdateCategoryDTO,
   PaginatedResponse,
+  PricePreviewResult,
+  PriceUpdateResult,
 } from "@/types/types";
 
 export const getAllCategoriesRequest = () => {
@@ -34,4 +36,22 @@ export const updateCategoryRequest = (id: number, data: UpdateCategoryDTO) =>
 export const deleteCategoryRequest = (id: number) =>
   fetchAPI<void>(`/categories/${id}`, {
     method: "DELETE",
+  });
+
+export const previewPriceAdjustmentRequest = (
+  id: number,
+  percentage: number
+) =>
+  fetchAPI<PricePreviewResult>(`/categories/${id}/price-preview`, {
+    method: "POST",
+    body: JSON.stringify({ percentage }),
+  });
+
+export const applyPriceAdjustmentRequest = (
+  id: number,
+  percentage: number
+) =>
+  fetchAPI<PriceUpdateResult>(`/categories/${id}/price-update`, {
+    method: "PATCH",
+    body: JSON.stringify({ percentage }),
   });

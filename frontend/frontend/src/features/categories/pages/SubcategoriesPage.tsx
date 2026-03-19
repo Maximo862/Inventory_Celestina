@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/EmpityState";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { SubcategoryCard } from "../components/SubcategoryCard";
 import { SubcategoryFormModal } from "../components/SubcategoryFormModal";
+import { PriceAdjustmentModal } from "../components/PriceAdjustmentModal";
 import { useCategories } from "../context/CategoryContext";
 import { useCategoryActions } from "../hooks/useCategoryActions";
 import { FiArrowLeft, FiPlus } from "react-icons/fi";
@@ -20,8 +21,13 @@ export function SubcategoriesPage() {
   const navigate = useNavigate();
 
   const { categories, getSubcategories, loading } = useCategories()!;
-  const { createCategory, updateCategory, deleteCategory } =
-    useCategoryActions();
+  const {
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    previewPriceAdjustment,
+    applyPriceAdjustment,
+  } = useCategoryActions();
 
   // Encontrar categoría padre
   const parentCategory = useMemo(() => {
@@ -35,6 +41,14 @@ export function SubcategoriesPage() {
   }, [categoryId, getSubcategories]);
 
   const [formModal, setFormModal] = useState<{
+    isOpen: boolean;
+    subcategory: Category | null;
+  }>({
+    isOpen: false,
+    subcategory: null,
+  });
+
+  const [priceModal, setPriceModal] = useState<{
     isOpen: boolean;
     subcategory: Category | null;
   }>({
@@ -124,6 +138,22 @@ export function SubcategoriesPage() {
 
   const handleCancelDelete = () => {
     setDeleteModal({ isOpen: false, id: null, name: "" });
+  };
+
+  const handlePriceAdjustment = (subcategory: Category) => {
+    setPriceModal({ isOpen: true, subcategory });
+  };
+
+  const handlePriceClose = () => {
+    setPriceModal({ isOpen: false, subcategory: null });
+  };
+
+  const handlePricePreview = async (id: number, percentage: number) => {
+    return previewPriceAdjustment(id, percentage);
+  };
+
+  const handlePriceApply = async (id: number, percentage: number) => {
+    await applyPriceAdjustment(id, percentage);
   };
 
   if (loading) {
@@ -262,6 +292,7 @@ export function SubcategoriesPage() {
                   subcategory={subcategory}
                   onEdit={() => handleEdit(subcategory)}
                   onDelete={handleDeleteClick}
+                  onPriceAdjustment={handlePriceAdjustment}
                 />
               ))}
             </div>
@@ -288,6 +319,16 @@ export function SubcategoriesPage() {
         onCancel={handleCancelDelete}
         isDeleting={isDeleting}
       />
+
+      {priceModal.subcategory && (
+        <PriceAdjustmentModal
+          isOpen={priceModal.isOpen}
+          category={priceModal.subcategory}
+          onClose={handlePriceClose}
+          onPreview={handlePricePreview}
+          onApply={handlePriceApply}
+        />
+      )}
     </div>
   );
 }

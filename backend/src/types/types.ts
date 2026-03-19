@@ -196,3 +196,28 @@ export interface PaginatedResult<T> {
 export interface CategoryRow extends RowDataPacket, Category { }
 export interface ProductRow extends RowDataPacket, Product { }
 export interface ClientRow extends RowDataPacket, Client { }
+
+// Price Update Types
+export interface UpdateCategoryPricesDTO {
+    percentage: number;
+}
+
+export interface PriceUpdateResult {
+    affectedProducts: number;
+    categoryId: number;
+    percentage: number;
+}
+
+export interface PricePreviewResult {
+    categoryId: number;
+    categoryIds: number[];
+    percentage: number;
+    affectedProducts: {
+        id: number;
+        name: string;
+        currentPrice: number;
+        newPrice: number;
+    }[];
+    totalCurrentPrice: number;
+    totalNewPrice: number;
+}

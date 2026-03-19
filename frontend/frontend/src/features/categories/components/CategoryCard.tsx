@@ -2,20 +2,23 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { useNavigate } from "react-router-dom";
 import { FiEdit2, FiTrash2, FiFolder } from "react-icons/fi";
+import { FiDollarSign } from "react-icons/fi";
 import type { Category } from "@/types/types";
 
 interface CategoryCardProps {
   category: Category;
-  subcategoriesCount?: number;  // NUEVO
+  subcategoriesCount?: number;
   onEdit: () => void;
   onDelete: (id: number, name: string) => void;
+  onPriceAdjustment: (category: Category) => void;
 }
 
 export function CategoryCard({
   category,
-  subcategoriesCount = 0,  // NUEVO
+  subcategoriesCount = 0,
   onEdit,
   onDelete,
+  onPriceAdjustment,
 }: CategoryCardProps) {
   const navigate = useNavigate();
 
@@ -40,7 +43,6 @@ export function CategoryCard({
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* NUEVO: Botón para ver subcategorías */}
           <Button
             variant="secondary"
             size="md"
@@ -49,6 +51,16 @@ export function CategoryCard({
           >
             <FiFolder className="text-xl" />
             Subcategorías
+          </Button>
+
+          <Button
+            variant="warning"
+            size="md"
+            onClick={() => onPriceAdjustment(category)}
+            className="flex items-center justify-center gap-2"
+          >
+            <FiDollarSign className="text-xl" />
+            Ajustar precios
           </Button>
 
           <Button

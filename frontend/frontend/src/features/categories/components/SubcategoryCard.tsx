@@ -1,18 +1,20 @@
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiDollarSign } from "react-icons/fi";
 import type { Category } from "@/types/types";
 
 interface SubcategoryCardProps {
   subcategory: Category;
   onEdit: () => void;
   onDelete: (id: number, name: string) => void;
+  onPriceAdjustment: (category: Category) => void;
 }
 
 export function SubcategoryCard({
   subcategory,
   onEdit,
   onDelete,
+  onPriceAdjustment,
 }: SubcategoryCardProps) {
   return (
     <Card className="hover:shadow-xl transition-shadow">
@@ -28,6 +30,16 @@ export function SubcategoryCard({
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="warning"
+            size="md"
+            onClick={() => onPriceAdjustment(subcategory)}
+            className="flex items-center justify-center gap-2"
+          >
+            <FiDollarSign className="text-xl" />
+            Ajustar precios
+          </Button>
+
           <Button
             variant="primary"
             size="md"

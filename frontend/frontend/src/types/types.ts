@@ -166,3 +166,26 @@ export interface PaginatedResponse<T> {
   data: T[];
   pagination: PaginationMeta;
 }
+
+// ============================================
+// PRICE ADJUSTMENT TYPES
+// ============================================
+export interface PricePreviewResult {
+  categoryId: number;
+  categoryIds: number[];
+  percentage: number;
+  affectedProducts: {
+    id: number;
+    name: string;
+    currentPrice: number;
+    newPrice: number;
+  }[];
+  totalCurrentPrice: number;
+  totalNewPrice: number;
+}
+
+export interface PriceUpdateResult {
+  affectedProducts: number;
+  categoryId: number;
+  percentage: number;
+}

@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/EmpityState";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { CategoryCard } from "../components/CategoryCard";
 import { CategoryFormModal } from "../components/CategoriesFormModal";
+import { PriceAdjustmentModal } from "../components/PriceAdjustmentModal";
 import { useCategories } from "../context/CategoryContext";
 import { useCategoryActions } from "../hooks/useCategoryActions";
 import { FaPlus } from "react-icons/fa6";
@@ -16,10 +17,23 @@ type SortOption = "name-asc" | "name-desc" | "id-asc" | "id-desc";
 
 export function CategoriesPage() {
   const { categories, loading, getSubcategories } = useCategories()!;
-  const { createCategory, updateCategory, deleteCategory } =
-    useCategoryActions();
+  const {
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    previewPriceAdjustment,
+    applyPriceAdjustment,
+  } = useCategoryActions();
 
   const [formModal, setFormModal] = useState<{
+    isOpen: boolean;
+    category: Category | null;
+  }>({
+    isOpen: false,
+    category: null,
+  });
+
+  const [priceModal, setPriceModal] = useState<{
     isOpen: boolean;
     category: Category | null;
   }>({
@@ -109,6 +123,22 @@ const filteredAndSortedCategories = useMemo(() => {
 
   const handleCancelDelete = () => {
     setDeleteModal({ isOpen: false, id: null, name: "" });
+  };
+
+  const handlePriceAdjustment = (category: Category) => {
+    setPriceModal({ isOpen: true, category });
+  };
+
+  const handlePriceClose = () => {
+    setPriceModal({ isOpen: false, category: null });
+  };
+
+  const handlePricePreview = async (id: number, percentage: number) => {
+    return previewPriceAdjustment(id, percentage);
+  };
+
+  const handlePriceApply = async (id: number, percentage: number) => {
+    await applyPriceAdjustment(id, percentage);
   };
 
   if (loading) {
@@ -219,6 +249,7 @@ const filteredAndSortedCategories = useMemo(() => {
                   subcategoriesCount={getSubcategories(category.id).length}
                   onEdit={() => handleEdit(category)}
                   onDelete={handleDeleteClick}
+                  onPriceAdjustment={handlePriceAdjustment}
                 />
               ))}
             </div>
@@ -242,6 +273,16 @@ const filteredAndSortedCategories = useMemo(() => {
         onCancel={handleCancelDelete}
         isDeleting={isDeleting}
       />
+
+      {priceModal.category && (
+        <PriceAdjustmentModal
+          isOpen={priceModal.isOpen}
+          category={priceModal.category}
+          onClose={handlePriceClose}
+          onPreview={handlePricePreview}
+          onApply={handlePriceApply}
+        />
+      )}
     </div>
   );
 }

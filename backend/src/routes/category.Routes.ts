@@ -13,5 +13,7 @@ categoryRouter.get('/:id', authRequired, requireRole('admin'), controller.getByI
 categoryRouter.post('/', authRequired, requireRole('admin'), controller.create);
 categoryRouter.patch('/:id', authRequired, requireRole('admin'), controller.update);
 categoryRouter.delete('/:id', authRequired, requireRole('admin'), controller.delete);
+categoryRouter.post('/:id/price-preview', authRequired, requireRole('admin'), controller.previewPrices);
+categoryRouter.patch('/:id/price-update', authRequired, requireRole('admin'), controller.updatePrices);
 
 export default categoryRouter;

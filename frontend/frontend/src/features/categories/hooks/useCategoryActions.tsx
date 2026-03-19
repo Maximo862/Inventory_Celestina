@@ -4,11 +4,15 @@ import {
   updateCategoryRequest,
   deleteCategoryRequest,
   getCategoryByIdRequest,
+  previewPriceAdjustmentRequest,
+  applyPriceAdjustmentRequest,
 } from "../api/CategoriesRequest";
 import type {
   CreateCategoryDTO,
   UpdateCategoryDTO,
   Category,
+  PricePreviewResult,
+  PriceUpdateResult,
 } from "@/types/types";
 import toast from "react-hot-toast";
 import { handleError } from "@/utils/errorHandler";
@@ -59,10 +63,42 @@ export function useCategoryActions() {
     }
   }
 
+  async function previewPriceAdjustment(
+    id: number,
+    percentage: number
+  ): Promise<PricePreviewResult> {
+    try {
+      const result = await previewPriceAdjustmentRequest(id, percentage);
+      return result;
+    } catch (error) {
+      handleError(error, "obtener preview de precios");
+      throw error;
+    }
+  }
+
+  async function applyPriceAdjustment(
+    id: number,
+    percentage: number
+  ): Promise<PriceUpdateResult> {
+    try {
+      const result = await applyPriceAdjustmentRequest(id, percentage);
+      await refreshCategories();
+      toast.success(
+        `Precios actualizados en ${result.affectedProducts} producto${result.affectedProducts !== 1 ? "s" : ""}`
+      );
+      return result;
+    } catch (error) {
+      handleError(error, "aplicar ajuste de precios");
+      throw error;
+    }
+  }
+
   return {
     getCategoryById,
     createCategory,
     updateCategory,
     deleteCategory,
+    previewPriceAdjustment,
+    applyPriceAdjustment,
   };
 }

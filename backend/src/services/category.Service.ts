@@ -4,7 +4,10 @@ import {
     CreateCategoryDTO,
     UpdateCategoryDTO,
     Category,
-    CategoryRow
+    CategoryRow,
+    UpdateCategoryPricesDTO,
+    PriceUpdateResult,
+    PricePreviewResult
 } from '../types/types';
 
 export class CategoryService {
@@ -26,6 +29,7 @@ export class CategoryService {
         const category = await this.repository.findById(id);
 
         if (!category) {
+              console.log("el id es :", id)
             throw new NotFoundError('Category', id);
         }
 
@@ -110,5 +114,64 @@ export class CategoryService {
         // Verificar que el padre existe
         await this.getById(parentId);
         return this.repository.findSubcategories(parentId);
+    }
+
+    async updatePrices(id: number, data: UpdateCategoryPricesDTO): Promise<PriceUpdateResult> {
+        await this.getById(id);
+
+        if (data.percentage === 0) {
+            throw new ValidationError('Percentage cannot be zero');
+        }
+
+        if (data.percentage < -100 || data.percentage > 1000) {
+            throw new ValidationError('Percentage must be between -100 and 1000');
+        }
+
+        const categoryIds = await this.repository.getCategoryTree(id);
+        const affectedProducts = await this.repository.updatePricesByCategory(categoryIds, data.percentage);
+
+        return {
+            affectedProducts,
+            categoryId: id,
+            percentage: data.percentage,
+        };
+    }
+
+    async previewPrices(id: number, data: UpdateCategoryPricesDTO): Promise<PricePreviewResult> {
+        await this.getById(id);
+
+        if (data.percentage === 0) {
+            throw new ValidationError('Percentage cannot be zero');
+        }
+
+        if (data.percentage < -100 || data.percentage > 1000) {
+            throw new ValidationError('Percentage must be between -100 and 1000');
+        }
+
+        const categoryIds = await this.repository.getCategoryTree(id);
+        const products = await this.repository.getProductsByCategories(categoryIds);
+
+        const productsWithNewPrice = products.map(product => {
+            const currentPrice = Number(product.price);
+            const newPrice = Math.round(currentPrice * (1 + data.percentage / 100) * 100) / 100;
+            return {
+                id: product.id as number,
+                name: product.name as string,
+                currentPrice,
+                newPrice,
+            };
+        });
+
+        const totalCurrentPrice = productsWithNewPrice.reduce((sum, p) => sum + p.currentPrice, 0);
+        const totalNewPrice = productsWithNewPrice.reduce((sum, p) => sum + p.newPrice, 0);
+
+        return {
+            categoryId: id,
+            categoryIds,
+            percentage: data.percentage,
+            affectedProducts: productsWithNewPrice,
+            totalCurrentPrice: Math.round(totalCurrentPrice * 100) / 100,
+            totalNewPrice: Math.round(totalNewPrice * 100) / 100,
+        };
     }
 }

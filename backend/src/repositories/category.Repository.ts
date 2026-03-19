@@ -1,6 +1,6 @@
 import { pool } from '../db/db';
 import { CategoryRow, CreateCategoryDTO, UpdateCategoryDTO, PaginationParams } from '../types/types';
-import { ResultSetHeader } from 'mysql2';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 export class CategoryRepository {
 
@@ -104,6 +104,54 @@ export class CategoryRepository {
             'SELECT * FROM categories ORDER BY parent_id ASC, name ASC'
         );
 
+        return rows;
+    }
+
+    async getCategoryTree(categoryId: number): Promise<number[]> {
+        const [rows] = await pool.query<RowDataPacket[]>(
+            `WITH RECURSIVE category_tree AS (
+                SELECT id, parent_id, 0 AS level
+                FROM categories WHERE id = ?
+                UNION ALL
+                SELECT c.id, c.parent_id, ct.level + 1
+                FROM categories c
+                INNER JOIN category_tree ct ON c.parent_id = ct.id
+            )
+            SELECT id FROM category_tree`,
+            [categoryId]
+        );
+
+        return rows.map(row => row.id as number);
+    }
+
+    async updatePricesByCategory(categoryIds: number[], percentage: number): Promise<number> {
+        const connection = await pool.getConnection();
+
+        try {
+            await connection.beginTransaction();
+
+            const [result] = await connection.query<ResultSetHeader>(
+                `UPDATE products
+                 SET price = ROUND(price * (1 + ? / 100.0), 2)
+                 WHERE category_id IN (?)`,
+                [percentage, categoryIds]
+            );
+
+            await connection.commit();
+            return result.affectedRows;
+        } catch (err) {
+            await connection.rollback();
+            throw err;
+        } finally {
+            connection.release();
+        }
+    }
+
+    async getProductsByCategories(categoryIds: number[]): Promise<RowDataPacket[]> {
+        const [rows] = await pool.query<RowDataPacket[]>(
+            'SELECT id, name, price FROM products WHERE category_id IN (?) ORDER BY name',
+            [categoryIds]
+        );
         return rows;
     }
 
