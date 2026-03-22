@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { FormLayout } from "@/components/FormLayout";
 import { Input } from "@/components/Input";
 import type { Client, CreateClientDTO, UpdateClientDTO } from "@/types/types";
+import { FaClipboardList } from "react-icons/fa6";
+import { FaEdit } from "react-icons/fa";
 
 interface ClientFormModalProps {
   isOpen: boolean;
@@ -19,7 +21,7 @@ export function ClientFormModal({
   const [formData, setFormData] = useState({
     name: "",
     cuil: "",
-    tax_condition: "" as "responsable_inscripto" | "monotributo" | "", 
+    tax_condition: "" as "responsable_inscripto" | "monotributo" | "",
     phone: "",
     email: "",
     address: "",
@@ -57,7 +59,7 @@ export function ClientFormModal({
       const dataToSubmit: any = {
         name: formData.name.trim(),
         cuil: formData.cuil.trim(),
-        tax_condition: formData.tax_condition, // Ya no trim porque es enum
+        tax_condition: formData.tax_condition,
       };
 
       if (formData.phone.trim()) dataToSubmit.phone = formData.phone.trim();
@@ -94,7 +96,7 @@ export function ClientFormModal({
   const isFormValid = !!(
     formData.name.trim() &&
     formData.cuil.trim() &&
-    formData.tax_condition // ← Ya no necesita trim
+    formData.tax_condition
   );
 
   return (
@@ -105,21 +107,20 @@ export function ClientFormModal({
       }
       onClose={handleClose}
       onSubmit={handleSubmit}
-      submitLabel={isEdit ? "💾 Guardar cambios" : "➕ Crear cliente"}
+      submitLabel={isEdit ? "Guardar cambios" : "Crear cliente"}
       isSubmitting={isSubmitting}
       isValid={isFormValid}
     >
-      {/* Campos obligatorios */}
       <div className="space-y-6">
-        <h3 className="text-2xl font-bold text-[#0F172A] border-b-2 border-[#E2E8F0] pb-3">
-          📋 Datos obligatorios
+        <h3 className="text-2xl font-bold text-[#0F172A] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
+          <FaClipboardList className="text-xl" /> Datos obligatorios
         </h3>
 
         <Input
           id="client-name"
           label="Nombre completo *"
           type="text"
-          placeholder="Ej: Juan Pérez"
+          placeholder="Ej: Juan Perez"
           value={formData.name}
           onChange={(e) => handleChange("name", e.target.value)}
           required
@@ -136,13 +137,12 @@ export function ClientFormModal({
           required
         />
 
-        {/* ← NUEVO: Select para Tax Condition */}
         <div>
           <label
             htmlFor="client-tax"
             className="block text-[#0F172A] text-lg font-semibold mb-2"
           >
-            Condición fiscal *
+            Condicion fiscal *
           </label>
           <select
             id="client-tax"
@@ -151,22 +151,21 @@ export function ClientFormModal({
             required
             className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
           >
-            <option value="">Seleccione una opción</option>
+            <option value="">Seleccione una opcion</option>
             <option value="responsable_inscripto">Responsable Inscripto</option>
             <option value="monotributo">Monotributo</option>
           </select>
         </div>
       </div>
 
-      {/* Campos opcionales */}
       <div className="space-y-6 pt-4">
-        <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3">
-          📝 Datos opcionales
+        <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
+          <FaEdit className="text-xl" /> Datos opcionales
         </h3>
 
         <Input
           id="client-phone"
-          label="Teléfono"
+          label="Telefono"
           type="tel"
           placeholder="Ej: 011 1234-5678"
           value={formData.phone}
@@ -175,7 +174,7 @@ export function ClientFormModal({
 
         <Input
           id="client-email"
-          label="Correo electrónico"
+          label="Correo electronico"
           type="email"
           placeholder="Ej: cliente@ejemplo.com"
           value={formData.email}
@@ -184,7 +183,7 @@ export function ClientFormModal({
 
         <Input
           id="client-address"
-          label="Dirección"
+          label="Direccion"
           type="text"
           placeholder="Ej: Av. Principal 123"
           value={formData.address}

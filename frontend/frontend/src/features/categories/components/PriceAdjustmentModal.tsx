@@ -13,8 +13,8 @@ interface PriceAdjustmentModalProps {
   isOpen: boolean;
   category: Category;
   onClose: () => void;
-  onApply: (id : number, percentage: number) => Promise<void>;
-  onPreview: (id : number, percentage: number) => Promise<PricePreviewResult>;
+  onApply: (id: number, percentage: number) => Promise<void>;
+  onPreview: (id: number, percentage: number) => Promise<PricePreviewResult>;
 }
 
 export function PriceAdjustmentModal({
@@ -137,9 +137,8 @@ export function PriceAdjustmentModal({
             <div className="flex items-center justify-between mb-2">
               <span className="text-lg text-[#475569]">Porcentaje:</span>
               <span
-                className={`text-2xl font-bold ${
-                  isPositive ? "text-[#16A34A]" : "text-[#DC2626]"
-                }`}
+                className={`text-2xl font-bold ${isPositive ? "text-[#16A34A]" : "text-[#DC2626]"
+                  }`}
               >
                 {isPositive ? "+" : ""}
                 {previewData.percentage}%
@@ -197,13 +196,12 @@ export function PriceAdjustmentModal({
                           {formatPrice(product.newPrice)}
                         </td>
                         <td
-                          className={`px-4 py-3 text-right font-semibold ${
-                            product.newPrice > product.currentPrice
+                          className={`px-4 py-3 text-right font-semibold ${product.newPrice > product.currentPrice
                               ? "text-[#16A34A]"
                               : product.newPrice < product.currentPrice
                                 ? "text-[#DC2626]"
                                 : "text-[#475569]"
-                          }`}
+                            }`}
                         >
                           {product.newPrice > product.currentPrice ? "+" : ""}
                           {formatPrice(
@@ -232,9 +230,8 @@ export function PriceAdjustmentModal({
                 <div className="flex justify-between text-xl border-t border-[#475569] pt-2 mt-2">
                   <span>Diferencia:</span>
                   <span
-                    className={`font-bold ${
-                      diff > 0 ? "text-[#22C55E]" : diff < 0 ? "text-[#EF4444]" : "text-white"
-                    }`}
+                    className={`font-bold ${diff > 0 ? "text-[#22C55E]" : diff < 0 ? "text-[#EF4444]" : "text-white"
+                      }`}
                   >
                     {diff > 0 ? "+" : ""}
                     {formatPrice(diff)}

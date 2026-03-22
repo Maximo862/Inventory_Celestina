@@ -11,7 +11,8 @@ import { useProductActions } from "../hooks/useProductActions";
 import { useCategories } from "@/features/categories/context/CategoryContext";
 import { AuthContext } from "@/features/auth/context/AuthContext";
 import { FaBox, FaPlus } from "react-icons/fa6";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiDollarSign, FiClock,FiFolder } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 import type { Product } from "@/types/types";
 
 type SortOption =
@@ -226,7 +227,7 @@ export function ProductsPage() {
             <div>
               <input
                 type="text"
-                placeholder="🔍 Buscar producto por nombre..."
+                placeholder="Buscar producto por nombre..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
@@ -244,13 +245,13 @@ export function ProductsPage() {
                   onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
-                  <option value="all">📁 Todas las categorías</option>
+                  <option value="all"><FiFolder /> Todas las categorías</option>
 
                   {parentCategories.map((parent) => {
                     const subs = getSubcategories(parent.id);
 
                     return (
-                      <optgroup key={parent.id} label={`🏷️ ${parent.name}`}>
+                      <optgroup key={parent.id} label={parent.name}>
                         {subs.length > 0 ? (
                           subs.map((sub) => (
                             <option key={sub.id} value={sub.id}>
@@ -279,14 +280,14 @@ export function ProductsPage() {
                   }}
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
-                  <option value="name-asc">🔤 Nombre (A → Z)</option>
-                  <option value="name-desc">🔤 Nombre (Z → A)</option>
-                  <option value="price-asc">💰 Precio (menor → mayor)</option>
-                  <option value="price-desc">💰 Precio (mayor → menor)</option>
-                  <option value="quantity-asc">📦 Stock (menor → mayor)</option>
-                  <option value="quantity-desc">📦 Stock (mayor → menor)</option>
-                  <option value="created_at-desc">🕐 Más reciente</option>
-                  <option value="created_at-asc">🕐 Más antiguo</option>
+                  <option value="name-asc">Nombre (A → Z)</option>
+                  <option value="name-desc">Nombre (Z → A)</option>
+                  <option value="price-asc"><FiDollarSign /> Precio (menor → mayor)</option>
+                  <option value="price-desc"><FiDollarSign /> Precio (mayor → menor)</option>
+                  <option value="quantity-asc"><FaBox /> Stock (menor → mayor)</option>
+                  <option value="quantity-desc"><FaBox /> Stock (mayor → menor)</option>
+                  <option value="created_at-desc"><FiClock /> Más reciente</option>
+                  <option value="created_at-asc"><FiClock /> Más antiguo</option>
                 </select>
               </div>
             </div>
@@ -310,7 +311,7 @@ export function ProductsPage() {
                       }}
                       className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
                     >
-                      ✕ Limpiar filtros
+                      <IoMdClose /> Limpiar filtros
                     </button>
                   )}
               </div>

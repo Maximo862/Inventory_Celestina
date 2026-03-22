@@ -9,7 +9,8 @@ import { OrderFormModal } from "../components/OrderFormModal";
 import { OrderDetailModal } from "../components/OrderDetailModal";
 import { useOrders } from "../context/OrderContext";
 import { useOrderActions } from "../hooks/useOrderActions";
-import { FiPlus, FiFileText, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiPlus, FiFileText, FiChevronLeft, FiChevronRight, FiFolder, FiArrowDown, FiArrowUp, FiCalendar, FiDollarSign } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 import type { Order, OrderWithDetails } from "@/types/types";
 
 type FilterOption = "all" | "entry" | "exit";
@@ -238,7 +239,7 @@ export function OrdersPage() {
             <div>
               <input
                 type="text"
-                placeholder="🔍 Buscar por cliente o notas..."
+                placeholder="Buscar por cliente o notas..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
@@ -258,9 +259,9 @@ export function OrdersPage() {
                   }
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
-                  <option value="all">📁 Todos los remitos</option>
-                  <option value="entry">📥 Solo entradas</option>
-                  <option value="exit">📤 Solo salidas</option>
+                  <option value="all"><FiFolder /> Todos los remitos</option>
+                  <option value="entry"><FiArrowDown /> Solo entradas</option>
+                  <option value="exit"><FiArrowUp /> Solo salidas</option>
                 </select>
               </div>
 
@@ -274,10 +275,10 @@ export function OrdersPage() {
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
                 >
-                  <option value="date-desc">📅 Más reciente primero</option>
-                  <option value="date-asc">📅 Más antiguo primero</option>
-                  <option value="amount-desc">💰 Monto (mayor → menor)</option>
-                  <option value="amount-asc">💰 Monto (menor → mayor)</option>
+                  <option value="date-desc"><FiCalendar /> Más reciente primero</option>
+                  <option value="date-asc"><FiCalendar /> Más antiguo primero</option>
+                  <option value="amount-desc"><FiDollarSign /> Monto (mayor → menor)</option>
+                  <option value="amount-asc"><FiDollarSign /> Monto (menor → mayor)</option>
                 </select>
               </div>
             </div>
@@ -298,7 +299,7 @@ export function OrdersPage() {
                     }}
                     className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
                   >
-                    ✕ Limpiar filtros
+                    <IoMdClose /> Limpiar filtros
                   </button>
                 )}
               </div>
@@ -376,8 +377,8 @@ export function OrdersPage() {
                               key={pageNumber}
                               onClick={() => handlePageClick(pageNumber)}
                               className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                  ? "bg-[#2563EB] text-white"
-                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                ? "bg-[#2563EB] text-white"
+                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
                                 }`}
                             >
                               {pageNumber}

@@ -29,12 +29,10 @@ export function SubcategoriesPage() {
     applyPriceAdjustment,
   } = useCategoryActions();
 
-  // Encontrar categoría padre
   const parentCategory = useMemo(() => {
     return categories.find((cat) => cat.id === Number(categoryId));
   }, [categories, categoryId]);
 
-  // Obtener subcategorías de esta categoría
   const subcategories = useMemo(() => {
     if (!categoryId) return [];
     return getSubcategories(Number(categoryId));
@@ -70,7 +68,6 @@ export function SubcategoriesPage() {
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Filtrado y ordenamiento
   const filteredAndSortedSubcategories = useMemo(() => {
     let result = subcategories.filter((sub) =>
       sub.name.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -106,12 +103,9 @@ export function SubcategoriesPage() {
     name: string;
     parent_id: number;
   }) => {
-    // Usar las mismas acciones del hook existente
     if (formModal.subcategory) {
-      // Editar: solo necesitamos el nombre, parent_id no cambia
       await updateCategory(formModal.subcategory.id, { name: data.name });
     } else {
-      // Crear: enviamos name y parent_id
       await createCategory(data);
     }
   };
@@ -163,7 +157,7 @@ export function SubcategoriesPage() {
   if (!parentCategory) {
     return (
       <div className="text-center py-12">
-        <p className="text-2xl text-[#DC2626] mb-4">Categoría no encontrada</p>
+        <p className="text-2xl text-[#DC2626] mb-4">Categoria no encontrada</p>
         <Button
           variant="secondary"
           size="lg"
@@ -171,7 +165,7 @@ export function SubcategoriesPage() {
           className="flex items-center justify-center gap-2"
         >
           <FiArrowLeft className="text-xl" />
-          Volver a categorías
+          Volver a categorias
         </Button>
       </div>
     );
@@ -185,19 +179,19 @@ export function SubcategoriesPage() {
             <button
               onClick={() => navigate("/categories")}
               className="p-2 hover:bg-[#F8FAFC] rounded-lg transition-colors"
-              aria-label="Volver a categorías"
+              aria-label="Volver a categorias"
             >
               <FiArrowLeft className="text-3xl text-[#475569]" />
             </button>
             <div>
-              <p className="text-lg text-[#475569] mb-1">Subcategorías de:</p>
+              <p className="text-lg text-[#475569] mb-1">Subcategorias de:</p>
               <h1 className="text-4xl font-bold text-[#0F172A]">
                 {parentCategory.name}
               </h1>
             </div>
           </div>
         }
-        subtitle={`Gestión de subcategorías`}
+        subtitle="Gestion de subcategorias"
         action={
           <Button
             variant="primary"
@@ -206,7 +200,7 @@ export function SubcategoriesPage() {
             className="flex items-center justify-center gap-3"
           >
             <FiPlus className="text-2xl" />
-            Nueva subcategoría
+            Nueva subcategoria
           </Button>
         }
       />
@@ -214,19 +208,18 @@ export function SubcategoriesPage() {
       {subcategories.length === 0 ? (
         <EmptyState
           icon={<MdCategory />}
-          title="No hay subcategorías"
-          description={`Comience creando la primera subcategoría de ${parentCategory.name}`}
-          actionLabel="Crear primera subcategoría"
+          title="No hay subcategorias"
+          description={`Comience creando la primera subcategoria de ${parentCategory.name}`}
+          actionLabel="Crear primera subcategoria"
           onAction={handleCreate}
         />
       ) : (
         <>
-          {/* Barra de búsqueda y filtros */}
           <div className="mb-6 space-y-4">
             <div>
               <input
                 type="text"
-                placeholder="🔍 Buscar subcategoría por nombre..."
+                placeholder="Buscar subcategoria por nombre..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
@@ -242,17 +235,17 @@ export function SubcategoriesPage() {
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 className="w-full sm:w-auto bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               >
-                <option value="name-asc">🔤 Nombre (A → Z)</option>
-                <option value="name-desc">🔤 Nombre (Z → A)</option>
-                <option value="id-asc">🔢 Más antigua primero</option>
-                <option value="id-desc">🔢 Más reciente primero</option>
+                <option value="name-asc">Nombre (A → Z)</option>
+                <option value="name-desc">Nombre (Z → A)</option>
+                <option value="id-asc">Mas antigua primero</option>
+                <option value="id-desc">Mas reciente primero</option>
               </select>
             </div>
 
             <div className="flex items-center justify-between text-lg text-[#475569]">
               <p>
                 Mostrando {filteredAndSortedSubcategories.length} de{" "}
-                {subcategories.length} subcategorías
+                {subcategories.length} subcategorias
               </p>
               {(searchTerm || sortBy !== "name-asc") && (
                 <button
@@ -262,7 +255,7 @@ export function SubcategoriesPage() {
                   }}
                   className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
                 >
-                  ✕ Limpiar filtros
+                  Limpiar filtros
                 </button>
               )}
             </div>
@@ -271,7 +264,7 @@ export function SubcategoriesPage() {
           {filteredAndSortedSubcategories.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#475569] mb-4">
-                No se encontraron subcategorías
+                No se encontraron subcategorias
               </p>
               <Button
                 variant="secondary"
@@ -312,8 +305,8 @@ export function SubcategoriesPage() {
 
       <DeleteConfirmModal
         isOpen={deleteModal.isOpen}
-        title="¿Eliminar subcategoría?"
-        message="Está por eliminar la subcategoría:"
+        title="Eliminar subcategoria?"
+        message="Esta por eliminar la subcategoria:"
         itemName={deleteModal.name}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}

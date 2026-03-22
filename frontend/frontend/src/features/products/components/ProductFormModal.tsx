@@ -8,6 +8,8 @@ import type {
   UpdateProductDTO,
 } from "@/types/types";
 import { parsePrice } from "@/utils/parsePrice";
+import { FaClipboardList, FaLightbulb, FaTriangleExclamation } from "react-icons/fa6";
+import { FaEdit } from "react-icons/fa";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -32,12 +34,10 @@ export function ProductFormModal({
     category_id: "",
   });
 
-  // NUEVO: Estado para categoría padre seleccionada
   const [selectedParentId, setSelectedParentId] = useState<string>("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // NUEVO: Filtrar subcategorías según categoría padre
   const availableSubcategories = useMemo(() => {
     if (!selectedParentId) return [];
     return categories.filter(
@@ -55,16 +55,13 @@ export function ProductFormModal({
         category_id: product.category_id?.toString() || "",
       });
 
-      // NUEVO: Si el producto tiene categoría, encontrar su padre
       if (product.category_id) {
         const category = categories.find(
           (cat) => cat.id === product.category_id,
         );
         if (category?.parent_id) {
-          // Es subcategoría
           setSelectedParentId(category.parent_id.toString());
         } else if (category) {
-          // Es categoría padre
           setSelectedParentId(category.id.toString());
         }
       }
@@ -89,7 +86,7 @@ export function ProductFormModal({
         name: formData.name.trim(),
         quantity: parseInt(formData.quantity),
         price: parsePrice(formData.price),
-        category_id: parseInt(formData.category_id), // Ahora es obligatorio
+        category_id: parseInt(formData.category_id),
       };
 
       if (formData.description.trim()) {
@@ -115,15 +112,14 @@ export function ProductFormModal({
   };
 
   const handleChange = (field: keyof typeof formData, value: string) => {
-     let sanitized = value;
+    let sanitized = value;
 
-  if (field === "price") {
-    sanitized = value.replace(/\D/g, "");
-  }
+    if (field === "price") {
+      sanitized = value.replace(/\D/g, "");
+    }
     setFormData((prev) => ({ ...prev, [field]: sanitized }));
   };
 
-  // NUEVO: Handler para cambio de categoría padre
   const handleParentChange = (value: string) => {
     setSelectedParentId(value);
 
@@ -132,10 +128,8 @@ export function ProductFormModal({
     );
 
     if (hasSubcategories) {
-      // Tiene subcategorías, limpiar selección
       setFormData((prev) => ({ ...prev, category_id: "" }));
     } else {
-      // No tiene subcategorías, usar directamente
       setFormData((prev) => ({ ...prev, category_id: value }));
     }
   };
@@ -164,35 +158,33 @@ export function ProductFormModal({
       }
       onClose={handleClose}
       onSubmit={handleSubmit}
-      submitLabel={isEdit ? "💾 Guardar cambios" : "➕ Crear producto"}
+      submitLabel={isEdit ? "Guardar cambios" : "Crear producto"}
       isSubmitting={isSubmitting}
       isValid={isFormValid}
     >
       <div className="space-y-6">
-        <h3 className="text-2xl font-bold text-[#0F172A] border-b-2 border-[#E2E8F0] pb-3">
-          📋 Datos obligatorios
+        <h3 className="text-2xl font-bold text-[#0F172A] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
+          <FaClipboardList className="text-xl" /> Datos obligatorios
         </h3>
 
         <Input
           id="product-name"
           label="Nombre del producto *"
           type="text"
-          placeholder="Ej: Tablón de pino 2x4"
+          placeholder="Ej: Tablon de pino 2x4"
           value={formData.name}
           onChange={(e) => handleChange("name", e.target.value)}
           required
           autoFocus
         />
 
-        {/* NUEVO: Selects duales para categorías */}
         <div className="space-y-4">
-          {/* Select 1: Categoría principal */}
           <div>
             <label
               htmlFor="parent-category"
               className="block text-[#0F172A] text-lg font-semibold mb-2"
             >
-              Categoría principal *
+              Categoria principal *
             </label>
             <select
               id="parent-category"
@@ -201,25 +193,24 @@ export function ProductFormModal({
               required
               className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
             >
-              <option value="">Seleccione una categoría</option>
+              <option value="">Seleccione una categoria</option>
               {categories
                 .filter((cat) => cat.parent_id === null)
                 .map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    🏷️ {cat.name}
+                    {cat.name}
                   </option>
                 ))}
             </select>
           </div>
 
-          {/* Select 2: Subcategoría (solo si la categoría tiene subcategorías) */}
           {selectedParentId && availableSubcategories.length > 0 && (
             <div>
               <label
                 htmlFor="product-category"
                 className="block text-[#0F172A] text-lg font-semibold mb-2"
               >
-                Subcategoría *
+                Subcategoria *
               </label>
               <select
                 id="product-category"
@@ -228,22 +219,22 @@ export function ProductFormModal({
                 required
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               >
-                <option value="">Seleccione una subcategoría</option>
+                <option value="">Seleccione una subcategoria</option>
                 {availableSubcategories.map((sub) => (
                   <option key={sub.id} value={sub.id}>
-                    └─ {sub.name}
+                    {sub.name}
                   </option>
                 ))}
               </select>
-              <p className="mt-2 text-base text-[#475569]">
-                💡 Esta categoría tiene subcategorías. Debe elegir una.
+              <p className="mt-2 text-base text-[#475569] flex items-center gap-2">
+                <FaLightbulb className="text-base" /> Esta categoria tiene subcategorias. Debe elegir una.
               </p>
             </div>
           )}
 
           {categories.length === 0 && (
-            <p className="mt-2 text-[#F59E0B] text-base font-medium">
-              ⚠️ Debe crear al menos una categoría primero
+            <p className="mt-2 text-[#F59E0B] text-base font-medium flex items-center gap-2">
+              <FaTriangleExclamation className="text-base" /> Debe crear al menos una categoria primero
             </p>
           )}
         </div>
@@ -278,10 +269,9 @@ export function ProductFormModal({
         </div>
       </div>
 
-      {/* Descripción (opcional)*/}
       <div className="space-y-6 pt-4">
-        <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3">
-          📝 Datos opcionales
+        <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
+          <FaEdit className="text-xl" /> Datos opcionales
         </h3>
 
         <div>
@@ -289,7 +279,7 @@ export function ProductFormModal({
             htmlFor="product-description"
             className="block text-[#0F172A] text-lg font-semibold mb-2"
           >
-            Descripción
+            Descripcion
           </label>
           <textarea
             id="product-description"

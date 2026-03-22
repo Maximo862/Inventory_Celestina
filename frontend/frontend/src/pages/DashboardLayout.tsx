@@ -3,11 +3,12 @@ import { useState, useContext } from "react"; // ← AGREGAR useContext
 import { AuthContext } from "@/features/auth/context/AuthContext"; // ← NUEVO
 import { useAuthActions } from "@/features/auth/hooks/useAuthActions";
 import { Button } from "@/components/Button";
-import { IoMdPerson, IoIosHome } from "react-icons/io";
+import { IoMdPerson, IoIosHome, IoMdClose } from "react-icons/io";
 import { FaBox } from "react-icons/fa6";
 import { GiTicket } from "react-icons/gi";
 import { FiFileText } from "react-icons/fi";
 import { CiLogout } from "react-icons/ci";
+import { FiAlignLeft } from "react-icons/fi";
 
 export function DashboardLayout() {
   const location = useLocation();
@@ -81,9 +82,9 @@ export function DashboardLayout() {
         aria-label="Abrir menú"
       >
         {isSidebarOpen ? (
-          <span className="text-3xl">✕</span>
+          <IoMdClose className="text-3xl" />
         ) : (
-          <span className="text-3xl">☰</span>
+          <FiAlignLeft className="text-3xl" />
         )}
       </button>
 
@@ -127,11 +128,11 @@ export function DashboardLayout() {
             </p>
             <span
               className={`inline-block px-3 py-1 rounded-lg text-sm font-bold ${isAdmin
-                  ? "bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/30"
-                  : "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/30"
+                ? "bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/30"
+                : "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/30"
                 }`}
             >
-              {isAdmin ? "👑 Administrador" : "👤 Empleado"}
+              {isAdmin ? "Administrador" : "Empleado"}
             </span>
           </div>
         )}
@@ -145,8 +146,8 @@ export function DashboardLayout() {
                 to={item.path}
                 onClick={handleLinkClick}
                 className={`flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-200 ${active
-                    ? "bg-[#2563EB] text-white shadow-lg"
-                    : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  ? "bg-[#2563EB] text-white shadow-lg"
+                  : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
               >
                 <span className="text-3xl">{item.icon}</span>

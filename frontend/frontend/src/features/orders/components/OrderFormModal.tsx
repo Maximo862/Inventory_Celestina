@@ -4,6 +4,7 @@ import { Button } from "@/components/Button";
 import { useClients } from "@/features/clients/context/ClientContext";
 import { useProducts } from "@/features/products/context/ProductContext";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
+import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 import type { Order, CreateOrderDTO, UpdateOrderDTO } from "@/types/types";
 import { formatARS } from "@/utils/formatCurrency";
 
@@ -39,11 +40,9 @@ export function OrderFormModal({
 
   useEffect(() => {
     if (order) {
-      // Modo edición (solo client_id y notes)
       setClientId(order.client_id?.toString() || "");
       setNotes(order.notes || "");
     } else {
-      // Modo creación
       setType("entry");
       setClientId("");
       setNotes("");
@@ -57,14 +56,12 @@ export function OrderFormModal({
     setIsSubmitting(true);
     try {
       if (order) {
-        // Edición: solo client_id y notes
         const data: UpdateOrderDTO = {
           client_id: clientId ? parseInt(clientId) : null,
           notes: notes.trim() || undefined,
         };
         await onSubmit(data);
       } else {
-        // Creación: orden completa
         const data: CreateOrderDTO = {
           type,
           client_id: clientId ? parseInt(clientId) : undefined,
@@ -135,7 +132,7 @@ export function OrderFormModal({
   }, [items]);
 
   const isFormValid = order
-    ? true // Edición siempre válida
+    ? true
     : type &&
     items.length > 0 &&
     items.every(
@@ -159,12 +156,11 @@ export function OrderFormModal({
       }
       onClose={handleClose}
       onSubmit={handleSubmit}
-      submitLabel={isEdit ? "💾 Guardar cambios" : "➕ Registrar remito"}
+      submitLabel={isEdit ? "Guardar cambios" : "Registrar remito"}
       isSubmitting={isSubmitting}
       isValid={isFormValid}
     >
       <div className="space-y-6">
-        {/* Tipo de orden (solo en creación) */}
         {!isEdit && (
           <div>
             <label className="block text-[#0F172A] text-lg font-semibold mb-3">
@@ -174,28 +170,29 @@ export function OrderFormModal({
               <button
                 type="button"
                 onClick={() => setType("entry")}
-                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all ${type === "entry"
+                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
+                    type === "entry"
                     ? "bg-[#16A34A]/10 border-[#16A34A] text-[#16A34A]"
                     : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]"
                   }`}
               >
-                📥 Entrada
+                <FaArrowDown className="text-xl" /> Entrada
               </button>
               <button
                 type="button"
                 onClick={() => setType("exit")}
-                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all ${type === "exit"
+                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
+                    type === "exit"
                     ? "bg-[#DC2626]/10 border-[#DC2626] text-[#DC2626]"
                     : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]"
                   }`}
               >
-                📤 Salida
+                <FaArrowUp className="text-xl" /> Salida
               </button>
             </div>
           </div>
         )}
 
-        {/* Cliente (opcional) */}
         <div>
           <label
             htmlFor="client"
@@ -218,7 +215,6 @@ export function OrderFormModal({
           </select>
         </div>
 
-        {/* Notas */}
         <div>
           <label
             htmlFor="notes"
@@ -236,7 +232,6 @@ export function OrderFormModal({
           />
         </div>
 
-        {/* Items (solo en creación) */}
         {!isEdit && (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -260,7 +255,6 @@ export function OrderFormModal({
                   className="p-4 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-lg"
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                    {/* Producto */}
                     <div className="sm:col-span-5">
                       <label className="block text-[#0F172A] text-base font-semibold mb-2">
                         Producto
@@ -282,7 +276,6 @@ export function OrderFormModal({
                       </select>
                     </div>
 
-                    {/* Cantidad */}
                     <div className="sm:col-span-3">
                       <label className="block text-[#0F172A] text-base font-semibold mb-2">
                         Cantidad
@@ -299,7 +292,6 @@ export function OrderFormModal({
                       />
                     </div>
 
-                    {/* Precio */}
                     <div className="sm:col-span-3">
                       <label className="block text-[#0F172A] text-base font-semibold mb-2">
                         Precio Unitario
@@ -315,7 +307,6 @@ export function OrderFormModal({
                       />
                     </div>
 
-                    {/* Botón eliminar */}
                     <div className="sm:col-span-1 flex items-end">
                       <button
                         type="button"
@@ -329,7 +320,6 @@ export function OrderFormModal({
                     </div>
                   </div>
 
-                  {/* Subtotal */}
                   {item.quantity && item.price && (
                     <div className="mt-3 text-right">
                       <span className="text-base font-semibold text-[#475569]">
@@ -346,7 +336,6 @@ export function OrderFormModal({
               ))}
             </div>
 
-            {/* Total */}
             {items.length > 0 && (
               <div className="mt-6 p-4 bg-[#2563EB]/5 border-2 border-[#2563EB]/30 rounded-lg">
                 <div className="flex items-center justify-between">

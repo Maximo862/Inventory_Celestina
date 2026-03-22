@@ -10,7 +10,7 @@ import { getOrderStatsRequest } from "@/features/orders/api/OrderRequests";
 import { IoMdPerson } from "react-icons/io";
 import { FaBox } from "react-icons/fa6";
 import { GiTicket } from "react-icons/gi";
-import { FiFileText, FiArrowDown, FiArrowUp } from "react-icons/fi";
+import { FiFileText, FiArrowDown, FiArrowUp, FiAlertTriangle } from "react-icons/fi";
 import { formatARS } from "@/utils/formatCurrency";
 
 export function Home() {
@@ -164,7 +164,7 @@ export function Home() {
       {(lowStockProducts > 0 || outOfStockProducts > 0) && (
         <Card className="bg-[#FEF2F2] border-2 border-[#DC2626]">
           <div className="flex items-start gap-4">
-            <div className="text-5xl">⚠️</div>
+            <FiAlertTriangle className="text-5xl" />
             <div className="flex-1">
               <h3 className="text-2xl font-bold text-[#DC2626] mb-2">
                 Alertas de inventario

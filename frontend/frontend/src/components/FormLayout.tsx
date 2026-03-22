@@ -1,5 +1,6 @@
 import type { ReactNode, FormHTMLAttributes } from "react";
 import { Button } from "@/components/Button";
+import { FaTimes } from "react-icons/fa";
 
 interface FormLayoutProps extends FormHTMLAttributes<HTMLFormElement> {
   children: ReactNode;
@@ -29,7 +30,6 @@ export function FormLayout({
       className={`bg-white border-2 border-[#E2E8F0] rounded-2xl shadow-2xl ${className}`}
       {...props}
     >
-      {/* Header con título y botón cerrar */}
       <div className="px-6 py-5 border-b-2 border-[#E2E8F0]">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -44,29 +44,15 @@ export function FormLayout({
             className="text-[#475569] hover:text-[#0F172A] transition-colors duration-200 p-2"
             aria-label="Cerrar"
           >
-            <svg
-              className="w-8 h-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <FaTimes className="w-8 h-8" />
           </button>
         </div>
       </div>
 
-      {/* Contenido del formulario */}
       <div className="px-6 py-6 space-y-6 max-h-[60vh] overflow-y-auto">
         {children}
       </div>
 
-      {/* Footer con botones */}
       <div className="px-6 py-5 border-t-2 border-[#E2E8F0] bg-[#F8FAFC]">
         <div className="flex flex-col sm:flex-row gap-4">
           <Button
@@ -75,16 +61,16 @@ export function FormLayout({
             size="lg"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 flex items-center justify-center gap-2"
           >
-            ❌ Cancelar
+            <FaTimes className="text-xl" /> Cancelar
           </Button>
           <Button
             type="submit"
             variant="primary"
             size="lg"
             disabled={isSubmitting || !isValid}
-            className="flex-1"
+            className="flex-1 flex items-center justify-center gap-2"
           >
             {isSubmitting ? "Guardando..." : submitLabel}
           </Button>

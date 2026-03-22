@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FormLayout } from "@/components/FormLayout";
 import { Input } from "@/components/Input";
+import { FaTag } from "react-icons/fa6";
 import type { Category } from "@/types/types";
 
 interface SubcategoryFormModalProps {
@@ -57,31 +58,30 @@ export function SubcategoryFormModal({
 
   return (
     <FormLayout
-      title={isEdit ? "Editar subcategoría" : "Nueva subcategoría"}
+      title={isEdit ? "Editar subcategoria" : "Nueva subcategoria"}
       description={
         isEdit
           ? `Modificar: ${subcategory.name}`
-          : `Crear subcategoría de: ${parentCategory.name}`
+          : `Crear subcategoria de: ${parentCategory.name}`
       }
       onClose={handleClose}
       onSubmit={handleSubmit}
-      submitLabel={isEdit ? "💾 Guardar cambios" : "➕ Crear subcategoría"}
+      submitLabel={isEdit ? "Guardar cambios" : "Crear subcategoria"}
       isSubmitting={isSubmitting}
       isValid={name.trim().length > 0}
     >
-      {/* Info de categoría padre (solo lectura) */}
       <div className="p-4 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-lg mb-4">
         <p className="text-base font-semibold text-[#475569] mb-1">
-          Categoría padre
+          Categoria padre
         </p>
-        <p className="text-xl font-bold text-[#2563EB]">
-          🏷️ {parentCategory.name}
+        <p className="text-xl font-bold text-[#2563EB] flex items-center gap-2">
+          <FaTag className="text-lg" /> {parentCategory.name}
         </p>
       </div>
 
       <Input
         id="subcategory-name"
-        label="Nombre de la subcategoría"
+        label="Nombre de la subcategoria"
         type="text"
         placeholder="Ej: Quebracho 240"
         value={name}

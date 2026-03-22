@@ -55,35 +55,30 @@ export function CategoriesPage() {
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Filtrado y ordenamiento
- // Solo mostrar categorías PADRE (parent_id === null)
-const filteredAndSortedCategories = useMemo(() => {
-  // ← CAMBIAR: Solo categorías padre
-  let result = categories.filter((cat) => cat.parent_id === null);
+  const filteredAndSortedCategories = useMemo(() => {
+    let result = categories.filter((cat) => cat.parent_id === null);
 
-  // Aplicar búsqueda
-  result = result.filter((category) =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    result = result.filter((category) =>
+      category.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  // Ordenar
-  result.sort((a, b) => {
-    switch (sortBy) {
-      case "name-asc":
-        return a.name.localeCompare(b.name);
-      case "name-desc":
-        return b.name.localeCompare(a.name);
-      case "id-asc":
-        return a.id - b.id;
-      case "id-desc":
-        return b.id - a.id;
-      default:
-        return 0;
-    }
-  });
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "id-asc":
+          return a.id - b.id;
+        case "id-desc":
+          return b.id - a.id;
+        default:
+          return 0;
+      }
+    });
 
-  return result;
-}, [categories, searchTerm, sortBy]);
+    return result;
+  }, [categories, searchTerm, sortBy]);
 
   const handleCreate = () => {
     setFormModal({ isOpen: true, category: null });
@@ -149,7 +144,7 @@ const filteredAndSortedCategories = useMemo(() => {
     <div>
       <PageHeader
         title="Categorías"
-        subtitle="Gestión de categorías de productos"
+        subtitle="Gestion de categorias de productos"
         action={
           <Button
             variant="primary"
@@ -157,8 +152,8 @@ const filteredAndSortedCategories = useMemo(() => {
             onClick={handleCreate}
             className="flex items-center justify-center gap-3"
           >
-            <FaPlus className="text-2xl " />
-            Nueva categoría
+            <FaPlus className="text-2xl" />
+            Nueva categoria
           </Button>
         }
       />
@@ -166,27 +161,24 @@ const filteredAndSortedCategories = useMemo(() => {
       {categories.length === 0 ? (
         <EmptyState
           icon={<GiTicket />}
-          title="No hay categorías"
-          description="Comience creando su primera categoría para organizar los productos"
-          actionLabel="Crear primera categoría"
+          title="No hay categorias"
+          description="Comience creando su primera categoria para organizar los productos"
+          actionLabel="Crear primera categoria"
           onAction={handleCreate}
         />
       ) : (
         <>
-          {/* Barra de búsqueda y filtros */}
           <div className="mb-6 space-y-4">
-            {/* Búsqueda */}
             <div>
               <input
                 type="text"
-                placeholder="🔍 Buscar categoría por nombre..."
+                placeholder="Buscar categoria por nombre..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               />
             </div>
 
-            {/* Ordenar por */}
             <div>
               <label className="block text-[#0F172A] text-lg font-semibold mb-2">
                 Ordenar por
@@ -196,18 +188,17 @@ const filteredAndSortedCategories = useMemo(() => {
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 className="w-full sm:w-auto bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               >
-                <option value="name-asc">🔤 Nombre (A → Z)</option>
-                <option value="name-desc">🔤 Nombre (Z → A)</option>
-                <option value="id-asc">🔢 Más antigua primero</option>
-                <option value="id-desc">🔢 Más reciente primero</option>
+                <option value="name-asc">Nombre (A → Z)</option>
+                <option value="name-desc">Nombre (Z → A)</option>
+                <option value="id-asc">Mas antigua primero</option>
+                <option value="id-desc">Mas reciente primero</option>
               </select>
             </div>
 
-            {/* Contador de resultados */}
             <div className="flex items-center justify-between text-lg text-[#475569]">
               <p>
                 Mostrando {filteredAndSortedCategories.length} de{" "}
-                {categories.length} categorías
+                {categories.length} categorias
               </p>
               {(searchTerm || sortBy !== "name-asc") && (
                 <button
@@ -217,17 +208,16 @@ const filteredAndSortedCategories = useMemo(() => {
                   }}
                   className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
                 >
-                  ✕ Limpiar filtros
+                  Limpiar filtros
                 </button>
               )}
             </div>
           </div>
 
-          {/* Lista de categorías */}
           {filteredAndSortedCategories.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#475569] mb-4">
-                No se encontraron categorías
+                No se encontraron categorias
               </p>
               <Button
                 variant="secondary"
@@ -266,8 +256,8 @@ const filteredAndSortedCategories = useMemo(() => {
 
       <DeleteConfirmModal
         isOpen={deleteModal.isOpen}
-        title="¿Eliminar categoría?"
-        message="Está por eliminar la categoría:"
+        title="Eliminar categoria?"
+        message="Esta por eliminar la categoria:"
         itemName={deleteModal.name}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}

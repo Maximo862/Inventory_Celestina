@@ -29,7 +29,6 @@ export class CategoryService {
         const category = await this.repository.findById(id);
 
         if (!category) {
-              console.log("el id es :", id)
             throw new NotFoundError('Category', id);
         }
 

@@ -3,12 +3,12 @@ import { Request, Response, NextFunction } from "express";
 
 export async function registerAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const { email, password, role } = req.body;  
+    const { email, password, role } = req.body;
 
     const userData = await registerUser({
       email,
       password,
-      role  
+      role
     });
 
     res
@@ -16,14 +16,14 @@ export async function registerAuth(req: Request, res: Response, next: NextFuncti
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 1000 * 60 * 60,
+        maxAge: 1000 * 60 * 60 * 24 * 30,
       })
       .json({
         message: "User Created",
         user: {
           id: userData.id,
           email,
-          role: userData.role  
+          role: userData.role
         },
       });
   } catch (err) {
@@ -42,14 +42,14 @@ export async function loginAuth(req: Request, res: Response, next: NextFunction)
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 1000 * 60 * 60,
+        maxAge: 1000 * 60 * 60 * 24 * 30,
       })
       .json({
         message: "Successful login",
         user: {
           id: userData.id,
           email,
-          role: userData.role  
+          role: userData.role
         },
       });
   } catch (err) {
@@ -63,7 +63,7 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
     if (!token) return res.status(401).json({ error: "No token" });
 
     const user = await verifyUser(token);
-    res.json({ user });  
+    res.json({ user });
   } catch (err) {
     next(err);
   }

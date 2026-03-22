@@ -43,6 +43,11 @@ export function errorHandler(
       error: "La categoría es obligatoria",
       code: "CATEGORY_REQUIRED",
     },
+    ER_WARN_DATA_OUT_OF_RANGE: {
+      status: 400,
+      error: "Un numero esta fuera del rango permitido",
+      code: "OUT_OF_RANGE",
+    },
   };
 
   if (err.code && dbErrorMap[err.code]) {

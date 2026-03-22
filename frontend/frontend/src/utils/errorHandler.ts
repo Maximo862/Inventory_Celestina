@@ -20,7 +20,13 @@ export function handleError(error: any, action: string, itemName?: string) {
       "No se puede eliminar la categoría porque tiene productos asociados",
       { icon: "📦", duration: 6000 },
     );
-  } else if (error.code === "INVALID_REFERENCE") {
+  } else if (error.code === "OUT_OF_RANGE") {
+    toast.error("Un numero esta fuera del rango permitido", {
+      icon: "❌",
+      duration: 6000,
+    });
+  }
+  else if (error.code === "INVALID_REFERENCE") {
     toast.error("Referencia inválida", { icon: "❌" });
   } else if (error.code === "NOT_FOUND") {
     toast.error(`Elemento no encontrado`);

@@ -1,13 +1,14 @@
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import { FiEdit2, FiTrash2 } from "react-icons/fi"; // ← AGREGAR
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FaTag, FaTriangleExclamation, FaCheck } from "react-icons/fa6";
 import type { Product } from "@/types/types";
 import { formatARS } from "@/utils/formatCurrency";
 
 interface ProductCardProps {
   product: Product;
   categoryName?: string;
-  isAdmin: boolean; // ← AGREGAR
+  isAdmin: boolean;
   onEdit: () => void;
   onDelete: (id: number, name: string) => void;
 }
@@ -15,7 +16,7 @@ interface ProductCardProps {
 export function ProductCard({
   product,
   categoryName,
-  isAdmin, // ← AGREGAR
+  isAdmin,
   onEdit,
   onDelete,
 }: ProductCardProps) {
@@ -33,8 +34,8 @@ export function ProductCard({
               </h3>
               {categoryName && (
                 <div className="inline-block px-5 py-3 bg-[#2563EB]/10 border-2 border-[#2563EB]/30 rounded-xl">
-                  <span className="text-xl font-bold text-[#2563EB]">
-                    🏷️ {categoryName}
+                  <span className="text-xl font-bold text-[#2563EB] flex items-center gap-2">
+                    <FaTag className="text-lg" /> {categoryName}
                   </span>
                 </div>
               )}
@@ -45,12 +46,12 @@ export function ProductCard({
                 SIN STOCK
               </span>
             ) : isLowStock ? (
-              <span className="px-4 py-2 bg-[#F59E0B] text-white text-lg font-bold rounded-lg">
-                ⚠️ BAJO STOCK
+              <span className="px-4 py-2 bg-[#F59E0B] text-white text-lg font-bold rounded-lg flex items-center gap-2">
+                <FaTriangleExclamation className="text-lg" /> BAJO STOCK
               </span>
             ) : (
-              <span className="px-4 py-2 bg-[#16A34A] text-white text-lg font-bold rounded-lg">
-                ✓ EN STOCK
+              <span className="px-4 py-2 bg-[#16A34A] text-white text-lg font-bold rounded-lg flex items-center gap-2">
+                <FaCheck className="text-lg" /> EN STOCK
               </span>
             )}
           </div>
@@ -83,7 +84,6 @@ export function ProductCard({
           </div>
         </div>
 
-        {/* ← CONDICIONAL: Solo mostrar botones si es admin */}
         {isAdmin && (
           <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:w-48">
             <Button

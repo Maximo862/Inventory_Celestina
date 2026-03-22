@@ -45,7 +45,6 @@ function App() {
 export default App;
 
 // Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
-// Que se pueda subir categorias enteras por porcentaje por ej : alambre subieron un 10% 
 // implementar la api de AFIP 
 // Guardar quien creo cada Orden
 
@@ -53,10 +52,10 @@ export default App;
 
 // - Mirar el tema de la ALERTA DE BAJO STOCK
 
-// - Manejar errores de rango con : 'ER_WARN_DATA_OUT_OF_RANGE'
-
 // Logros de este proyecto :
 
 // - Crear un arbol infinito
 
 // - Paginacion
+
+// - Recurividad 

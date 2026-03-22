@@ -12,6 +12,7 @@ import { AuthContext } from "@/features/auth/context/AuthContext";
 import { IoMdPerson } from "react-icons/io";
 import { FaPlus } from "react-icons/fa6";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 import type { Client } from "@/types/types";
 
 type SortOption = "name-asc" | "name-desc" | "cuil-asc" | "cuil-desc";
@@ -194,7 +195,7 @@ export function ClientsPage() {
             <div>
               <input
                 type="text"
-                placeholder="🔍 Buscar por nombre, CUIL, email o teléfono..."
+                placeholder="Buscar por nombre, CUIL, email o teléfono..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
@@ -210,10 +211,10 @@ export function ClientsPage() {
                 onChange={(e) => handleSortChange(e.target.value as SortOption)}
                 className="w-full sm:w-auto bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
               >
-                <option value="name-asc">🔤 Nombre (A → Z)</option>
-                <option value="name-desc">🔤 Nombre (Z → A)</option>
-                <option value="cuil-asc">🔢 CUIL (menor → mayor)</option>
-                <option value="cuil-desc">🔢 CUIL (mayor → menor)</option>
+                <option value="name-asc">Nombre (A → Z)</option>
+                <option value="name-desc">Nombre (Z → A)</option>
+                <option value="cuil-asc">CUIL (menor → mayor)</option>
+                <option value="cuil-desc">CUIL (mayor → menor)</option>
               </select>
             </div>
 
@@ -232,7 +233,7 @@ export function ClientsPage() {
                     }}
                     className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
                   >
-                    ✕ Limpiar filtros
+                    <IoMdClose /> Limpiar filtros
                   </button>
                 )}
               </div>

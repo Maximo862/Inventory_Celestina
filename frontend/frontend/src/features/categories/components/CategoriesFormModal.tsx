@@ -52,21 +52,21 @@ export function CategoryFormModal({
 
   return (
     <FormLayout
-      title={isEdit ? "Editar categoría" : "Nueva categoría"}
+      title={isEdit ? "Editar categoria" : "Nueva categoria"}
       description={
         isEdit
           ? `Modificar: ${category.name}`
-          : "Crear una nueva categoría de productos"
+          : "Crear una nueva categoria de productos"
       }
       onClose={handleClose}
       onSubmit={handleSubmit}
-      submitLabel={isEdit ? "💾 Guardar cambios" : "➕ Crear categoría"}
+      submitLabel={isEdit ? "Guardar cambios" : "Crear categoria"}
       isSubmitting={isSubmitting}
       isValid={name.trim().length > 0}
     >
       <Input
         id="category-name"
-        label="Nombre de la categoría"
+        label="Nombre de la categoria"
         type="text"
         placeholder="Ej: Maderas duras"
         value={name}
