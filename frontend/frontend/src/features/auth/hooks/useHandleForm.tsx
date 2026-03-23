@@ -7,6 +7,7 @@ export function useHandleForm(mode = "register") {
   const [user, setUser] = useState<User>({
     email: "",
     password: "",
+    role: "employee",
   });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
