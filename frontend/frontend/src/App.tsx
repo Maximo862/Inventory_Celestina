@@ -59,3 +59,9 @@ export default App;
 // - Paginacion
 
 // - Recurividad 
+
+// - Indices 
+
+// - Querys dinamicas 
+
+// - Manejo de errores 
