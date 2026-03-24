@@ -58,10 +58,10 @@ export function Login() {
       }
       button={{
         submit: "Ingresar",
-        textRedirect: "¿No tiene cuenta?",
-        redirect: "Crear cuenta",
+        // textRedirect: "¿No tiene cuenta?",
+        // redirect: "Crear cuenta",
       }}
-      path="/register"
+      // path="/register"
     />
   );
 }

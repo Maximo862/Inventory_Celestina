@@ -188,6 +188,7 @@ export function ClientsPage() {
           description="Comience agregando su primer cliente al sistema"
           actionLabel="Crear primer cliente"
           onAction={handleCreate}
+          showAction={isAdmin}
         />
       ) : (
         <>
@@ -309,8 +310,8 @@ export function ClientsPage() {
                               key={pageNumber}
                               onClick={() => handlePageClick(pageNumber)}
                               className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                  ? "bg-[#2563EB] text-white"
-                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                ? "bg-[#2563EB] text-white"
+                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
                                 }`}
                             >
                               {pageNumber}

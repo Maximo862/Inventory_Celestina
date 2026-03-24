@@ -219,6 +219,7 @@ export function ProductsPage() {
           description="Comience agregando su primer producto al inventario"
           actionLabel="Crear primer producto"
           onAction={handleCreate}
+          showAction={isAdmin}
         />
       ) : (
         <>

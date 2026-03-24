@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { useAuthActions } from "../hooks/useAuthActions";
 
 interface ButtonConfig {
-  textRedirect: string;
-  redirect: string;
+  textRedirect?: string;
+  redirect?: string;
   submit: string;
 }
 
@@ -13,7 +13,7 @@ interface Props {
   button: ButtonConfig;
   tittle: string;
   inputs: React.ReactNode;
-  path: string;
+  path?: string;
 }
 
 export function AuthenticationCard({
@@ -57,7 +57,7 @@ export function AuthenticationCard({
         </button>
 
         {/* Link secundario con buen contraste */}
-        <p className="text-base text-[#475569] mt-6 text-center">
+        {/* <p className="text-base text-[#475569] mt-6 text-center">
           {button.textRedirect}{" "}
           <Link
             className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold underline text-lg"
@@ -65,7 +65,7 @@ export function AuthenticationCard({
           >
             {button.redirect}
           </Link>
-        </p>
+        </p> */}
       </form>
     </div>
   );
