@@ -18,6 +18,7 @@ export async function fetchAPI<T = unknown>(
 
   if (!res.ok) {
     const error: any = new Error(data.error || "API Error");
+    console.log("esto pasa: " , error)
     error.code = data.code;
     error.statusCode = res.status;
     error.field = data.field;
