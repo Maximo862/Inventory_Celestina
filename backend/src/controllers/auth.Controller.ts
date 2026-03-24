@@ -41,7 +41,7 @@ export async function loginAuth(req: Request, res: Response, next: NextFunction)
       .cookie("token", userData.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "none",
         maxAge: 1000 * 60 * 60 * 24 * 30,
       })
       .json({
@@ -74,7 +74,7 @@ export async function logoutAuth(req: Request, res: Response, next: NextFunction
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
     });
     res.json({ message: "Logout successful" });
   } catch (err) {
