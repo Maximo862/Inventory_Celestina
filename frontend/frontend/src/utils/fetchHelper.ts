@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export async function fetchAPI<T = unknown>(
   endpoint: string,  
@@ -18,7 +18,6 @@ export async function fetchAPI<T = unknown>(
 
   if (!res.ok) {
     const error: any = new Error(data.error || "API Error");
-    console.log("esto pasa: " , error)
     error.code = data.code;
     error.statusCode = res.status;
     error.field = data.field;

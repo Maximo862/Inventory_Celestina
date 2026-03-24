@@ -15,7 +15,7 @@ export async function registerAuth(req: Request, res: Response, next: NextFuncti
       .cookie("token", userData.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "none",
         maxAge: 1000 * 60 * 60 * 24 * 30,
       })
       .json({
