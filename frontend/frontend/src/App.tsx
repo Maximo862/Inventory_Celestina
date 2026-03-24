@@ -44,9 +44,9 @@ function App() {
 
 export default App;
 
-// Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
-// implementar la api de AFIP 
-// Guardar quien creo cada Orden
+// - Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
+// - implementar la api de AFIP 
+// - Guardar quien creo cada Orden
 
 // EXTRAS : 
 
