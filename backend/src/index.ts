@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://inventory-celestina-vwj7.vercel.app"],
+    origin: ["http://localhost:5173", "https://inventory-celestina.vercel.app"],
     credentials: true,
   })
 );
