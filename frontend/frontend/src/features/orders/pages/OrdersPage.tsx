@@ -242,7 +242,7 @@ export function OrdersPage() {
                 placeholder="Buscar por cliente o notas..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
               />
             </div>
 
@@ -257,7 +257,7 @@ export function OrdersPage() {
                   onChange={(e) =>
                     handleFilterChange(e.target.value as FilterOption)
                   }
-                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
                 >
                   <option value="all"><FiFolder /> Todos los remitos</option>
                   <option value="entry"><FiArrowDown /> Solo entradas</option>
@@ -273,7 +273,7 @@ export function OrdersPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
                 >
                   <option value="date-desc"><FiCalendar /> Más reciente primero</option>
                   <option value="date-asc"><FiCalendar /> Más antiguo primero</option>
@@ -284,7 +284,7 @@ export function OrdersPage() {
             </div>
 
             {pagination && (
-              <div className="flex items-center justify-between text-lg text-[#475569]">
+              <div className="flex items-center justify-between text-lg text-[#64748B]">
                 <p>
                   Mostrando {sortedOrders.length} de {pagination.total} remitos
                   totales (Página {currentPage} de {pagination.totalPages})
@@ -297,7 +297,7 @@ export function OrdersPage() {
                       setSortBy("date-desc");
                       setCurrentPage(1);
                     }}
-                    className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
+                    className="text-[#4FA3D1] hover:text-[#3D8AB5] font-semibold text-lg"
                   >
                     <IoMdClose /> Limpiar filtros
                   </button>
@@ -308,7 +308,7 @@ export function OrdersPage() {
 
           {sortedOrders.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-2xl text-[#475569] mb-4">
+              <p className="text-2xl text-[#64748B] mb-4">
                 No se encontraron remitos
               </p>
               <Button
@@ -341,7 +341,7 @@ export function OrdersPage() {
 
               {pagination && pagination.totalPages > 1 && (
                 <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
-                  <p className="text-lg text-[#475569] font-semibold">
+                  <p className="text-lg text-[#64748B] font-semibold">
                     Página {currentPage} de {pagination.totalPages}
                   </p>
 
@@ -377,8 +377,8 @@ export function OrdersPage() {
                               key={pageNumber}
                               onClick={() => handlePageClick(pageNumber)}
                               className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                ? "bg-[#2563EB] text-white"
-                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                  ? "bg-[#4FA3D1] text-white"
+                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
                                 }`}
                             >
                               {pageNumber}

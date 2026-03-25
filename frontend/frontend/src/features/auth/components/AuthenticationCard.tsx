@@ -51,7 +51,7 @@ export function AuthenticationCard({
         {/* Botón principal - GRANDE y CLARO */}
         <button
           type="submit"
-          className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xl font-bold py-5 rounded-xl mt-8 transition-colors duration-200 shadow-md hover:shadow-lg"
+          className="w-full bg-[#4FA3D1] hover:bg-[#3D8AB5] text-white text-xl font-bold py-5 rounded-xl mt-8 transition-colors duration-200 shadow-md hover:shadow-lg"
         >
           {button.submit}
         </button>

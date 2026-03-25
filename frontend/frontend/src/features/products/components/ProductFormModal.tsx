@@ -191,7 +191,7 @@ export function ProductFormModal({
               value={selectedParentId}
               onChange={(e) => handleParentChange(e.target.value)}
               required
-              className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+              className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
             >
               <option value="">Seleccione una categoria</option>
               {categories
@@ -217,7 +217,7 @@ export function ProductFormModal({
                 value={formData.category_id}
                 onChange={(e) => handleChange("category_id", e.target.value)}
                 required
-                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
               >
                 <option value="">Seleccione una subcategoria</option>
                 {availableSubcategories.map((sub) => (
@@ -226,7 +226,7 @@ export function ProductFormModal({
                   </option>
                 ))}
               </select>
-              <p className="mt-2 text-base text-[#475569] flex items-center gap-2">
+              <p className="mt-2 text-base text-[#64748B] flex items-center gap-2">
                 <FaLightbulb className="text-base" /> Esta categoria tiene subcategorias. Debe elegir una.
               </p>
             </div>
@@ -270,7 +270,7 @@ export function ProductFormModal({
       </div>
 
       <div className="space-y-6 pt-4">
-        <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
+        <h3 className="text-2xl font-bold text-[#64748B] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
           <FaEdit className="text-xl" /> Datos opcionales
         </h3>
 
@@ -287,7 +287,7 @@ export function ProductFormModal({
             placeholder="Ej: Madera de primera calidad, tratada para exteriores"
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
-            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200 resize-none"
+            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200 resize-none"
           />
         </div>
       </div>

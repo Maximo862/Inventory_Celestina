@@ -21,12 +21,12 @@ export function SubcategoryCard({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-2xl text-[#475569]">└─</span>
+            <span className="text-2xl text-[#64748B]">└─</span>
             <h3 className="text-2xl font-bold text-[#0F172A]">
               {subcategory.name}
             </h3>
           </div>
-          <p className="text-lg text-[#475569] ml-9">ID: {subcategory.id}</p>
+          <p className="text-lg text-[#64748B] ml-9">ID: {subcategory.id}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

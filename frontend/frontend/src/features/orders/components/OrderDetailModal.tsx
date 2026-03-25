@@ -49,12 +49,12 @@ export function OrderDetailModal({
                   Remito #{order.id}
                 </h2>
               </div>
-              <p className="text-lg text-[#475569]">{date}</p>
+              <p className="text-lg text-[#64748B]">{date}</p>
             </div>
 
             <button
               onClick={onClose}
-              className="text-[#475569] hover:text-[#0F172A] transition-colors p-2"
+              className="text-[#64748B] hover:text-[#0F172A] transition-colors p-2"
               aria-label="Cerrar"
             >
               <FiX className="text-3xl" />
@@ -65,15 +65,15 @@ export function OrderDetailModal({
           <div className="space-y-4 mb-6">
             {order.client_name && (
               <div className="flex items-center gap-3 text-xl">
-                <FiUser className="text-2xl text-[#475569]" />
-                <span className="font-semibold text-[#475569]">Cliente:</span>
+                <FiUser className="text-2xl text-[#64748B]" />
+                <span className="font-semibold text-[#64748B]">Cliente:</span>
                 <span className="text-[#0F172A]">{order.client_name}</span>
               </div>
             )}
 
             {order.notes && (
               <div className="p-4 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-lg">
-                <p className="text-base font-semibold text-[#475569] mb-2">
+                <p className="text-base font-semibold text-[#64748B] mb-2">
                   Notas
                 </p>
                 <p className="text-lg text-[#0F172A]">{order.notes}</p>
@@ -84,7 +84,7 @@ export function OrderDetailModal({
           {/* Tabla de items */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-4">
-              <FiPackage className="text-2xl text-[#475569]" />
+              <FiPackage className="text-2xl text-[#64748B]" />
               <h3 className="text-2xl font-bold text-[#0F172A]">
                 Productos ({order.items.length})
               </h3>
@@ -129,7 +129,7 @@ export function OrderDetailModal({
                     </tr>
                   ))}
                 </tbody>
-                <tfoot className="bg-[#2563EB]/5">
+                <tfoot className="bg-[#4FA3D1]/5">
                   <tr>
                     <td
                       colSpan={3}
@@ -137,7 +137,7 @@ export function OrderDetailModal({
                     >
                       TOTAL:
                     </td>
-                    <td className="p-4 text-2xl font-bold text-[#2563EB] text-right">
+                    <td className="p-4 text-2xl font-bold text-[#4FA3D1] text-right">
                       {formatARS(order.total_amount)}
                     </td>
                   </tr>

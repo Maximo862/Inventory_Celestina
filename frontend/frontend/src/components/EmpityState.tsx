@@ -22,7 +22,7 @@ export function EmptyState({
     <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8">
       <div className="mb-6 text-6xl">{icon}</div>
       <h2 className="text-3xl font-bold text-[#0F172A] mb-3">{title}</h2>
-      <p className="text-xl text-[#475569] mb-8 max-w-md">{description}</p>
+      <p className="text-xl text-[#64748B] mb-8 max-w-md">{description}</p>
       {showAction && (
         <Button variant="primary" size="lg" onClick={onAction}>
           {actionLabel}

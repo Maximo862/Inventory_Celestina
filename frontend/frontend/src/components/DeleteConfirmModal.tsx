@@ -34,11 +34,11 @@ export function DeleteConfirmModal({
 
           <h2 className="text-3xl font-bold text-[#0F172A] mb-4">{title}</h2>
 
-          <p className="text-xl text-[#475569] mb-3">{message}</p>
+          <p className="text-xl text-[#64748B] mb-3">{message}</p>
 
           <p className="text-2xl font-bold text-[#DC2626] mb-8">{itemName}</p>
 
-          <p className="text-lg text-[#475569] mb-8">
+          <p className="text-lg text-[#64748B] mb-8">
             Esta accion no se puede deshacer
           </p>
 

@@ -181,10 +181,10 @@ export function SubcategoriesPage() {
               className="p-2 hover:bg-[#F8FAFC] rounded-lg transition-colors"
               aria-label="Volver a categorias"
             >
-              <FiArrowLeft className="text-3xl text-[#475569]" />
+              <FiArrowLeft className="text-3xl text-[#64748B]" />
             </button>
             <div>
-              <p className="text-lg text-[#475569] mb-1">Subcategorias de:</p>
+              <p className="text-lg text-[#64748B] mb-1">Subcategorias de:</p>
               <h1 className="text-4xl font-bold text-[#0F172A]">
                 {parentCategory.name}
               </h1>
@@ -222,7 +222,7 @@ export function SubcategoriesPage() {
                 placeholder="Buscar subcategoria por nombre..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
               />
             </div>
 
@@ -233,7 +233,7 @@ export function SubcategoriesPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full sm:w-auto bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                className="w-full sm:w-auto bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
               >
                 <option value="name-asc">Nombre (A → Z)</option>
                 <option value="name-desc">Nombre (Z → A)</option>
@@ -242,7 +242,7 @@ export function SubcategoriesPage() {
               </select>
             </div>
 
-            <div className="flex items-center justify-between text-lg text-[#475569]">
+            <div className="flex items-center justify-between text-lg text-[#64748B]">
               <p>
                 Mostrando {filteredAndSortedSubcategories.length} de{" "}
                 {subcategories.length} subcategorias
@@ -253,7 +253,7 @@ export function SubcategoriesPage() {
                     setSearchTerm("");
                     setSortBy("name-asc");
                   }}
-                  className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
+                  className="text-[#4FA3D1] hover:text-[#3D8AB5] font-semibold text-lg"
                 >
                   Limpiar filtros
                 </button>
@@ -263,7 +263,7 @@ export function SubcategoriesPage() {
 
           {filteredAndSortedSubcategories.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-2xl text-[#475569] mb-4">
+              <p className="text-2xl text-[#64748B] mb-4">
                 No se encontraron subcategorias
               </p>
               <Button

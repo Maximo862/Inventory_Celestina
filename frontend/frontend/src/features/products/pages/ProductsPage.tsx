@@ -231,7 +231,7 @@ export function ProductsPage() {
                 placeholder="Buscar producto por nombre..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
               />
             </div>
 
@@ -244,7 +244,7 @@ export function ProductsPage() {
                 <select
                   value={filterCategory}
                   onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
                 >
                   <option value="all"><FiFolder /> Todas las categorías</option>
 
@@ -279,7 +279,7 @@ export function ProductsPage() {
                     setSortBy(e.target.value as SortOption);
                     setCurrentPage(1);
                   }}
-                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
                 >
                   <option value="name-asc">Nombre (A → Z)</option>
                   <option value="name-desc">Nombre (Z → A)</option>
@@ -294,7 +294,7 @@ export function ProductsPage() {
             </div>
 
             {pagination && (
-              <div className="flex items-center justify-between text-lg text-[#475569]">
+              <div className="flex items-center justify-between text-lg text-[#64748B]">
                 <p>
                   Mostrando {products.length} de {pagination.total}{" "}
                   productos totales (Página {currentPage} de{" "}
@@ -310,7 +310,7 @@ export function ProductsPage() {
                         setSortBy("name-asc");
                         setCurrentPage(1);
                       }}
-                      className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg"
+                      className="text-[#4FA3D1] hover:text-[#3D8AB5] font-semibold text-lg"
                     >
                       <IoMdClose /> Limpiar filtros
                     </button>
@@ -321,7 +321,7 @@ export function ProductsPage() {
 
           {products.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-2xl text-[#475569] mb-4">
+              <p className="text-2xl text-[#64748B] mb-4">
                 No se encontraron productos
               </p>
               <Button
@@ -358,7 +358,7 @@ export function ProductsPage() {
 
               {pagination && pagination.totalPages > 1 && (
                 <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
-                  <p className="text-lg text-[#475569] font-semibold">
+                  <p className="text-lg text-[#64748B] font-semibold">
                     Página {currentPage} de {pagination.totalPages}
                   </p>
 
@@ -394,7 +394,7 @@ export function ProductsPage() {
                               key={pageNumber}
                               onClick={() => handlePageClick(pageNumber)}
                               className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                  ? "bg-[#2563EB] text-white"
+                                  ? "bg-[#4FA3D1] text-white"
                                   : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
                                 }`}
                             >

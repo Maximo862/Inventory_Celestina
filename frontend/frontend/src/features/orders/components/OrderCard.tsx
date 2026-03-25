@@ -50,10 +50,10 @@ export function OrderCard({
 
             {/* ID y fecha */}
             <div>
-              <p className="text-base font-semibold text-[#475569]">
+              <p className="text-base font-semibold text-[#64748B]">
                 Remito #{order.id}
               </p>
-              <p className="text-base text-[#475569]">{date}</p>
+              <p className="text-base text-[#64748B]">{date}</p>
             </div>
           </div>
 
@@ -62,8 +62,8 @@ export function OrderCard({
             {/* Cliente */}
             {clientName && (
               <div className="flex items-center gap-2 text-lg">
-                <FiUser className="text-[#475569]" />
-                <span className="font-semibold text-[#475569]">Cliente:</span>
+                <FiUser className="text-[#64748B]" />
+                <span className="font-semibold text-[#64748B]">Cliente:</span>
                 <span className="text-[#0F172A]">{clientName}</span>
               </div>
             )}
@@ -71,14 +71,14 @@ export function OrderCard({
             {/* Notas */}
             {order.notes && (
               <div className="text-lg">
-                <span className="font-semibold text-[#475569]">Notas: </span>
+                <span className="font-semibold text-[#64748B]">Notas: </span>
                 <span className="text-[#0F172A]">{order.notes}</span>
               </div>
             )}
 
             {/* Monto total */}
             <div className="inline-block px-4 py-2 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-lg">
-              <span className="text-base font-semibold text-[#475569]">
+              <span className="text-base font-semibold text-[#64748B]">
                 Total:{" "}
               </span>
               <span className="text-2xl font-bold text-[#0F172A]">

@@ -33,8 +33,8 @@ export function ProductCard({
                 {product.name}
               </h3>
               {categoryName && (
-                <div className="inline-block px-5 py-3 bg-[#2563EB]/10 border-2 border-[#2563EB]/30 rounded-xl">
-                  <span className="text-xl font-bold text-[#2563EB] flex items-center gap-2">
+                <div className="inline-block px-5 py-3 bg-[#4FA3D1]/10 border-2 border-[#4FA3D1]/30 rounded-xl">
+                  <span className="text-xl font-bold text-[#4FA3D1] flex items-center gap-2">
                     <FaTag className="text-lg" /> {categoryName}
                   </span>
                 </div>
@@ -57,14 +57,14 @@ export function ProductCard({
           </div>
 
           {product.description && (
-            <p className="text-lg text-[#475569] leading-relaxed">
+            <p className="text-lg text-[#64748B] leading-relaxed">
               {product.description}
             </p>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             <div className="bg-[#F8FAFC] p-4 rounded-lg border-2 border-[#E2E8F0]">
-              <p className="text-sm font-semibold text-[#475569] mb-1">
+              <p className="text-sm font-semibold text-[#64748B] mb-1">
                 Cantidad
               </p>
               <p className="text-2xl font-bold text-[#0F172A]">
@@ -73,7 +73,7 @@ export function ProductCard({
             </div>
 
             <div className="bg-[#F8FAFC] p-4 rounded-lg border-2 border-[#E2E8F0]">
-              <p className="text-sm font-semibold text-[#475569] mb-1">
+              <p className="text-sm font-semibold text-[#64748B] mb-1">
                 Precio unitario apoximado
               </p>
               <p className="text-2xl font-bold text-[#0F172A]">

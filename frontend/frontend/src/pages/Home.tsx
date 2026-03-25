@@ -50,25 +50,25 @@ export function Home() {
       label: "Productos",
       value: paginationProducts?.total || 0,
       icon: <FaBox />,
-      color: "bg-[#2563EB]",
+      color: "bg-[#4FA3D1]",
     },
     {
       label: "Clientes",
       value: paginationClients?.total || 0,
       icon: <IoMdPerson />,
-      color: "bg-[#16A34A]",
+      color: "bg-[#4FA3D1]",
     },
     {
       label: "Categorías",
       value: categories.length,
       icon: <GiTicket />,
-      color: "bg-[#F59E0B]",
+      color: "bg-[#4FA3D1]",
     },
     {
       label: "Remitos",
       value: orderStats.total_orders,
       icon: <FiFileText />,
-      color: "bg-[#DC2626]",
+      color: "bg-[#4FA3D1]",
     },
   ];
 
@@ -122,7 +122,7 @@ export function Home() {
             <p className="text-5xl font-bold text-[#0F172A] mb-2">
               {stat.value}
             </p>
-            <p className="text-xl font-semibold text-[#475569]">{stat.label}</p>
+            <p className="text-xl font-semibold text-[#64748B]">{stat.label}</p>
           </Card>
         ))}
       </div>
@@ -222,7 +222,7 @@ export function Home() {
                   </span>
                 )}
 
-                <p className="text-lg text-[#475569] mb-6 flex-1">
+                <p className="text-lg text-[#64748B] mb-6 flex-1">
                   {section.description}
                 </p>
 

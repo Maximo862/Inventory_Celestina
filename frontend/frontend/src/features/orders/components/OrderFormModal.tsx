@@ -173,7 +173,7 @@ export function OrderFormModal({
                 className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
                     type === "entry"
                     ? "bg-[#16A34A]/10 border-[#16A34A] text-[#16A34A]"
-                    : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]"
+                    : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                   }`}
               >
                 <FaArrowDown className="text-xl" /> Entrada
@@ -184,7 +184,7 @@ export function OrderFormModal({
                 className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
                     type === "exit"
                     ? "bg-[#DC2626]/10 border-[#DC2626] text-[#DC2626]"
-                    : "bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]"
+                    : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                   }`}
               >
                 <FaArrowUp className="text-xl" /> Salida
@@ -204,7 +204,7 @@ export function OrderFormModal({
             id="client"
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
-            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
           >
             <option value="">Sin cliente</option>
             {clients.map((client) => (
@@ -228,7 +228,7 @@ export function OrderFormModal({
             placeholder="Ej: Entrega para obra X"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200 resize-none"
+            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200 resize-none"
           />
         </div>
 
@@ -265,7 +265,7 @@ export function OrderFormModal({
                           handleItemChange(index, "product_id", e.target.value)
                         }
                         required
-                        className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition duration-200"
+                        className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-2 focus:ring-[#4FA3D1]/20 transition duration-200"
                       >
                         <option value="">Seleccionar</option>
                         {products.map((product) => (
@@ -288,7 +288,7 @@ export function OrderFormModal({
                           handleItemChange(index, "quantity", e.target.value)
                         }
                         required
-                        className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition duration-200"
+                        className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-2 focus:ring-[#4FA3D1]/20 transition duration-200"
                       />
                     </div>
 
@@ -303,7 +303,7 @@ export function OrderFormModal({
                           handleItemChange(index, "price", e.target.value);
                         }}
                         required
-                        className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition duration-200"
+                        className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-2 focus:ring-[#4FA3D1]/20 transition duration-200"
                       />
                     </div>
 
@@ -322,7 +322,7 @@ export function OrderFormModal({
 
                   {item.quantity && item.price && (
                     <div className="mt-3 text-right">
-                      <span className="text-base font-semibold text-[#475569]">
+                      <span className="text-base font-semibold text-[#64748B]">
                         Subtotal:{" "}
                       </span>
                       <span className="text-xl font-bold text-[#0F172A]">
@@ -337,12 +337,12 @@ export function OrderFormModal({
             </div>
 
             {items.length > 0 && (
-              <div className="mt-6 p-4 bg-[#2563EB]/5 border-2 border-[#2563EB]/30 rounded-lg">
+              <div className="mt-6 p-4 bg-[#4FA3D1]/5 border-2 border-[#4FA3D1]/30 rounded-lg">
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-[#0F172A]">
                     TOTAL:
                   </span>
-                  <span className="text-3xl font-bold text-[#2563EB]">
+                  <span className="text-3xl font-bold text-[#4FA3D1]">
                     {formatARS(calculateTotal)}
                   </span>
                 </div>

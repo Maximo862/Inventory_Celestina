@@ -125,7 +125,7 @@ export function PriceAdjustmentModal({
       {status === "previewing" || status === "applying" ? (
         <div className="flex flex-col items-center justify-center py-12">
           <LoadingSpinner />
-          <p className="mt-4 text-lg text-[#475569]">
+          <p className="mt-4 text-lg text-[#64748B]">
             {status === "previewing"
               ? "Calculando..."
               : "Aplicando cambios..."}
@@ -135,7 +135,7 @@ export function PriceAdjustmentModal({
         <div className="space-y-6">
           <div className="bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-lg text-[#475569]">Porcentaje:</span>
+              <span className="text-lg text-[#64748B]">Porcentaje:</span>
               <span
                 className={`text-2xl font-bold ${isPositive ? "text-[#16A34A]" : "text-[#DC2626]"
                   }`}
@@ -145,7 +145,7 @@ export function PriceAdjustmentModal({
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-lg text-[#475569]">
+              <span className="text-lg text-[#64748B]">
                 Productos afectados:
               </span>
               <span className="text-xl font-semibold text-[#0F172A]">
@@ -156,7 +156,7 @@ export function PriceAdjustmentModal({
 
           {previewData.affectedProducts.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-xl text-[#475569]">
+              <p className="text-xl text-[#64748B]">
                 No hay productos en esta categoría
               </p>
             </div>
@@ -166,16 +166,16 @@ export function PriceAdjustmentModal({
                 <table className="w-full">
                   <thead className="bg-[#F8FAFC] sticky top-0">
                     <tr>
-                      <th className="text-left px-4 py-3 text-[#475569] font-semibold text-base">
+                      <th className="text-left px-4 py-3 text-[#64748B] font-semibold text-base">
                         Producto
                       </th>
-                      <th className="text-right px-4 py-3 text-[#475569] font-semibold text-base">
+                      <th className="text-right px-4 py-3 text-[#64748B] font-semibold text-base">
                         Precio actual
                       </th>
-                      <th className="text-right px-4 py-3 text-[#475569] font-semibold text-base">
+                      <th className="text-right px-4 py-3 text-[#64748B] font-semibold text-base">
                         Nuevo precio
                       </th>
-                      <th className="text-right px-4 py-3 text-[#475569] font-semibold text-base">
+                      <th className="text-right px-4 py-3 text-[#64748B] font-semibold text-base">
                         Diferencia
                       </th>
                     </tr>
@@ -189,7 +189,7 @@ export function PriceAdjustmentModal({
                         <td className="px-4 py-3 text-[#0F172A]">
                           {product.name}
                         </td>
-                        <td className="px-4 py-3 text-right text-[#475569]">
+                        <td className="px-4 py-3 text-right text-[#64748B]">
                           {formatPrice(product.currentPrice)}
                         </td>
                         <td className="px-4 py-3 text-right font-semibold text-[#0F172A]">
@@ -200,7 +200,7 @@ export function PriceAdjustmentModal({
                               ? "text-[#16A34A]"
                               : product.newPrice < product.currentPrice
                                 ? "text-[#DC2626]"
-                                : "text-[#475569]"
+                                : "text-[#64748B]"
                             }`}
                         >
                           {product.newPrice > product.currentPrice ? "+" : ""}
@@ -227,7 +227,7 @@ export function PriceAdjustmentModal({
                     {formatPrice(previewData.totalNewPrice)}
                   </span>
                 </div>
-                <div className="flex justify-between text-xl border-t border-[#475569] pt-2 mt-2">
+                <div className="flex justify-between text-xl border-t border-[#64748B] pt-2 mt-2">
                   <span>Diferencia:</span>
                   <span
                     className={`font-bold ${diff > 0 ? "text-[#22C55E]" : diff < 0 ? "text-[#EF4444]" : "text-white"
@@ -242,7 +242,7 @@ export function PriceAdjustmentModal({
               <button
                 type="button"
                 onClick={handleBack}
-                className="w-full text-[#2563EB] hover:text-[#1D4ED8] font-semibold text-lg py-2"
+                className="w-full text-[#4FA3D1] hover:text-[#1D4ED8] font-semibold text-lg py-2"
               >
                 ← Volver a calcular con otro porcentaje
               </button>
@@ -273,13 +273,13 @@ export function PriceAdjustmentModal({
                   setPercentage(String(val));
                   setPercentageError(null);
                 }}
-                className="px-4 py-2 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-lg text-[#0F172A] hover:border-[#2563EB] hover:bg-[#2563EB]/5 transition-colors font-medium"
+                className="px-4 py-2 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-lg text-[#0F172A] hover:border-[#4FA3D1] hover:bg-[#4FA3D1]/5 transition-colors font-medium"
               >
                 {val > 0 ? `+${val}%` : `${val}%`}
               </button>
             ))}
           </div>
-          <p className="text-base text-[#475569]">
+          <p className="text-base text-[#64748B]">
             Usá valores positivos (+) para aumentar precios o negativos (-) para
             reducir. Rango permitido: -100% a 1000%.
           </p>
@@ -287,7 +287,7 @@ export function PriceAdjustmentModal({
             type="button"
             onClick={handlePreview}
             disabled={!percentage.trim()}
-            className="w-full py-4 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:bg-[#E2E8F0] disabled:text-[#94A3B8] text-white font-bold text-lg rounded-xl transition-colors"
+            className="w-full py-4 bg-[#4FA3D1] hover:bg-[#1D4ED8] disabled:bg-[#E2E8F0] disabled:text-[#94A3B8] text-white font-bold text-lg rounded-xl transition-colors"
           >
             Vista previa
           </button>

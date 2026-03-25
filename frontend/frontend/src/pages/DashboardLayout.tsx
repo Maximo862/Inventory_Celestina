@@ -115,7 +115,7 @@ export function DashboardLayout() {
           >
             <div>
               <h1 className="text-2xl font-bold text-[#0F172A]">LaCelestina</h1>
-              <p className="text-base text-[#475569]">Maderera</p>
+              <p className="text-base text-[#64748B]">Maderera</p>
             </div>
           </Link>
         </div>
@@ -126,10 +126,10 @@ export function DashboardLayout() {
             <p className="text-base font-semibold text-[#0F172A] mb-1">
               {user.email}
             </p>
-            <span
+              <span
               className={`inline-block px-3 py-1 rounded-lg text-sm font-bold ${isAdmin
-                ? "bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/30"
-                : "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/30"
+                ? "bg-[#4FA3D1]/10 text-[#4FA3D1] border border-[#4FA3D1]/30"
+                : "bg-[#4FA3D1]/10 text-[#4FA3D1] border border-[#4FA3D1]/30"
                 }`}
             >
               {isAdmin ? "Administrador" : "Empleado"}
@@ -146,8 +146,8 @@ export function DashboardLayout() {
                 to={item.path}
                 onClick={handleLinkClick}
                 className={`flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-200 ${active
-                  ? "bg-[#2563EB] text-white shadow-lg"
-                  : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  ? "bg-[#4FA3D1] text-white shadow-lg"
+                  : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                   }`}
               >
                 <span className="text-3xl">{item.icon}</span>

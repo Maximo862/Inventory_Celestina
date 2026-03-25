@@ -30,7 +30,7 @@ export function Register() {
             <input
               id="email"
               type="email"
-              className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+              className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
               placeholder="ejemplo@correo.com"
               value={user.email}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
@@ -47,7 +47,7 @@ export function Register() {
             <input
               id="password"
               type="password"
-              className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+              className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
               placeholder="••••••••"
               value={user.password}
               onChange={(e) => setUser({ ...user, password: e.target.value })}

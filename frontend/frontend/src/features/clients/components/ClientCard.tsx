@@ -30,12 +30,12 @@ export function ClientCard({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-lg">
             <div>
-              <span className="font-semibold text-[#475569]">CUIL: </span>
+              <span className="font-semibold text-[#64748B]">CUIL: </span>
               <span className="text-[#0F172A]">{client.cuil}</span>
             </div>
 
             <div>
-              <span className="font-semibold text-[#475569]">Condición: </span>
+              <span className="font-semibold text-[#64748B]">Condición: </span>
               <span className="text-[#0F172A]">
                 {getTaxConditionLabel(client.tax_condition)}
               </span>
@@ -43,14 +43,14 @@ export function ClientCard({
 
             {client.phone && (
               <div>
-                <span className="font-semibold text-[#475569]">Teléfono: </span>
+                <span className="font-semibold text-[#64748B]">Teléfono: </span>
                 <span className="text-[#0F172A]">{client.phone}</span>
               </div>
             )}
 
             {client.email && (
               <div>
-                <span className="font-semibold text-[#475569]">Email: </span>
+                <span className="font-semibold text-[#64748B]">Email: </span>
                 <span className="text-[#0F172A]">{client.email}</span>
               </div>
             )}
@@ -58,7 +58,7 @@ export function ClientCard({
 
           {client.address && (
             <div className="text-lg">
-              <span className="font-semibold text-[#475569]">Dirección: </span>
+              <span className="font-semibold text-[#64748B]">Dirección: </span>
               <span className="text-[#0F172A]">{client.address}</span>
             </div>
           )}

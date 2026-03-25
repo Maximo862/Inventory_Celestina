@@ -149,7 +149,7 @@ export function ClientFormModal({
             value={formData.tax_condition}
             onChange={(e) => handleChange("tax_condition", e.target.value)}
             required
-            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/20 transition duration-200"
+            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
           >
             <option value="">Seleccione una opcion</option>
             <option value="responsable_inscripto">Responsable Inscripto</option>
@@ -159,7 +159,7 @@ export function ClientFormModal({
       </div>
 
       <div className="space-y-6 pt-4">
-        <h3 className="text-2xl font-bold text-[#475569] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
+        <h3 className="text-2xl font-bold text-[#64748B] border-b-2 border-[#E2E8F0] pb-3 flex items-center gap-2">
           <FaEdit className="text-xl" /> Datos opcionales
         </h3>
 

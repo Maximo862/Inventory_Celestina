@@ -17,7 +17,7 @@ export function Button({
     "font-bold rounded-xl transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
-    primary: "bg-[#2563EB] hover:bg-[#1D4ED8] text-white",
+    primary: "bg-[#4FA3D1] hover:bg-[#3D8AB5] text-white",
     success: "bg-[#16A34A] hover:bg-[#15803D] text-white",
     warning: "bg-[#F59E0B] hover:bg-[#D97706] text-white",
     danger: "bg-[#DC2626] hover:bg-[#B91C1C] text-white",

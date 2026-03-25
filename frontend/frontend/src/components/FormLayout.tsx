@@ -35,13 +35,13 @@ export function FormLayout({
           <div className="flex-1">
             <h2 className="text-3xl font-bold text-[#0F172A] mb-1">{title}</h2>
             {description && (
-              <p className="text-lg text-[#475569] mt-2">{description}</p>
+              <p className="text-lg text-[#64748B] mt-2">{description}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#475569] hover:text-[#0F172A] transition-colors duration-200 p-2"
+            className="text-[#64748B] hover:text-[#0F172A] transition-colors duration-200 p-2"
             aria-label="Cerrar"
           >
             <FaTimes className="w-8 h-8" />

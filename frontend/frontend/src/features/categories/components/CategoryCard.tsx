@@ -30,7 +30,7 @@ export function CategoryCard({
             {category.name}
           </h3>
           <div className="flex flex-wrap items-center gap-3">
-            <p className="text-lg text-[#475569]">ID: {category.id}</p>
+            <p className="text-lg text-[#64748B]">ID: {category.id}</p>
 
             {/* Badge de subcategorías */}
             {subcategoriesCount > 0 && (
