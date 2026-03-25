@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useAuthActions } from "../hooks/useAuthActions";
 
 interface ButtonConfig {
@@ -20,8 +19,7 @@ export function AuthenticationCard({
   Handlesubmit,
   button,
   tittle,
-  inputs,
-  path,
+  inputs
 }: Props) {
   const { errors } = useAuthActions();
 
