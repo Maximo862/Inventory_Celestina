@@ -11,7 +11,7 @@ import { useProductActions } from "../hooks/useProductActions";
 import { useCategories } from "@/features/categories/context/CategoryContext";
 import { AuthContext } from "@/features/auth/context/AuthContext";
 import { FaBox, FaPlus } from "react-icons/fa6";
-import { FiChevronLeft, FiChevronRight, FiDollarSign, FiClock,FiFolder } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiDollarSign, FiClock, FiFolder } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import type { Product } from "@/types/types";
 
@@ -394,8 +394,8 @@ export function ProductsPage() {
                               key={pageNumber}
                               onClick={() => handlePageClick(pageNumber)}
                               className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                  ? "bg-[#4FA3D1] text-white"
-                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                ? "bg-[#4FA3D1] text-white"
+                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
                                 }`}
                             >
                               {pageNumber}

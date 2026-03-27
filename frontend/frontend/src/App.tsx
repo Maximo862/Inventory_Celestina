@@ -44,9 +44,13 @@ function App() {
 
 export default App;
 
-// - Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
-// - implementar la api de AFIP 
 // - Guardar quien creo cada Orden
+// - Arreglar tema del buscador, es decir que al buscar y no encontrar no aparezca nuevo producto como si no hubiera nada... y performance
+// - Remito Imprimible
+// - Factura proforma 
+// - Multisucursal
+// - AFIP
+// - Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
 
 // EXTRAS : 
 
