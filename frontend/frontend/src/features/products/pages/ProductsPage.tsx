@@ -64,7 +64,19 @@ export function ProductsPage() {
 
   // ← ESTADOS: Búsqueda y filtro (SERVER-SIDE)
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const isFiltering = searchTerm || filterCategory !== "all";
+
+  // ← DEBOUNCE
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
 
   // ← ESTADOS: Ordenamiento (SERVER-SIDE) y paginación
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
@@ -78,12 +90,12 @@ export function ProductsPage() {
     loadProducts({
       page: currentPage,
       limit: itemsPerPage,
-      ...(searchTerm && { search: searchTerm }),
+      ...(debouncedSearch && { search: debouncedSearch }),
       ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
       sort: sortConfig.sort,
       order: sortConfig.order,
     });
-  }, [currentPage, searchTerm, filterCategory, sortBy]);
+  }, [currentPage, debouncedSearch, filterCategory, sortBy]);
 
   const categoryMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -117,7 +129,7 @@ export function ProductsPage() {
     loadProducts({
       page: currentPage,
       limit: itemsPerPage,
-      ...(searchTerm && { search: searchTerm }),
+      ...(debouncedSearch && { search: debouncedSearch }),
       ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
       sort: sortConfig.sort,
       order: sortConfig.order,
@@ -143,7 +155,7 @@ export function ProductsPage() {
       loadProducts({
         page: currentPage,
         limit: itemsPerPage,
-        ...(searchTerm && { search: searchTerm }),
+        ...(debouncedSearch && { search: debouncedSearch }),
         ...(filterCategory !== "all" && { category_id: parseInt(filterCategory) }),
         sort: sortConfig.sort,
         order: sortConfig.order,
@@ -157,10 +169,9 @@ export function ProductsPage() {
     setDeleteModal({ isOpen: false, id: null, name: "" });
   };
 
-  // ← Handlers de búsqueda/filtro: Reset a página 1
+  // ← Handlers de búsqueda/filtro
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1);
   };
 
   const handleCategoryChange = (value: string) => {
@@ -212,216 +223,219 @@ export function ProductsPage() {
         }
       />
 
-      {pagination && pagination.total === 0 ? (
-        <EmptyState
-          icon={<FaBox />}
-          title="No hay productos"
-          description="Comience agregando su primer producto al inventario"
-          actionLabel="Crear primer producto"
-          onAction={handleCreate}
-          showAction={isAdmin}
-        />
-      ) : (
-        <>
-          <div className="mb-6 space-y-4">
-            {/* ← BÚSQUEDA (SERVER-SIDE) */}
-            <div>
-              <input
-                type="text"
-                placeholder="Buscar producto por nombre..."
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* ← FILTRO POR CATEGORÍA (SERVER-SIDE) */}
+      {pagination && pagination.total === 0 && !isFiltering
+        ? (
+          <EmptyState
+            icon={<FaBox />}
+            title="No hay productos"
+            description="Comience agregando su primer producto al inventario"
+            actionLabel="Crear primer producto"
+            onAction={handleCreate}
+            showAction={isAdmin}
+          />
+        ) : (
+          <>
+            <div className="mb-6 space-y-4">
+              {/* ← BÚSQUEDA (SERVER-SIDE) */}
               <div>
-                <label className="block text-[#0F172A] text-lg font-semibold mb-2">
-                  Filtrar por categoría
-                </label>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
+                <input
+                  type="text"
+                  placeholder="Buscar producto por nombre..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
-                >
-                  <option value="all"><FiFolder /> Todas las categorías</option>
-
-                  {parentCategories.map((parent) => {
-                    const subs = getSubcategories(parent.id);
-
-                    return (
-                      <optgroup key={parent.id} label={parent.name}>
-                        {subs.length > 0 ? (
-                          subs.map((sub) => (
-                            <option key={sub.id} value={sub.id}>
-                              &nbsp;&nbsp;└─ {sub.name}
-                            </option>
-                          ))
-                        ) : (
-                          <option value={parent.id}>{parent.name}</option>
-                        )}
-                      </optgroup>
-                    );
-                  })}
-                </select>
+                />
               </div>
 
-              {/* ← ORDENAR (SERVER-SIDE) */}
-              <div>
-                <label className="block text-[#0F172A] text-lg font-semibold mb-2">
-                  Ordenar por
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => {
-                    setSortBy(e.target.value as SortOption);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
-                >
-                  <option value="name-asc">Nombre (A → Z)</option>
-                  <option value="name-desc">Nombre (Z → A)</option>
-                  <option value="price-asc"><FiDollarSign /> Precio (menor → mayor)</option>
-                  <option value="price-desc"><FiDollarSign /> Precio (mayor → menor)</option>
-                  <option value="quantity-asc"><FaBox /> Stock (menor → mayor)</option>
-                  <option value="quantity-desc"><FaBox /> Stock (mayor → menor)</option>
-                  <option value="created_at-desc"><FiClock /> Más reciente</option>
-                  <option value="created_at-asc"><FiClock /> Más antiguo</option>
-                </select>
-              </div>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* ← FILTRO POR CATEGORÍA (SERVER-SIDE) */}
+                <div>
+                  <label className="block text-[#0F172A] text-lg font-semibold mb-2">
+                    Filtrar por categoría
+                  </label>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
+                  >
+                    <option value="all"><FiFolder /> Todas las categorías</option>
 
-            {pagination && (
-              <div className="flex items-center justify-between text-lg text-[#64748B]">
-                <p>
-                  Mostrando {products.length} de {pagination.total}{" "}
-                  productos totales (Página {currentPage} de{" "}
-                  {pagination.totalPages})
-                </p>
-                {(searchTerm ||
-                  filterCategory !== "all" ||
-                  sortBy !== "name-asc") && (
-                    <button
-                      onClick={() => {
-                        setSearchTerm("");
-                        setFilterCategory("all");
-                        setSortBy("name-asc");
-                        setCurrentPage(1);
-                      }}
-                      className="text-[#4FA3D1] hover:text-[#3D8AB5] font-semibold text-lg"
-                    >
-                      <IoMdClose /> Limpiar filtros
-                    </button>
-                  )}
-              </div>
-            )}
-          </div>
+                    {parentCategories.map((parent) => {
+                      const subs = getSubcategories(parent.id);
 
-          {products.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-2xl text-[#64748B] mb-4">
-                No se encontraron productos
-              </p>
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => {
-                  setSearchTerm("");
-                  setFilterCategory("all");
-                  setSortBy("name-asc");
-                  setCurrentPage(1);
-                }}
-              >
-                Limpiar filtros
-              </Button>
-            </div>
-          ) : (
-            <>
-              <div className="space-y-4">
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    categoryName={
-                      product.category_id
-                        ? categoryMap.get(product.category_id)
-                        : undefined
-                    }
-                    isAdmin={isAdmin}
-                    onEdit={() => handleEdit(product)}
-                    onDelete={handleDeleteClick}
-                  />
-                ))}
+                      return (
+                        <optgroup key={parent.id} label={parent.name}>
+                          {subs.length > 0 ? (
+                            subs.map((sub) => (
+                              <option key={sub.id} value={sub.id}>
+                                &nbsp;&nbsp;└─ {sub.name}
+                              </option>
+                            ))
+                          ) : (
+                            <option value={parent.id}>{parent.name}</option>
+                          )}
+                        </optgroup>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* ← ORDENAR (SERVER-SIDE) */}
+                <div>
+                  <label className="block text-[#0F172A] text-lg font-semibold mb-2">
+                    Ordenar por
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value as SortOption);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
+                  >
+                    <option value="name-asc">Nombre (A → Z)</option>
+                    <option value="name-desc">Nombre (Z → A)</option>
+                    <option value="price-asc"><FiDollarSign /> Precio (menor → mayor)</option>
+                    <option value="price-desc"><FiDollarSign /> Precio (mayor → menor)</option>
+                    <option value="quantity-asc"><FaBox /> Stock (menor → mayor)</option>
+                    <option value="quantity-desc"><FaBox /> Stock (mayor → menor)</option>
+                    <option value="created_at-desc"><FiClock /> Más reciente</option>
+                    <option value="created_at-asc"><FiClock /> Más antiguo</option>
+                  </select>
+                </div>
               </div>
 
-              {pagination && pagination.totalPages > 1 && (
-                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
-                  <p className="text-lg text-[#64748B] font-semibold">
-                    Página {currentPage} de {pagination.totalPages}
+              {pagination && (
+                <div className="flex items-center justify-between text-lg text-[#64748B]">
+                  <p>
+                    Mostrando {products.length} de {pagination.total}{" "}
+                    productos totales (Página {currentPage} de{" "}
+                    {pagination.totalPages})
                   </p>
-
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      onClick={handlePreviousPage}
-                      disabled={currentPage === 1}
-                      className="flex items-center gap-2"
-                    >
-                      <FiChevronLeft className="text-xl" />
-                      Anterior
-                    </Button>
-
-                    <div className="hidden sm:flex gap-2">
-                      {Array.from(
-                        { length: Math.min(pagination.totalPages, 5) },
-                        (_, i) => {
-                          let pageNumber;
-                          if (pagination.totalPages <= 5) {
-                            pageNumber = i + 1;
-                          } else if (currentPage <= 3) {
-                            pageNumber = i + 1;
-                          } else if (currentPage >= pagination.totalPages - 2) {
-                            pageNumber = pagination.totalPages - 4 + i;
-                          } else {
-                            pageNumber = currentPage - 2 + i;
-                          }
-
-                          return (
-                            <button
-                              key={pageNumber}
-                              onClick={() => handlePageClick(pageNumber)}
-                              className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                ? "bg-[#4FA3D1] text-white"
-                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
-                                }`}
-                            >
-                              {pageNumber}
-                            </button>
-                          );
-                        }
-                      )}
-                    </div>
-
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      onClick={handleNextPage}
-                      disabled={currentPage === pagination.totalPages}
-                      className="flex items-center gap-2"
-                    >
-                      Siguiente
-                      <FiChevronRight className="text-xl" />
-                    </Button>
-                  </div>
+                  {(debouncedSearch ||
+                    filterCategory !== "all" ||
+                    sortBy !== "name-asc") && (
+                      <button
+                        onClick={() => {
+                          setSearchTerm("");
+                          setDebouncedSearch("");
+                          setFilterCategory("all");
+                          setSortBy("name-asc");
+                          setCurrentPage(1);
+                        }}
+                        className="text-[#4FA3D1] hover:text-[#3D8AB5] font-semibold text-lg"
+                      >
+                        <IoMdClose /> Limpiar filtros
+                      </button>
+                    )}
                 </div>
               )}
-            </>
-          )}
-        </>
-      )}
+            </div>
+
+            {products.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-2xl text-[#64748B] mb-4">
+                  No se encontraron productos
+                </p>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setDebouncedSearch("");
+                    setFilterCategory("all");
+                    setSortBy("name-asc");
+                    setCurrentPage(1);
+                  }}
+                >
+                  Limpiar filtros
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      categoryName={
+                        product.category_id
+                          ? categoryMap.get(product.category_id)
+                          : undefined
+                      }
+                      isAdmin={isAdmin}
+                      onEdit={() => handleEdit(product)}
+                      onDelete={handleDeleteClick}
+                    />
+                  ))}
+                </div>
+
+                {pagination && pagination.totalPages > 1 && (
+                  <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-lg border-2 border-[#E2E8F0]">
+                    <p className="text-lg text-[#64748B] font-semibold">
+                      Página {currentPage} de {pagination.totalPages}
+                    </p>
+
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                        className="flex items-center gap-2"
+                      >
+                        <FiChevronLeft className="text-xl" />
+                        Anterior
+                      </Button>
+
+                      <div className="hidden sm:flex gap-2">
+                        {Array.from(
+                          { length: Math.min(pagination.totalPages, 5) },
+                          (_, i) => {
+                            let pageNumber;
+                            if (pagination.totalPages <= 5) {
+                              pageNumber = i + 1;
+                            } else if (currentPage <= 3) {
+                              pageNumber = i + 1;
+                            } else if (currentPage >= pagination.totalPages - 2) {
+                              pageNumber = pagination.totalPages - 4 + i;
+                            } else {
+                              pageNumber = currentPage - 2 + i;
+                            }
+
+                            return (
+                              <button
+                                key={pageNumber}
+                                onClick={() => handlePageClick(pageNumber)}
+                                className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
+                                  ? "bg-[#4FA3D1] text-white"
+                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                  }`}
+                              >
+                                {pageNumber}
+                              </button>
+                            );
+                          }
+                        )}
+                      </div>
+
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        onClick={handleNextPage}
+                        disabled={currentPage === pagination.totalPages}
+                        className="flex items-center gap-2"
+                      >
+                        Siguiente
+                        <FiChevronRight className="text-xl" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
 
       {isAdmin && (
         <ProductFormModal

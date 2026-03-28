@@ -43,11 +43,23 @@ export function ClientsPage() {
   });
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const isFiltering = searchTerm !== "";
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // ← DEBOUNCE: Actualizar debouncedSearch después de 1500ms
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
 
   // ← Mapear sortBy a sortField y sortOrder
   const getSortParams = (sortOption: SortOption) => {
@@ -66,11 +78,11 @@ export function ClientsPage() {
     loadClients({
       page: currentPage,
       limit: itemsPerPage,
-      ...(searchTerm && { search: searchTerm }),
+      ...(debouncedSearch && { search: debouncedSearch }),
       sortField: field,
       sortOrder: order,
     });
-  }, [currentPage, searchTerm, sortBy]);
+  }, [currentPage, debouncedSearch, sortBy]);
 
   const handleCreate = () => {
     setFormModal({ isOpen: true, client: null });
@@ -90,7 +102,7 @@ export function ClientsPage() {
     loadClients({
       page: currentPage,
       limit: itemsPerPage,
-      ...(searchTerm && { search: searchTerm }),
+      ...(debouncedSearch && { search: debouncedSearch }),
       sortField: field,
       sortOrder: order,
     });
@@ -115,7 +127,7 @@ export function ClientsPage() {
       loadClients({
         page: currentPage,
         limit: itemsPerPage,
-        ...(searchTerm && { search: searchTerm }),
+        ...(debouncedSearch && { search: debouncedSearch }),
         sortField: field,
         sortOrder: order,
       });
@@ -130,7 +142,6 @@ export function ClientsPage() {
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1);
   };
 
   const handleSortChange = (value: SortOption) => {
@@ -181,7 +192,7 @@ export function ClientsPage() {
         }
       />
 
-      {pagination && pagination.total === 0 ? (
+      {pagination && pagination.total === 0 && !isFiltering ? (
         <EmptyState
           icon={<IoMdPerson />}
           title="No hay clientes"
@@ -225,10 +236,11 @@ export function ClientsPage() {
                   Mostrando {clients.length} de {pagination.total} clientes
                   totales (Página {currentPage} de {pagination.totalPages})
                 </p>
-                {(searchTerm || sortBy !== "name-asc") && (
+                {(debouncedSearch || sortBy !== "name-asc") && (
                   <button
                     onClick={() => {
                       setSearchTerm("");
+                      setDebouncedSearch("");
                       setSortBy("name-asc");
                       setCurrentPage(1);
                     }}
@@ -251,6 +263,7 @@ export function ClientsPage() {
                 size="lg"
                 onClick={() => {
                   setSearchTerm("");
+                  setDebouncedSearch("");
                   setSortBy("name-asc");
                   setCurrentPage(1);
                 }}

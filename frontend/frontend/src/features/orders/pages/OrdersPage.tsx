@@ -49,7 +49,9 @@ export function OrdersPage() {
 
   // ← ESTADOS: Búsqueda y filtro (SERVER-SIDE)
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterType, setFilterType] = useState<FilterOption>("all");
+  const isFiltering = searchTerm !== "" || filterType !== "all";
 
   // ← ESTADOS: Ordenamiento (CLIENT-SIDE) y paginación
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
@@ -57,15 +59,25 @@ export function OrdersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // ← DEBOUNCE: Actualizar debouncedSearch después de 1500ms
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
   // ← CARGAR orders cuando cambian: página, búsqueda o filtro
   useEffect(() => {
     loadOrders({
       page: currentPage,
       limit: itemsPerPage,
-      ...(searchTerm && { search: searchTerm }),
+      ...(debouncedSearch && { search: debouncedSearch }),
       ...(filterType !== "all" && { type: filterType }),
     });
-  }, [currentPage, searchTerm, filterType]);
+  }, [currentPage, debouncedSearch, filterType]);
 
   // Crear mapa de nombres de clientes
   const clientMap = useMemo(() => {
@@ -131,7 +143,7 @@ export function OrdersPage() {
     loadOrders({
       page: currentPage,
       limit: itemsPerPage,
-      ...(searchTerm && { search: searchTerm }),
+      ...(debouncedSearch && { search: debouncedSearch }),
       ...(filterType !== "all" && { type: filterType }),
     });
   };
@@ -159,7 +171,7 @@ export function OrdersPage() {
       loadOrders({
         page: currentPage,
         limit: itemsPerPage,
-        ...(searchTerm && { search: searchTerm }),
+        ...(debouncedSearch && { search: debouncedSearch }),
         ...(filterType !== "all" && { type: filterType }),
       });
     } finally {
@@ -171,10 +183,9 @@ export function OrdersPage() {
     setDeleteModal({ isOpen: false, id: null, type: "" });
   };
 
-  // ← Handlers de búsqueda/filtro: Reset a página 1
+  // ← Handlers de búsqueda/filtro
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1);
   };
 
   const handleFilterChange = (newFilter: FilterOption) => {
@@ -224,7 +235,7 @@ export function OrdersPage() {
         }
       />
 
-      {pagination && pagination.total === 0 ? (
+      {pagination && pagination.total === 0 && !isFiltering ? (
         <EmptyState
           icon={<FiFileText />}
           title="No hay remitos"
@@ -289,10 +300,11 @@ export function OrdersPage() {
                   Mostrando {sortedOrders.length} de {pagination.total} remitos
                   totales (Página {currentPage} de {pagination.totalPages})
                 </p>
-                {(searchTerm || filterType !== "all" || sortBy !== "date-desc") && (
+                {(debouncedSearch || filterType !== "all" || sortBy !== "date-desc") && (
                   <button
                     onClick={() => {
                       setSearchTerm("");
+                      setDebouncedSearch("");
                       setFilterType("all");
                       setSortBy("date-desc");
                       setCurrentPage(1);
@@ -316,6 +328,7 @@ export function OrdersPage() {
                 size="lg"
                 onClick={() => {
                   setSearchTerm("");
+                  setDebouncedSearch("");
                   setFilterType("all");
                   setSortBy("date-desc");
                   setCurrentPage(1);
