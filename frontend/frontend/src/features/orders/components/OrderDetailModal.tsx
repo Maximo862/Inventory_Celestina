@@ -1,8 +1,9 @@
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
-import { FiX, FiArrowDown, FiArrowUp, FiUser, FiPackage } from "react-icons/fi";
+import { FiX, FiArrowDown, FiArrowUp, FiUser, FiPackage, FiPrinter } from "react-icons/fi";
 import type { OrderWithDetails } from "@/types/types";
 import { formatARS } from "@/utils/formatCurrency";
+import { generateRemitoPDF } from "@/utils/generateRemitoPDF";
 
 interface OrderDetailModalProps {
   isOpen: boolean;
@@ -146,8 +147,18 @@ export function OrderDetailModal({
             </div>
           </div>
 
-          {/* Botón cerrar */}
-          <div className="flex justify-end">
+          {/* Botones */}
+          <div className="flex justify-between">
+            <Button 
+              variant="primary" 
+              size="lg" 
+              onClick={() => generateRemitoPDF(order)}
+              className="flex items-center gap-2"
+            >
+              <FiPrinter className="text-xl" />
+              Imprimir remito
+            </Button>
+            
             <Button variant="secondary" size="lg" onClick={onClose}>
               Cerrar
             </Button>
