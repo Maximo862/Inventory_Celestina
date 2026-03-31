@@ -3,6 +3,7 @@ import { FormLayout } from "@/components/FormLayout";
 import { Button } from "@/components/Button";
 import { useClients } from "@/features/clients/context/ClientContext";
 import { useProducts } from "@/features/products/context/ProductContext";
+import { ProductSearchInput } from "@/components/ProductSearchInput";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 import type { Order, CreateOrderDTO, UpdateOrderDTO, DocumentType } from "@/types/types";
@@ -303,21 +304,12 @@ export function OrderFormModal({
                       <label className="block text-[#0F172A] text-base font-semibold mb-2">
                         Producto
                       </label>
-                      <select
+                      <ProductSearchInput
                         value={item.product_id}
-                        onChange={(e) =>
-                          handleItemChange(index, "product_id", e.target.value)
+                        onChange={(productId) =>
+                          handleItemChange(index, "product_id", productId)
                         }
-                        required
-                        className="w-full bg-white text-[#0F172A] text-base rounded-lg p-3 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-2 focus:ring-[#4FA3D1]/20 transition duration-200"
-                      >
-                        <option value="">Seleccionar</option>
-                        {products.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.name} (Stock: {product.quantity})
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
 
                     <div className="sm:col-span-3">

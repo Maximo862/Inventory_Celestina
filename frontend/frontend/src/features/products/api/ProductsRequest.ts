@@ -56,3 +56,6 @@ export const deleteProductRequest = (id: number) =>
     fetchAPI<void>(`/products/${id}`, {
         method: "DELETE",
     });
+
+export const searchProductsRequest = (query: string, limit: number = 10) =>
+    fetchAPI<{ id: number; name: string }[]>(`/products/search?query=${encodeURIComponent(query)}&limit=${limit}`);

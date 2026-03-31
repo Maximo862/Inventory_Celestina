@@ -7,6 +7,7 @@ const productRouter = Router();
 const controller = new ProductController();
 
 productRouter.get('/', authRequired, requireRole(['admin', 'employee']), controller.getAll);
+productRouter.get('/search', authRequired, requireRole(['admin', 'employee']), controller.search);
 productRouter.get('/:id', authRequired, requireRole(['admin', 'employee']), controller.getById);
 productRouter.post('/', authRequired, requireRole('admin'), controller.create);
 productRouter.patch('/:id', authRequired, requireRole('admin'),controller.update);

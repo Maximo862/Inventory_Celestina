@@ -4,6 +4,11 @@ import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 interface ProductRow extends RowDataPacket, Product { }
 
+interface SearchProductRow extends RowDataPacket {
+  id: number;
+  name: string;
+}
+
 const ALLOWED_SORT_FIELDS: ProductSortableFields = {
   name: true,
   price: true,
@@ -42,7 +47,7 @@ export class ProductRepository {
       ? sortParams!.sort
       : 'id';
     const sortOrder = ALLOWED_ORDER_VALUES.includes(sortParams?.order?.toLowerCase() || '')
-      ? sortParams!.order.toUpperCase()
+      ? sortParams!.order!.toUpperCase()
       : 'DESC';
 
     const productsQuery = `
@@ -132,5 +137,14 @@ export class ProductRepository {
     );
 
     return result.affectedRows > 0;
+  }
+
+  async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+    const [rows] = await pool.query<SearchProductRow[]>(
+      'SELECT id, name FROM products WHERE name LIKE ? ORDER BY name LIMIT ?',
+      [`%${query}%`, limit]
+    );
+
+    return rows;
   }
 }

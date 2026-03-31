@@ -101,4 +101,12 @@ export class ProductService {
             throw new ValidationError('Failed to delete product');
         }
     }
+
+    async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+        if (!query || query.trim() === '') {
+            return [];
+        }
+
+        return this.repository.search(query.trim(), limit);
+    }
 }

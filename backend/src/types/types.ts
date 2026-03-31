@@ -163,8 +163,8 @@ export interface PaginationParams {
 }
 
 export interface SortParams {
-  sort: string;
-  order: 'asc' | 'desc';
+  sort?: string;
+  order?: 'asc' | 'desc';
 }
 
 export interface ProductFilters {
