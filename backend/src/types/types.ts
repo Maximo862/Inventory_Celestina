@@ -14,10 +14,12 @@ declare global {
 export { };
 // Order Types
 export type OrderType = 'entry' | 'exit';
+export type DocumentType = 'proforma' | 'remito';
 
 export interface Order {
   id: number;
   type: OrderType;
+  document_type: DocumentType;
   client_id: number | null;
   notes: string | null;
   total_amount: number;
@@ -37,6 +39,7 @@ export interface OrderItem {
 // DTOs para crear órdenes
 export interface CreateOrderDTO {
   type: OrderType;
+  document_type: DocumentType;
   client_id?: number | null;
   notes?: string;
   items: CreateOrderItemDTO[];

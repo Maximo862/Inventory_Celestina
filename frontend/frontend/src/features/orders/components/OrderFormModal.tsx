@@ -5,7 +5,7 @@ import { useClients } from "@/features/clients/context/ClientContext";
 import { useProducts } from "@/features/products/context/ProductContext";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
-import type { Order, CreateOrderDTO, UpdateOrderDTO } from "@/types/types";
+import type { Order, CreateOrderDTO, UpdateOrderDTO, DocumentType } from "@/types/types";
 import { formatARS } from "@/utils/formatCurrency";
 
 interface OrderFormModalProps {
@@ -31,6 +31,7 @@ export function OrderFormModal({
   const { products } = useProducts()!;
 
   const [type, setType] = useState<"entry" | "exit">("entry");
+  const [documentType, setDocumentType] = useState<DocumentType>("remito");
   const [clientId, setClientId] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<OrderItemForm[]>([
@@ -44,6 +45,7 @@ export function OrderFormModal({
       setNotes(order.notes || "");
     } else {
       setType("entry");
+      setDocumentType("remito");
       setClientId("");
       setNotes("");
       setItems([{ product_id: "", quantity: "", price: "" }]);
@@ -64,6 +66,7 @@ export function OrderFormModal({
       } else {
         const data: CreateOrderDTO = {
           type,
+          document_type: documentType,
           client_id: clientId ? parseInt(clientId) : undefined,
           notes: notes.trim() || undefined,
           items: items.map((item) => ({
@@ -82,6 +85,7 @@ export function OrderFormModal({
 
   const handleClose = () => {
     setType("entry");
+    setDocumentType("remito");
     setClientId("");
     setNotes("");
     setItems([{ product_id: "", quantity: "", price: "" }]);
@@ -134,6 +138,7 @@ export function OrderFormModal({
   const isFormValid = order
     ? true
     : type &&
+    documentType &&
     items.length > 0 &&
     items.every(
       (item) =>
@@ -148,49 +153,88 @@ export function OrderFormModal({
 
   return (
     <FormLayout
-      title={isEdit ? "Editar remito" : "Nuevo remito"}
+      title={isEdit ? "Editar documento" : "Nuevo documento"}
       description={
         isEdit
-          ? `Modificar remito #${order.id}`
+          ? `Modificar documento #${order.id}`
           : "Registrar entrada o salida de productos"
       }
       onClose={handleClose}
       onSubmit={handleSubmit}
-      submitLabel={isEdit ? "Guardar cambios" : "Registrar remito"}
+      submitLabel={isEdit ? "Guardar cambios" : "Registrar documento"}
       isSubmitting={isSubmitting}
       isValid={isFormValid}
     >
       <div className="space-y-6">
         {!isEdit && (
-          <div>
-            <label className="block text-[#0F172A] text-lg font-semibold mb-3">
-              Tipo de remito *
-            </label>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setType("entry")}
-                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
-                    type === "entry"
-                    ? "bg-[#16A34A]/10 border-[#16A34A] text-[#16A34A]"
-                    : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
+          <>
+            <div>
+              <label className="block text-[#0F172A] text-lg font-semibold mb-3">
+                Tipo de documento *
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setDocumentType("proforma")}
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex flex-col items-center gap-1 ${
+                    documentType === "proforma"
+                      ? "bg-[#F59E0B]/10 border-[#F59E0B] text-[#F59E0B]"
+                      : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                   }`}
-              >
-                <FaArrowDown className="text-xl" /> Entrada
-              </button>
-              <button
-                type="button"
-                onClick={() => setType("exit")}
-                className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
-                    type === "exit"
-                    ? "bg-[#DC2626]/10 border-[#DC2626] text-[#DC2626]"
-                    : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
+                >
+                  <span className="text-2xl">📋</span>
+                  Presupuesto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocumentType("remito")}
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex flex-col items-center gap-1 ${
+                    documentType === "remito"
+                      ? "bg-[#4FA3D1]/10 border-[#4FA3D1] text-[#4FA3D1]"
+                      : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                   }`}
-              >
-                <FaArrowUp className="text-xl" /> Salida
-              </button>
+                >
+                  <span className="text-2xl">📦</span>
+                  Remito
+                </button>
+              </div>
+              <p className="mt-2 text-sm text-[#64748B]">
+                {documentType === "proforma" 
+                  ? "Presupuesto sin movimiento de stock" 
+                  : "Remito que registra entrada/salida de inventario"}
+              </p>
             </div>
-          </div>
+
+            <div>
+              <label className="block text-[#0F172A] text-lg font-semibold mb-3">
+                Tipo de operación *
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setType("entry")}
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
+                      type === "entry"
+                      ? "bg-[#16A34A]/10 border-[#16A34A] text-[#16A34A]"
+                      : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
+                    }`}
+                >
+                  <FaArrowDown className="text-xl" /> Entrada
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setType("exit")}
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
+                      type === "exit"
+                      ? "bg-[#DC2626]/10 border-[#DC2626] text-[#DC2626]"
+                      : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
+                    }`}
+                >
+                  <FaArrowUp className="text-xl" /> Salida
+                </button>
+              </div>
+            </div>
+          </>
         )}
 
         <div>

@@ -18,6 +18,10 @@ export class OrderService {
       throw new ValidationError('Order type must be "entry" or "exit"');
     }
 
+    if (!data.document_type || (data.document_type !== 'proforma' && data.document_type !== 'remito')) {
+      throw new ValidationError('Document type must be "proforma" or "remito"');
+    }
+
     if (!data.items || data.items.length === 0) {
       throw new ValidationError('Order must have at least one item');
     }
@@ -30,20 +34,32 @@ export class OrderService {
     }
 
     // Si es salida, validar stock
-    if (data.type === 'exit') {
+    if (data.type === 'exit' && data.document_type === "remito") {
+      const productTotals: Record<number, number> = {};
+
       for (const item of data.items) {
-        const product = await this.productRepo.findById(item.product_id);
-
-        if (!product) {
-          throw new NotFoundError('Product', item.product_id);
+        if (!productTotals[item.product_id]) {
+          productTotals[item.product_id] = 0;
         }
+        productTotals[item.product_id] += item.quantity;
+      }
 
-        if (product.quantity < item.quantity) {
-          throw new InsufficientStockError(
-            product.name,
-            product.quantity,
-            item.quantity
-          );
+      if (data.type === 'exit' && data.document_type === 'remito') {
+        for (const idProduct in productTotals) {
+          const productId = Number(idProduct)
+          const product = await this.productRepo.findById(productId);
+
+          if (!product) {
+            throw new NotFoundError('Product', productId);
+          }
+
+          if (product.quantity < productTotals[productId]) {
+            throw new InsufficientStockError(
+              product.name,
+              product.quantity,
+              productTotals[productId]
+            );
+          }
         }
       }
     }

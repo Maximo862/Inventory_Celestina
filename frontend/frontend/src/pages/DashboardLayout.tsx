@@ -30,7 +30,7 @@ export function DashboardLayout() {
     },
     {
       path: "/orders",
-      label: "Remitos",
+      label: "Documentos",
       icon: <FiFileText />,
       roles: ["admin", "employee"], // ← NUEVO: Todos pueden ver
     },

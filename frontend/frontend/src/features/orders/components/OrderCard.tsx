@@ -20,6 +20,7 @@ export function OrderCard({
   onDelete,
 }: OrderCardProps) {
   const isEntry = order.type === "entry";
+  const isProforma = order.document_type === "proforma";
   const date = new Date(order.created_at).toLocaleDateString("es-AR", {
     day: "2-digit",
     month: "2-digit",
@@ -35,7 +36,16 @@ export function OrderCard({
         <div className="flex-1 space-y-3">
           {/* Header con tipo y fecha */}
           <div className="flex items-center gap-4 flex-wrap">
-            {/* Badge de tipo */}
+            {/* Badge de tipo de documento */}
+            <span className={`inline-flex items-center gap-2 px-5 py-2 border-2 rounded-xl text-lg font-bold ${
+              isProforma 
+                ? "bg-[#F59E0B]/10 border-[#F59E0B]/30 text-[#F59E0B]" 
+                : "bg-[#4FA3D1]/10 border-[#4FA3D1]/30 text-[#4FA3D1]"
+            }`}>
+              {isProforma ? "📋" : "📦"} {isProforma ? "Presupuesto" : "Remito"}
+            </span>
+
+            {/* Badge de operación */}
             {isEntry ? (
               <span className="inline-flex items-center gap-2 px-5 py-2 bg-[#16A34A]/10 border-2 border-[#16A34A]/30 rounded-xl text-lg font-bold text-[#16A34A]">
                 <FiArrowDown className="text-2xl" />
@@ -51,7 +61,7 @@ export function OrderCard({
             {/* ID y fecha */}
             <div>
               <p className="text-base font-semibold text-[#64748B]">
-                Remito #{order.id}
+                #{order.id}
               </p>
               <p className="text-base text-[#64748B]">{date}</p>
             </div>

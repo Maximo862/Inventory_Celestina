@@ -220,7 +220,7 @@ export function OrdersPage() {
   return (
     <div>
       <PageHeader
-        title="Remitos"
+        title="Documentos"
         subtitle="Registro de entradas y salidas"
         action={
           <Button
@@ -230,7 +230,7 @@ export function OrdersPage() {
             className="flex items-center justify-center gap-3"
           >
             <FiPlus className="text-2xl" />
-            Nuevo remito
+            Nuevo documento
           </Button>
         }
       />
@@ -238,9 +238,9 @@ export function OrdersPage() {
       {pagination && pagination.total === 0 && !isFiltering ? (
         <EmptyState
           icon={<FiFileText />}
-          title="No hay remitos"
-          description="Comience registrando su primer remito de entrada o salida"
-          actionLabel="Crear primer remito"
+          title="No hay documentos"
+          description="Comience registrando su primer documento de entrada o salida"
+          actionLabel="Crear primer documento"
           onAction={handleCreate}
         />
       ) : (
@@ -270,7 +270,7 @@ export function OrdersPage() {
                   }
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
                 >
-                  <option value="all"><FiFolder /> Todos los remitos</option>
+                  <option value="all"><FiFolder /> Todos los documentos</option>
                   <option value="entry"><FiArrowDown /> Solo entradas</option>
                   <option value="exit"><FiArrowUp /> Solo salidas</option>
                 </select>
@@ -297,7 +297,7 @@ export function OrdersPage() {
             {pagination && (
               <div className="flex items-center justify-between text-lg text-[#64748B]">
                 <p>
-                  Mostrando {sortedOrders.length} de {pagination.total} remitos
+                  Mostrando {sortedOrders.length} de {pagination.total} documentos
                   totales (Página {currentPage} de {pagination.totalPages})
                 </p>
                 {(debouncedSearch || filterType !== "all" || sortBy !== "date-desc") && (
@@ -321,7 +321,7 @@ export function OrdersPage() {
           {sortedOrders.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-2xl text-[#64748B] mb-4">
-                No se encontraron remitos
+                No se encontraron documentos
               </p>
               <Button
                 variant="secondary"
@@ -434,9 +434,9 @@ export function OrdersPage() {
 
       <DeleteConfirmModal
         isOpen={deleteModal.isOpen}
-        title="¿Eliminar remito?"
-        message={`Está por eliminar este remito de ${deleteModal.type}. El stock se revertirá automáticamente.`}
-        itemName={`Remito #${deleteModal.id}`}
+        title="¿Eliminar documento?"
+        message={`Está por eliminar este documento de ${deleteModal.type}. El stock se revertirá automáticamente si es un remito.`}
+        itemName={`Documento #${deleteModal.id}`}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
         isDeleting={isDeleting}

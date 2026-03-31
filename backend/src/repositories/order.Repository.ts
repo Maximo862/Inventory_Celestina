@@ -15,14 +15,16 @@ export class OrderRepository {
 
             // 1. Insertar orden
             const [orderResult] = await connection.query<ResultSetHeader>(
-                'INSERT INTO orders (type, client_id, notes, total_amount) VALUES (?, ?, ?, ?)',
-                [data.type, data.client_id || null, data.notes || null, 0]
+                'INSERT INTO orders (type, document_type, client_id, notes, total_amount) VALUES (?, ?, ?, ?, ?)',
+                [data.type, data.document_type, data.client_id || null, data.notes || null, 0]
             );
 
             const orderId = orderResult.insertId;
 
-            // 2. Insertar items y actualizar stock
+            // 2. Insertar items y actualizar stock (solo si es remito)
             let totalAmount = 0;
+
+            const updateStock = data.document_type === 'remito';
 
             for (const item of data.items) {
                 // Insertar item
@@ -33,13 +35,15 @@ export class OrderRepository {
 
                 totalAmount += item.quantity * item.price;
 
-                // Actualizar stock según tipo
-                const stockChange = data.type === 'entry' ? item.quantity : -item.quantity;
+                // Actualizar stock solo si es remito
+                if (updateStock) {
+                    const stockChange = data.type === 'entry' ? item.quantity : -item.quantity;
 
-                await connection.query(
-                    'UPDATE products SET quantity = quantity + ? WHERE id = ?',
-                    [stockChange, item.product_id]
-                );
+                    await connection.query(
+                        'UPDATE products SET quantity = quantity + ? WHERE id = ?',
+                        [stockChange, item.product_id]
+                    );
+                }
             }
 
             // 3. Actualizar total_amount
@@ -172,7 +176,7 @@ export class OrderRepository {
         return result.affectedRows > 0;
     }
 
-    // Eliminar orden (con reversión de stock)
+    // Eliminar orden (con reversión de stock solo si es remito)
     async delete(id: number): Promise<void> {
         const connection = await pool.getConnection();
 
@@ -181,7 +185,7 @@ export class OrderRepository {
 
             // Obtener info de la orden
             const [orders] = await connection.query<OrderRow[]>(
-                'SELECT type FROM orders WHERE id = ?',
+                'SELECT type, document_type FROM orders WHERE id = ?',
                 [id]
             );
 
@@ -190,6 +194,7 @@ export class OrderRepository {
             }
 
             const orderType = orders[0].type;
+            const documentType = orders[0].document_type;
 
             // Obtener items
             const [items] = await connection.query<OrderItemRow[]>(
@@ -197,13 +202,15 @@ export class OrderRepository {
                 [id]
             );
 
-            // Revertir stock
-            for (const item of items) {
-                const stockChange = orderType === 'entry' ? -item.quantity : item.quantity;
-                await connection.query(
-                    'UPDATE products SET quantity = quantity + ? WHERE id = ?',
-                    [stockChange, item.product_id]
-                );
+            // Revertir stock solo si es remito
+            if (documentType === 'remito') {
+                for (const item of items) {
+                    const stockChange = orderType === 'entry' ? -item.quantity : item.quantity;
+                    await connection.query(
+                        'UPDATE products SET quantity = quantity + ? WHERE id = ?',
+                        [stockChange, item.product_id]
+                    );
+                }
             }
 
             // Eliminar orden (cascade eliminará items)

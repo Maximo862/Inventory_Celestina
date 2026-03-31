@@ -44,9 +44,10 @@ function App() {
 
 export default App;
 
+//Problemas : 2- Select de productos limitado en remitos. 
+
+
 // - Guardar quien creo cada Orden
-// - Arreglar tema del buscador, es decir que al buscar y no encontrar no aparezca nuevo producto como si no hubiera nada... y performance
-// - Remito Imprimible
 // - Factura proforma 
 // - Multisucursal
 // - AFIP
