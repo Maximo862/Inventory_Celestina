@@ -11,10 +11,11 @@ export class ClientService {
 
     async getAll(
         pagination: PaginationParams,
+        branchId: number,
         filters?: { search?: string },
         sort?: { field: string; order: 'ASC' | 'DESC' }
     ): Promise<PaginatedResult<Client>> {
-        const { clients, total } = await this.repository.findAll(pagination, filters, sort);
+        const { clients, total } = await this.repository.findAll(pagination, branchId, filters, sort);
 
         return {
             data: clients,
@@ -27,8 +28,8 @@ export class ClientService {
         };
     }
 
-    async getById(id: number): Promise<Client> {
-        const client = await this.repository.findById(id);
+    async getById(id: number, branchId: number): Promise<Client> {
+        const client = await this.repository.findById(id, branchId);
 
         if (!client) {
             throw new NotFoundError('Client', id);
@@ -37,7 +38,7 @@ export class ClientService {
         return client;
     }
 
-    async create(data: CreateClientDTO): Promise<Client> {
+    async create(data: CreateClientDTO, branchId: number): Promise<Client> {
         // Validaciones
         if (!data.name || data.name.trim() === '') {
             throw new ValidationError('Client name is required');
@@ -51,8 +52,8 @@ export class ClientService {
             throw new ValidationError('Tax condition is required');
         }
 
-        // Validación: CUIL único
-        const existing = await this.repository.findByCuil(data.cuil);
+        // Validación: CUIL único por sucursal
+        const existing = await this.repository.findByCuil(data.cuil, branchId);
         if (existing) {
             throw new DuplicateError('Cliente', 'CUIL', data.cuil);
         }
@@ -62,17 +63,17 @@ export class ClientService {
             throw new ValidationError('Invalid email format');
         }
 
-        const id = await this.repository.create(data);
-        return this.getById(id);
+        const id = await this.repository.create(data, branchId);
+        return this.getById(id, branchId);
     }
 
-    async update(id: number, data: UpdateClientDTO): Promise<Client> {
-        // Verificar que existe
-        await this.getById(id);
+    async update(id: number, data: UpdateClientDTO, branchId: number): Promise<Client> {
+        // Verificar que existe y pertenece a la sucursal
+        await this.getById(id, branchId);
 
-        // Validar CUIL único si se actualiza
+        // Validar CUIL único si se actualiza (por sucursal)
         if (data.cuil) {
-            const existing = await this.repository.findByCuil(data.cuil);
+            const existing = await this.repository.findByCuil(data.cuil, branchId);
             if (existing && existing.id !== id) {
                 throw new DuplicateError('Cliente', 'CUIL', data.cuil);
             }
@@ -83,20 +84,20 @@ export class ClientService {
             throw new ValidationError('Invalid email format');
         }
 
-        const updated = await this.repository.update(id, data);
+        const updated = await this.repository.update(id, data, branchId);
 
         if (!updated) {
             throw new ValidationError('No changes were made');
         }
 
-        return this.getById(id);
+        return this.getById(id, branchId);
     }
 
-    async delete(id: number): Promise<void> {
-        // Verificar que existe
-        await this.getById(id);
+    async delete(id: number, branchId: number): Promise<void> {
+        // Verificar que existe y pertenece a la sucursal
+        await this.getById(id, branchId);
 
-        const deleted = await this.repository.delete(id);
+        const deleted = await this.repository.delete(id, branchId);
 
         if (!deleted) {
             throw new ValidationError('Failed to delete client');
@@ -108,11 +109,11 @@ export class ClientService {
         return emailRegex.test(email);
     }
 
-    async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+    async search(query: string, branchId: number, limit: number = 10): Promise<{ id: number; name: string }[]> {
         if (!query || query.trim() === '') {
             return [];
         }
 
-        return this.repository.search(query.trim(), limit);
+        return this.repository.search(query.trim(), branchId, limit);
     }
 }

@@ -7,21 +7,21 @@ interface OrderItemRow extends RowDataPacket, OrderItem { }
 
 export class OrderRepository {
     // Crear orden con transacción
-    async create(data: CreateOrderDTO): Promise<number> {
+    async create(data: CreateOrderDTO, branchId: number): Promise<number> {
         const connection = await pool.getConnection();
 
         try {
             await connection.beginTransaction();
 
-            // 1. Insertar orden
+            // 1. Insertar orden con branch_id
             const [orderResult] = await connection.query<ResultSetHeader>(
-                'INSERT INTO orders (type, document_type, client_id, notes, total_amount) VALUES (?, ?, ?, ?, ?)',
-                [data.type, data.document_type, data.client_id || null, data.notes || null, 0]
+                'INSERT INTO orders (type, document_type, client_id, notes, total_amount, branch_id) VALUES (?, ?, ?, ?, ?, ?)',
+                [data.type, data.document_type, data.client_id || null, data.notes || null, 0, branchId]
             );
 
             const orderId = orderResult.insertId;
 
-            // 2. Insertar items y actualizar stock (solo si es remito)
+            // 2. Insertar items y actualizar stock (solo si es remito y solo productos de la misma sucursal)
             let totalAmount = 0;
 
             const updateStock = data.document_type === 'remito';
@@ -35,13 +35,13 @@ export class OrderRepository {
 
                 totalAmount += item.quantity * item.price;
 
-                // Actualizar stock solo si es remito
+                // Actualizar stock solo si es remito Y solo productos de la misma sucursal
                 if (updateStock) {
                     const stockChange = data.type === 'entry' ? item.quantity : -item.quantity;
 
                     await connection.query(
-                        'UPDATE products SET quantity = quantity + ? WHERE id = ?',
-                        [stockChange, item.product_id]
+                        'UPDATE products SET quantity = quantity + ? WHERE id = ? AND branch_id = ?',
+                        [stockChange, item.product_id, branchId]
                     );
                 }
             }
@@ -64,14 +64,21 @@ export class OrderRepository {
     }
 
     // Obtener orden con items y detalles
-    async findByIdWithItems(id: number): Promise<any> {
-        const [orders] = await pool.query<OrderRow[]>(
-            `SELECT o.*, c.name as client_name 
-             FROM orders o 
-             LEFT JOIN clients c ON o.client_id = c.id 
-             WHERE o.id = ?`,
-            [id]
-        );
+    async findByIdWithItems(id: number, branchId?: number): Promise<any> {
+        // Si se pasa branchId, filtrar por él (para validar propiedad)
+        const query = branchId 
+            ? `SELECT o.*, c.name as client_name 
+               FROM orders o 
+               LEFT JOIN clients c ON o.client_id = c.id 
+               WHERE o.id = ? AND o.branch_id = ?`
+            : `SELECT o.*, c.name as client_name 
+               FROM orders o 
+               LEFT JOIN clients c ON o.client_id = c.id 
+               WHERE o.id = ?`;
+
+        const params = branchId ? [id, branchId] : [id];
+
+        const [orders] = await pool.query<OrderRow[]>(query, params);
 
         if (orders.length === 0) return null;
 
@@ -89,7 +96,7 @@ export class OrderRepository {
         };
     }
 
-    // Listar órdenes con paginación y filtro
+    // Listar órdenes - SIN filtro de branch (se ven globalmente)
     async findAll(
         pagination: PaginationParams,
         filters?: { type?: 'entry' | 'exit'; search?: string }
@@ -149,8 +156,16 @@ export class OrderRepository {
     }
 
 
-    // Actualizar orden (solo client_id y notes)
-    async update(id: number, data: UpdateOrderDTO): Promise<boolean> {
+    // Actualizar orden (solo client_id y notes) - verificar branch
+    async update(id: number, data: UpdateOrderDTO, branchId: number): Promise<boolean> {
+        // Primero verificar que la orden pertenece a esta sucursal
+        const [orders] = await pool.query<OrderRow[]>(
+            'SELECT id FROM orders WHERE id = ? AND branch_id = ?',
+            [id, branchId]
+        );
+
+        if (orders.length === 0) return false;
+
         const fields: string[] = [];
         const values: any[] = [];
 
@@ -176,17 +191,17 @@ export class OrderRepository {
         return result.affectedRows > 0;
     }
 
-    // Eliminar orden (con reversión de stock solo si es remito)
-    async delete(id: number): Promise<void> {
+    // Eliminar orden (con reversión de stock solo si es remito) - verificar branch
+    async delete(id: number, branchId: number): Promise<void> {
         const connection = await pool.getConnection();
 
         try {
             await connection.beginTransaction();
 
-            // Obtener info de la orden
+            // Obtener info de la orden (solo de esta sucursal)
             const [orders] = await connection.query<OrderRow[]>(
-                'SELECT type, document_type FROM orders WHERE id = ?',
-                [id]
+                'SELECT type, document_type FROM orders WHERE id = ? AND branch_id = ?',
+                [id, branchId]
             );
 
             if (orders.length === 0) {
@@ -202,13 +217,13 @@ export class OrderRepository {
                 [id]
             );
 
-            // Revertir stock solo si es remito
+            // Revertir stock solo si es remito Y solo productos de la misma sucursal
             if (documentType === 'remito') {
                 for (const item of items) {
                     const stockChange = orderType === 'entry' ? -item.quantity : item.quantity;
                     await connection.query(
-                        'UPDATE products SET quantity = quantity + ? WHERE id = ?',
-                        [stockChange, item.product_id]
+                        'UPDATE products SET quantity = quantity + ? WHERE id = ? AND branch_id = ?',
+                        [stockChange, item.product_id, branchId]
                     );
                 }
             }
@@ -225,7 +240,7 @@ export class OrderRepository {
         }
     }
 
-    // Obtener estadísticas
+    // Obtener estadísticas - SIN filtro de branch (global)
     async getStats() {
         const [stats] = await pool.query<any[]>(`
             SELECT 

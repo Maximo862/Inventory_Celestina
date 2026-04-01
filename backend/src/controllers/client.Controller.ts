@@ -24,7 +24,8 @@ export class ClientController {
             const sortOrder = (req.query.sortOrder as string || 'DESC').toUpperCase() as 'ASC' | 'DESC';
             const sort = { field: sortField, order: sortOrder };
 
-            const result = await this.service.getAll({ page, limit }, filters, sort);
+            const branchId = req.user!.branch_id;
+            const result = await this.service.getAll({ page, limit }, branchId, filters, sort);
 
             res.status(200).json(result);
         } catch (err) {
@@ -35,8 +36,9 @@ export class ClientController {
     getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const client = await this.service.getById(id);
+            const client = await this.service.getById(id, branchId);
 
             res.status(200).json(client);
         } catch (err) {
@@ -46,7 +48,8 @@ export class ClientController {
 
     create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const client = await this.service.create(req.body);
+            const branchId = req.user!.branch_id;
+            const client = await this.service.create(req.body, branchId);
 
             res.status(201).json(client);
         } catch (err) {
@@ -57,8 +60,9 @@ export class ClientController {
     update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const client = await this.service.update(id, req.body);
+            const client = await this.service.update(id, req.body, branchId);
 
             res.status(200).json(client);
         } catch (err) {
@@ -69,8 +73,9 @@ export class ClientController {
     delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            await this.service.delete(id);
+            await this.service.delete(id, branchId);
 
             res.status(204).send();
         } catch (err) {
@@ -82,8 +87,9 @@ export class ClientController {
         try {
             const query = req.query.query as string;
             const limit = parseInt(req.query.limit as string) || 10;
+            const branchId = req.user!.branch_id;
 
-            const results = await this.service.search(query, limit);
+            const results = await this.service.search(query, branchId, limit);
 
             res.status(200).json(results);
         } catch (err) {

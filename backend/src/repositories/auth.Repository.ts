@@ -4,7 +4,7 @@ import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
 
 export async function findUserByEmail(email: string): Promise<UserDB | null> {
   const [rows] = await pool.execute<RowDataPacket[]>(
-    "SELECT id, email, password, role FROM users WHERE email = ?",
+    "SELECT id, email, password, role, branch_id FROM users WHERE email = ?",
     [email]
   );
 
@@ -13,7 +13,7 @@ export async function findUserByEmail(email: string): Promise<UserDB | null> {
 
 export async function findUserById(id: number): Promise<UserDB | null> {
   const [rows] = await pool.execute<RowDataPacket[]>(
-    "SELECT id, email, role FROM users WHERE id = ?",
+    "SELECT id, email, role, branch_id FROM users WHERE id = ?",
     [id]
   );
 
@@ -24,16 +24,18 @@ export interface CreateUserProps {
   email: string;
   password: string;
   role?: 'admin' | 'employee';
+  branch_id?: number;
 }
 
 export async function createUser({
   email,
   password,
-  role = 'employee'
+  role = 'employee',
+  branch_id
 }: CreateUserProps): Promise<number> {
   const [result] = await pool.execute<ResultSetHeader>(
-    "INSERT INTO users (email, password, role) VALUES (?, ?, ?)",
-    [email, password, role]
+    "INSERT INTO users (email, password, role, branch_id) VALUES (?, ?, ?, ?)",
+    [email, password, role, branch_id || null]
   );
 
   return result.insertId;

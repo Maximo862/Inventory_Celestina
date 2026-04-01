@@ -21,13 +21,14 @@ const ALLOWED_ORDER_VALUES = ['asc', 'desc'];
 export class ProductRepository {
   async findAll(
     pagination: PaginationParams,
+    branchId: number,
     filters?: { search?: string; category_id?: number },
     sortParams?: SortParams
   ): Promise<{ products: ProductRow[], total: number }> {
     const offset = (pagination.page - 1) * pagination.limit;
 
-    const whereClauses: string[] = [];
-    const params: any[] = [];
+    const whereClauses: string[] = ['branch_id = ?'];
+    const params: any[] = [branchId];
 
     if (filters?.search) {
       whereClauses.push('name LIKE ?');
@@ -78,26 +79,26 @@ export class ProductRepository {
 
 
 
-  async findById(id: number): Promise<ProductRow | null> {
+  async findById(id: number, branchId: number): Promise<ProductRow | null> {
     const [rows] = await pool.query<ProductRow[]>(
-      'SELECT * FROM products WHERE id = ?',
-      [id]
+      'SELECT * FROM products WHERE id = ? AND branch_id = ?',
+      [id, branchId]
     );
 
     return rows[0] || null;
   }
 
-  async create(data: CreateProductDTO): Promise<number> {
+  async create(data: CreateProductDTO, branchId: number): Promise<number> {
     const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO products (name, description, quantity, price, category_id) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [data.name, data.description || null, data.quantity, data.price, data.category_id || null]
+      `INSERT INTO products (name, description, quantity, price, category_id, branch_id) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [data.name, data.description || null, data.quantity, data.price, data.category_id || null, branchId]
     );
 
     return result.insertId;
   }
 
-  async update(id: number, data: UpdateProductDTO): Promise<boolean> {
+  async update(id: number, data: UpdateProductDTO, branchId: number): Promise<boolean> {
     const fields: string[] = [];
     const values: any[] = [];
 
@@ -120,29 +121,29 @@ export class ProductRepository {
 
     if (fields.length === 0) return false;
 
-    values.push(id);
+    values.push(id, branchId);
 
     const [result] = await pool.query<ResultSetHeader>(
-      `UPDATE products SET ${fields.join(', ')} WHERE id = ?`,
+      `UPDATE products SET ${fields.join(', ')} WHERE id = ? AND branch_id = ?`,
       values
     );
 
     return result.affectedRows > 0;
   }
 
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number, branchId: number): Promise<boolean> {
     const [result] = await pool.query<ResultSetHeader>(
-      'DELETE FROM products WHERE id = ?',
-      [id]
+      'DELETE FROM products WHERE id = ? AND branch_id = ?',
+      [id, branchId]
     );
 
     return result.affectedRows > 0;
   }
 
-  async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+  async search(query: string, branchId: number, limit: number = 10): Promise<{ id: number; name: string }[]> {
     const [rows] = await pool.query<SearchProductRow[]>(
-      'SELECT id, name FROM products WHERE name LIKE ? ORDER BY name LIMIT ?',
-      [`%${query}%`, limit]
+      'SELECT id, name FROM products WHERE name LIKE ? AND branch_id = ? ORDER BY name LIMIT ?',
+      [`%${query}%`, branchId, limit]
     );
 
     return rows;

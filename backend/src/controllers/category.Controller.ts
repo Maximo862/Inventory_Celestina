@@ -12,7 +12,8 @@ export class CategoryController {
     // Obtener todas (plano con paginación)
     getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const result = await this.service.getAll();
+            const branchId = req.user!.branch_id;
+            const result = await this.service.getAll(branchId);
 
             res.status(200).json(result);
         } catch (err) {
@@ -20,10 +21,10 @@ export class CategoryController {
         }
     };
 
-    // Obtener solo categorías padre
     getParents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const parents = await this.service.getParentCategories();
+            const branchId = req.user!.branch_id;
+            const parents = await this.service.getParentCategories(branchId);
 
             res.status(200).json(parents);
         } catch (err) {
@@ -31,12 +32,12 @@ export class CategoryController {
         }
     };
 
-    // Obtener subcategorías de una categoría
     getSubcategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const parentId = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const subcategories = await this.service.getSubcategories(parentId);
+            const subcategories = await this.service.getSubcategories(parentId, branchId);
 
             res.status(200).json(subcategories);
         } catch (err) {
@@ -47,8 +48,9 @@ export class CategoryController {
     getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const category = await this.service.getById(id);
+            const category = await this.service.getById(id, branchId);
 
             res.status(200).json(category);
         } catch (err) {
@@ -58,7 +60,8 @@ export class CategoryController {
 
     create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const category = await this.service.create(req.body);
+            const branchId = req.user!.branch_id;
+            const category = await this.service.create(req.body, branchId);
 
             res.status(201).json(category);
         } catch (err) {
@@ -69,8 +72,9 @@ export class CategoryController {
     update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const category = await this.service.update(id, req.body);
+            const category = await this.service.update(id, req.body, branchId);
 
             res.status(200).json(category);
         } catch (err) {
@@ -81,8 +85,9 @@ export class CategoryController {
     delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            await this.service.delete(id);
+            await this.service.delete(id, branchId);
 
             res.status(204).send();
         } catch (err) {
@@ -94,8 +99,9 @@ export class CategoryController {
         try {
             const id = Number(req.params.id);
             const data: UpdateCategoryPricesDTO = req.body;
+            const branchId = req.user!.branch_id;
 
-            const result = await this.service.previewPrices(id, data);
+            const result = await this.service.previewPrices(id, data, branchId);
 
             res.status(200).json(result);
         } catch (err) {
@@ -107,8 +113,9 @@ export class CategoryController {
         try {
             const id = Number(req.params.id);
             const data: UpdateCategoryPricesDTO = req.body;
+            const branchId = req.user!.branch_id;
 
-            const result = await this.service.updatePrices(id, data);
+            const result = await this.service.updatePrices(id, data, branchId);
 
             res.status(200).json(result);
         } catch (err) {

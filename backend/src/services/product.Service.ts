@@ -14,11 +14,11 @@ export class ProductService {
 
     async getAll(
         pagination: PaginationParams,
+        branchId: number,
         filters?: { search?: string; category_id?: number },
         sortParams?: SortParams
     ): Promise<PaginatedResult<Product>> {
-        const { products, total } = await this.repository.findAll(pagination, filters, sortParams);
-
+        const { products, total } = await this.repository.findAll(pagination, branchId, filters, sortParams);
         return {
             data: products,
             pagination: {
@@ -30,8 +30,8 @@ export class ProductService {
         };
     }
 
-    async getById(id: number): Promise<Product> {
-        const product = await this.repository.findById(id);
+    async getById(id: number, branchId: number): Promise<Product> {
+        const product = await this.repository.findById(id, branchId);
 
         if (!product) {
             throw new NotFoundError('Product', id);
@@ -40,7 +40,7 @@ export class ProductService {
         return product;
     }
 
-    async create(data: CreateProductDTO): Promise<Product> {
+    async create(data: CreateProductDTO, branchId: number): Promise<Product> {
         // Validaciones
         if (!data.name || data.name.trim() === '') {
             throw new ValidationError('Product name is required');
@@ -54,59 +54,59 @@ export class ProductService {
             throw new ValidationError('Price must be greater than zero');
         }
 
-        // Validar categoría si existe
+        // Validar categoría si existe (de la misma sucursal)
         if (data.category_id) {
-            const category = await this.categoryRepository.findById(data.category_id);
+            const category = await this.categoryRepository.findById(data.category_id, branchId);
             if (!category) {
                 throw new NotFoundError('Category', data.category_id);
             }
         }
 
-        const id = await this.repository.create(data);
-        return this.getById(id);
+        const id = await this.repository.create(data, branchId);
+        return this.getById(id, branchId);
     }
 
-    async update(id: number, data: UpdateProductDTO): Promise<Product> {
-        // Verificar que existe
-        await this.getById(id);
+    async update(id: number, data: UpdateProductDTO, branchId: number): Promise<Product> {
+        // Verificar que existe y pertenece a la sucursal
+        await this.getById(id, branchId);
 
         if (data.price !== undefined && data.price <= 0) {
             throw new ValidationError('Price must be greater than zero');
         }
 
-        // Validar categoría si se actualiza
+        // Validar categoría si se actualiza (de la misma sucursal)
         if (data.category_id) {
-            const category = await this.categoryRepository.findById(data.category_id);
+            const category = await this.categoryRepository.findById(data.category_id, branchId);
             if (!category) {
                 throw new NotFoundError('Category', data.category_id);
             }
         }
 
-        const updated = await this.repository.update(id, data);
+        const updated = await this.repository.update(id, data, branchId);
 
         if (!updated) {
             throw new ValidationError('No changes were made');
         }
 
-        return this.getById(id);
+        return this.getById(id, branchId);
     }
 
-    async delete(id: number): Promise<void> {
-        // Verificar que existe
-        await this.getById(id);
+    async delete(id: number, branchId: number): Promise<void> {
+        // Verificar que existe y pertenece a la sucursal
+        await this.getById(id, branchId);
 
-        const deleted = await this.repository.delete(id);
+        const deleted = await this.repository.delete(id, branchId);
 
         if (!deleted) {
             throw new ValidationError('Failed to delete product');
         }
     }
 
-    async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+    async search(query: string, branchId: number, limit: number = 10): Promise<{ id: number; name: string }[]> {
         if (!query || query.trim() === '') {
             return [];
         }
 
-        return this.repository.search(query.trim(), limit);
+        return this.repository.search(query.trim(), branchId, limit);
     }
 }

@@ -17,16 +17,16 @@ export class CategoryService {
         this.repository = new CategoryRepository();
     }
 
-    async getAll(): Promise<{data : CategoryRow[]}> {
-        const { categories } = await this.repository.findAll();
+    async getAll(branchId: number): Promise<{data : CategoryRow[]}> {
+        const { categories } = await this.repository.findAll(branchId);
 
         return {
             data: categories,
         };
     }
 
-    async getById(id: number): Promise<Category> {
-        const category = await this.repository.findById(id);
+    async getById(id: number, branchId: number): Promise<Category> {
+        const category = await this.repository.findById(id, branchId);
 
         if (!category) {
             throw new NotFoundError('Category', id);
@@ -35,37 +35,37 @@ export class CategoryService {
         return category;
     }
 
-    async create(data: CreateCategoryDTO): Promise<Category> {
+    async create(data: CreateCategoryDTO, branchId: number): Promise<Category> {
         // Validación: nombre requerido
         if (!data.name || data.name.trim() === '') {
             throw new ValidationError('Category name is required');
         }
 
-        // Validación: nombre único
-        const existing = await this.repository.findByName(data.name);
+        // Validación: nombre único por sucursal
+        const existing = await this.repository.findByName(data.name, branchId);
         if (existing) {
             throw new DuplicateError('Categoria', 'nombre', data.name);
         }
 
-        // Validación: si tiene parent_id, verificar que exista
+        // Validación: si tiene parent_id, verificar que exista (de la misma sucursal)
         if (data.parent_id) {
-            const parent = await this.repository.findById(data.parent_id);
+            const parent = await this.repository.findById(data.parent_id, branchId);
             if (!parent) {
                 throw new NotFoundError('Parent category', data.parent_id);
             }
         }
 
-        const id = await this.repository.create(data);
-        return this.getById(id);
+        const id = await this.repository.create(data, branchId);
+        return this.getById(id, branchId);
     }
 
-    async update(id: number, data: UpdateCategoryDTO): Promise<Category> {
-        // Verificar que existe
-        await this.getById(id);
+    async update(id: number, data: UpdateCategoryDTO, branchId: number): Promise<Category> {
+        // Verificar que existe y pertenece a la sucursal
+        await this.getById(id, branchId);
 
-        // Validación: si se actualiza el nombre, debe ser único
+        // Validación: si se actualiza el nombre, debe ser único por sucursal
         if (data.name) {
-            const existing = await this.repository.findByName(data.name);
+            const existing = await this.repository.findByName(data.name, branchId);
             if (existing && existing.id !== id) {
                 throw new DuplicateError('Category', 'name', data.name);
             }
@@ -78,45 +78,45 @@ export class CategoryService {
             }
 
             if (data.parent_id !== null) {
-                const parent = await this.repository.findById(data.parent_id);
+                const parent = await this.repository.findById(data.parent_id, branchId);
                 if (!parent) {
                     throw new NotFoundError('Parent category', data.parent_id);
                 }
             }
         }
 
-        const updated = await this.repository.update(id, data);
+        const updated = await this.repository.update(id, data, branchId);
 
         if (!updated) {
             throw new ValidationError('No changes were made');
         }
 
-        return this.getById(id);
+        return this.getById(id, branchId);
     }
 
-    async delete(id: number): Promise<void> {
-        // Verificar que existe
-        await this.getById(id);
+    async delete(id: number, branchId: number): Promise<void> {
+        // Verificar que existe y pertenece a la sucursal
+        await this.getById(id, branchId);
 
-        const deleted = await this.repository.delete(id);
+        const deleted = await this.repository.delete(id, branchId);
 
         if (!deleted) {
             throw new ValidationError('Failed to delete category');
         }
     }
 
-    async getParentCategories(): Promise<Category[]> {
-        return this.repository.findParentCategories();
+    async getParentCategories(branchId: number): Promise<Category[]> {
+        return this.repository.findParentCategories(branchId);
     }
 
-    async getSubcategories(parentId: number): Promise<Category[]> {
+    async getSubcategories(parentId: number, branchId: number): Promise<Category[]> {
         // Verificar que el padre existe
-        await this.getById(parentId);
-        return this.repository.findSubcategories(parentId);
+        await this.getById(parentId, branchId);
+        return this.repository.findSubcategories(parentId, branchId);
     }
 
-    async updatePrices(id: number, data: UpdateCategoryPricesDTO): Promise<PriceUpdateResult> {
-        await this.getById(id);
+    async updatePrices(id: number, data: UpdateCategoryPricesDTO, branchId: number): Promise<PriceUpdateResult> {
+        await this.getById(id, branchId);
 
         if (data.percentage === 0) {
             throw new ValidationError('Percentage cannot be zero');
@@ -126,8 +126,8 @@ export class CategoryService {
             throw new ValidationError('Percentage must be between -100 and 1000');
         }
 
-        const categoryIds = await this.repository.getCategoryTree(id);
-        const affectedProducts = await this.repository.updatePricesByCategory(categoryIds, data.percentage);
+        const categoryIds = await this.repository.getCategoryTree(id, branchId);
+        const affectedProducts = await this.repository.updatePricesByCategory(categoryIds, data.percentage, branchId);
 
         return {
             affectedProducts,
@@ -136,8 +136,8 @@ export class CategoryService {
         };
     }
 
-    async previewPrices(id: number, data: UpdateCategoryPricesDTO): Promise<PricePreviewResult> {
-        await this.getById(id);
+    async previewPrices(id: number, data: UpdateCategoryPricesDTO, branchId: number): Promise<PricePreviewResult> {
+        await this.getById(id, branchId);
 
         if (data.percentage === 0) {
             throw new ValidationError('Percentage cannot be zero');
@@ -147,8 +147,8 @@ export class CategoryService {
             throw new ValidationError('Percentage must be between -100 and 1000');
         }
 
-        const categoryIds = await this.repository.getCategoryTree(id);
-        const products = await this.repository.getProductsByCategories(categoryIds);
+        const categoryIds = await this.repository.getCategoryTree(id, branchId);
+        const products = await this.repository.getProductsByCategories(categoryIds, branchId);
 
         const productsWithNewPrice = products.map(product => {
             const currentPrice = Number(product.price);

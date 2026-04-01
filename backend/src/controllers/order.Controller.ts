@@ -23,6 +23,7 @@ export class OrderController {
                 ...(search && { search })
             };
 
+            // Sin filtro de branch - se ven globalmente
             const result = await this.service.getAll({ page, limit }, filters);
 
             res.status(200).json(result);
@@ -35,8 +36,9 @@ export class OrderController {
     getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const order = await this.service.getById(id);
+            const order = await this.service.getById(id, branchId);
 
             res.status(200).json(order);
         } catch (err) {
@@ -47,7 +49,8 @@ export class OrderController {
     // Crear una nueva orden (entrada o salida)
     create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const order = await this.service.create(req.body);
+            const branchId = req.user!.branch_id;
+            const order = await this.service.create(req.body, branchId);
 
             res.status(201).json(order);
         } catch (err) {
@@ -59,8 +62,9 @@ export class OrderController {
     update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const order = await this.service.update(id, req.body);
+            const order = await this.service.update(id, req.body, branchId);
 
             res.status(200).json(order);
         } catch (err) {
@@ -72,8 +76,9 @@ export class OrderController {
     delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            await this.service.delete(id);
+            await this.service.delete(id, branchId);
 
             res.status(204).send();
         } catch (err) {
@@ -84,6 +89,7 @@ export class OrderController {
     // Obtener estadísticas de órdenes
     getStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
+            // Stats globales (sin filtro de branch)
             const stats = await this.service.getStats();
 
             res.status(200).json(stats);

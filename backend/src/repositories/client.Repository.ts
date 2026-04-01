@@ -1,18 +1,19 @@
 import { pool } from '../db/db';
 import { ClientRow, CreateClientDTO, UpdateClientDTO, PaginationParams } from '../types/types';
-import { ResultSetHeader } from 'mysql2/promise';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
 export class ClientRepository {
     async findAll(
         pagination: PaginationParams,
+        branchId: number,
         filters?: { search?: string },
         sort?: { field: string; order: 'ASC' | 'DESC' }
     ): Promise<{ clients: ClientRow[], total: number }> {
         const offset = (pagination.page - 1) * pagination.limit;
 
         // ← Construir WHERE para búsqueda
-        const whereClauses: string[] = [];
-        const params: any[] = [];
+        const whereClauses: string[] = ['branch_id = ?'];
+        const params: any[] = [branchId];
 
         if (filters?.search) {
             whereClauses.push('(name LIKE ? OR cuil LIKE ? OR email LIKE ? OR phone LIKE ?)');
@@ -56,42 +57,43 @@ export class ClientRepository {
         };
     }
 
-    async findById(id: number): Promise<ClientRow | null> {
+    async findById(id: number, branchId: number): Promise<ClientRow | null> {
         const [rows] = await pool.query<ClientRow[]>(
-            'SELECT * FROM clients WHERE id = ?',
-            [id]
+            'SELECT * FROM clients WHERE id = ? AND branch_id = ?',
+            [id, branchId]
         );
 
         return rows[0] || null;
     }
 
-    async findByCuil(cuil: string): Promise<ClientRow | null> {
+    async findByCuil(cuil: string, branchId: number): Promise<ClientRow | null> {
         const [rows] = await pool.query<ClientRow[]>(
-            'SELECT * FROM clients WHERE cuil = ?',
-            [cuil]
+            'SELECT * FROM clients WHERE cuil = ? AND branch_id = ?',
+            [cuil, branchId]
         );
 
         return rows[0] || null;
     }
 
-    async create(data: CreateClientDTO): Promise<number> {
+    async create(data: CreateClientDTO, branchId: number): Promise<number> {
         const [result] = await pool.query<ResultSetHeader>(
-            `INSERT INTO clients (name, phone, email, address, cuil, tax_condition) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO clients (name, phone, email, address, cuil, tax_condition, branch_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
                 data.name,
                 data.phone || null,
                 data.email || null,
                 data.address || null,
                 data.cuil,
-                data.tax_condition
+                data.tax_condition,
+                branchId
             ]
         );
 
         return result.insertId;
     }
 
-    async update(id: number, data: UpdateClientDTO): Promise<boolean> {
+    async update(id: number, data: UpdateClientDTO, branchId: number): Promise<boolean> {
         const fields: string[] = [];
         const values: any[] = [];
 
@@ -122,34 +124,34 @@ export class ClientRepository {
 
         if (fields.length === 0) return false;
 
-        values.push(id);
+        values.push(id, branchId);
 
         const [result] = await pool.query<ResultSetHeader>(
-            `UPDATE clients SET ${fields.join(', ')} WHERE id = ?`,
+            `UPDATE clients SET ${fields.join(', ')} WHERE id = ? AND branch_id = ?`,
             values
         );
 
         return result.affectedRows > 0;
     }
 
-    async delete(id: number): Promise<boolean> {
+    async delete(id: number, branchId: number): Promise<boolean> {
         const [result] = await pool.query<ResultSetHeader>(
-            'DELETE FROM clients WHERE id = ?',
-            [id]
+            'DELETE FROM clients WHERE id = ? AND branch_id = ?',
+            [id, branchId]
         );
 
         return result.affectedRows > 0;
     }
 
-    async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+    async search(query: string, branchId: number, limit: number = 10): Promise<{ id: number; name: string }[]> {
         const searchTerm = `%${query}%`;
-        const [rows] = await pool.query<{ id: number; name: string }[]>(
+        const [rows] = await pool.query<RowDataPacket[]>(
             `SELECT id, name FROM clients 
-             WHERE name LIKE ? OR cuil LIKE ? OR email LIKE ? OR phone LIKE ?
+             WHERE (name LIKE ? OR cuil LIKE ? OR email LIKE ? OR phone LIKE ?) AND branch_id = ?
              ORDER BY name LIMIT ?`,
-            [searchTerm, searchTerm, searchTerm, searchTerm, limit]
+            [searchTerm, searchTerm, searchTerm, searchTerm, branchId, limit]
         );
 
-        return rows;
+        return rows as { id: number; name: string }[];
     }
 }

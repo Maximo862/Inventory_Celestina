@@ -31,7 +31,9 @@ export class ProductController {
                 ...(order && { order })
             };
 
-            const result = await this.service.getAll({ page, limit }, filters, sortParams);
+            const branchId = req.user!.branch_id;
+            console.log("ACA MIRA : ", req.user)
+            const result = await this.service.getAll({ page, limit }, branchId, filters, sortParams);
 
             res.status(200).json(result);
         } catch (err) {
@@ -42,8 +44,9 @@ export class ProductController {
     getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const product = await this.service.getById(id);
+            const product = await this.service.getById(id, branchId);
 
             res.status(200).json(product);
         } catch (err) {
@@ -53,7 +56,8 @@ export class ProductController {
 
     create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const product = await this.service.create(req.body);
+            const branchId = req.user!.branch_id;
+            const product = await this.service.create(req.body, branchId);
 
             res.status(201).json(product);
         } catch (err) {
@@ -64,8 +68,9 @@ export class ProductController {
     update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            const product = await this.service.update(id, req.body);
+            const product = await this.service.update(id, req.body, branchId);
 
             res.status(200).json(product);
         } catch (err) {
@@ -76,8 +81,9 @@ export class ProductController {
     delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
+            const branchId = req.user!.branch_id;
 
-            await this.service.delete(id);
+            await this.service.delete(id, branchId);
 
             res.status(204).send();
         } catch (err) {
@@ -89,8 +95,9 @@ export class ProductController {
         try {
             const query = req.query.query as string;
             const limit = parseInt(req.query.limit as string) || 10;
+            const branchId = req.user!.branch_id;
 
-            const results = await this.service.search(query, limit);
+            const results = await this.service.search(query, branchId, limit);
 
             res.status(200).json(results);
         } catch (err) {

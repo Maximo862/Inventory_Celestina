@@ -50,6 +50,7 @@ export default App;
 // - Multisucursal
 // - AFIP
 // - Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
+// - Poner el ojito, cuando estas poniendo la contraseña. 
 
 // EXTRAS : 
 
@@ -66,3 +67,7 @@ export default App;
 // - Querys dinamicas 
 
 // - Manejo de errores 
+
+// - Multi sucursal 
+
+// - Manejo masivo de precios por porcentaje 

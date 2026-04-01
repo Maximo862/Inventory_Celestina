@@ -1,14 +1,16 @@
 import { loginUser, registerUser, verifyUser } from "../services/auth.Service";
 import { Request, Response, NextFunction } from "express";
+import { findUserById } from "../repositories/auth.Repository";
 
 export async function registerAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, branch_id } = req.body;
 
     const userData = await registerUser({
       email,
       password,
-      role
+      role,
+      branch_id
     });
 
     res
@@ -23,7 +25,8 @@ export async function registerAuth(req: Request, res: Response, next: NextFuncti
         user: {
           id: userData.id,
           email,
-          role: userData.role
+          role: userData.role,
+          branch_id: userData.branch_id
         },
       });
   } catch (err) {
@@ -37,6 +40,9 @@ export async function loginAuth(req: Request, res: Response, next: NextFunction)
 
     const userData = await loginUser({ email, password });
 
+    // Obtener branch_id del usuario
+    const user = await findUserById(userData.id);
+
     res
       .cookie("token", userData.token, {
         httpOnly: true,
@@ -49,7 +55,8 @@ export async function loginAuth(req: Request, res: Response, next: NextFunction)
         user: {
           id: userData.id,
           email,
-          role: userData.role
+          role: userData.role,
+          branch_id: user?.branch_id || null
         },
       });
   } catch (err) {

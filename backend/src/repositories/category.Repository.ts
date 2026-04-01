@@ -4,10 +4,11 @@ import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 export class CategoryRepository {
 
-    async findAll(): Promise<{ categories: CategoryRow[] }> {
+    async findAll(branchId: number): Promise<{ categories: CategoryRow[] }> {
 
         const [categories] = await pool.query<CategoryRow[]>(
-            'SELECT * FROM categories ORDER BY parent_id ASC, name ASC',
+            'SELECT * FROM categories WHERE branch_id = ? ORDER BY parent_id ASC, name ASC',
+            [branchId]
         );
 
         return {
@@ -15,34 +16,34 @@ export class CategoryRepository {
         };
     }
 
-    async findById(id: number): Promise<CategoryRow | null> {
+    async findById(id: number, branchId: number): Promise<CategoryRow | null> {
         const [rows] = await pool.query<CategoryRow[]>(
-            'SELECT * FROM categories WHERE id = ?',
-            [id]
+            'SELECT * FROM categories WHERE id = ? AND branch_id = ?',
+            [id, branchId]
         );
 
         return rows[0] || null;
     }
 
-    async findByName(name: string): Promise<CategoryRow | null> {
+    async findByName(name: string, branchId: number): Promise<CategoryRow | null> {
         const [rows] = await pool.query<CategoryRow[]>(
-            'SELECT * FROM categories WHERE name = ?',
-            [name]
+            'SELECT * FROM categories WHERE name = ? AND branch_id = ?',
+            [name, branchId]
         );
 
         return rows[0] || null;
     }
 
-    async create(data: CreateCategoryDTO): Promise<number> {
+    async create(data: CreateCategoryDTO, branchId: number): Promise<number> {
         const [result] = await pool.query<ResultSetHeader>(
-            'INSERT INTO categories (name, parent_id) VALUES (?, ?)',
-            [data.name, data.parent_id || null]
+            'INSERT INTO categories (name, parent_id, branch_id) VALUES (?, ?, ?)',
+            [data.name, data.parent_id || null, branchId]
         );
 
         return result.insertId;
     }
 
-    async update(id: number, data: UpdateCategoryDTO): Promise<boolean> {
+    async update(id: number, data: UpdateCategoryDTO, branchId: number): Promise<boolean> {
         const fields: string[] = [];
         const values: any[] = [];
 
@@ -58,20 +59,20 @@ export class CategoryRepository {
 
         if (fields.length === 0) return false;
 
-        values.push(id);
+        values.push(id, branchId);
 
         const [result] = await pool.query<ResultSetHeader>(
-            `UPDATE categories SET ${fields.join(', ')} WHERE id = ?`,
+            `UPDATE categories SET ${fields.join(', ')} WHERE id = ? AND branch_id = ?`,
             values
         );
 
         return result.affectedRows > 0;
     }
 
-    async delete(id: number): Promise<boolean> {
+    async delete(id: number, branchId: number): Promise<boolean> {
         const [result] = await pool.query<ResultSetHeader>(
-            'DELETE FROM categories WHERE id = ?',
-            [id]
+            'DELETE FROM categories WHERE id = ? AND branch_id = ?',
+            [id, branchId]
         );
 
         return result.affectedRows > 0;
@@ -80,51 +81,54 @@ export class CategoryRepository {
     // MÉTODOS ESPECÍFICOS PARA SUBCATEGORÍAS
 
     // Obtener solo categorías padre (parent_id = null)
-    async findParentCategories(): Promise<CategoryRow[]> {
+    async findParentCategories(branchId: number): Promise<CategoryRow[]> {
         const [rows] = await pool.query<CategoryRow[]>(
-            'SELECT * FROM categories WHERE parent_id IS NULL ORDER BY name ASC'
+            'SELECT * FROM categories WHERE parent_id IS NULL AND branch_id = ? ORDER BY name ASC',
+            [branchId]
         );
 
         return rows;
     }
 
     // Obtener subcategorías de una categoría específica
-    async findSubcategories(parentId: number): Promise<CategoryRow[]> {
+    async findSubcategories(parentId: number, branchId: number): Promise<CategoryRow[]> {
         const [rows] = await pool.query<CategoryRow[]>(
-            'SELECT * FROM categories WHERE parent_id = ? ORDER BY name ASC',
-            [parentId]
+            'SELECT * FROM categories WHERE parent_id = ? AND branch_id = ? ORDER BY name ASC',
+            [parentId, branchId]
         );
 
         return rows;
     }
 
     // Obtener todas las categorías con estructura plana
-    async findAllFlat(): Promise<CategoryRow[]> {
+    async findAllFlat(branchId: number): Promise<CategoryRow[]> {
         const [rows] = await pool.query<CategoryRow[]>(
-            'SELECT * FROM categories ORDER BY parent_id ASC, name ASC'
+            'SELECT * FROM categories WHERE branch_id = ? ORDER BY parent_id ASC, name ASC',
+            [branchId]
         );
 
         return rows;
     }
 
-    async getCategoryTree(categoryId: number): Promise<number[]> {
+    async getCategoryTree(categoryId: number, branchId: number): Promise<number[]> {
         const [rows] = await pool.query<RowDataPacket[]>(
             `WITH RECURSIVE category_tree AS (
                 SELECT id, parent_id, 0 AS level
-                FROM categories WHERE id = ?
+                FROM categories WHERE id = ? AND branch_id = ?
                 UNION ALL
                 SELECT c.id, c.parent_id, ct.level + 1
                 FROM categories c
                 INNER JOIN category_tree ct ON c.parent_id = ct.id
+                WHERE c.branch_id = ?
             )
             SELECT id FROM category_tree`,
-            [categoryId]
+            [categoryId, branchId, branchId]
         );
 
         return rows.map(row => row.id as number);
     }
 
-    async updatePricesByCategory(categoryIds: number[], percentage: number): Promise<number> {
+    async updatePricesByCategory(categoryIds: number[], percentage: number, branchId: number): Promise<number> {
         const connection = await pool.getConnection();
 
         try {
@@ -133,8 +137,8 @@ export class CategoryRepository {
             const [result] = await connection.query<ResultSetHeader>(
                 `UPDATE products
                  SET price = ROUND(price * (1 + ? / 100.0), 2)
-                 WHERE category_id IN (?)`,
-                [percentage, categoryIds]
+                 WHERE category_id IN (?) AND branch_id = ?`,
+                [percentage, categoryIds, branchId]
             );
 
             await connection.commit();
@@ -147,10 +151,10 @@ export class CategoryRepository {
         }
     }
 
-    async getProductsByCategories(categoryIds: number[]): Promise<RowDataPacket[]> {
+    async getProductsByCategories(categoryIds: number[], branchId: number): Promise<RowDataPacket[]> {
         const [rows] = await pool.query<RowDataPacket[]>(
-            'SELECT id, name, price FROM products WHERE category_id IN (?) ORDER BY name',
-            [categoryIds]
+            'SELECT id, name, price FROM products WHERE category_id IN (?) AND branch_id = ? ORDER BY name',
+            [categoryIds, branchId]
         );
         return rows;
     }

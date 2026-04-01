@@ -7,6 +7,7 @@ declare global {
         id: number;
         role: 'admin' | 'employee';
         email?: string;
+        branch_id: number;
       };
     }
   }
@@ -71,11 +72,13 @@ export interface UserDB {
   email: string;
   password?: string;
   role: 'admin' | 'employee';
+  branch_id?: number;
 }
 
 export type DecodedToken = {
   id: number;
   role: 'admin' | 'employee';
+  branch_id: number;
 };
 
 // Category Types
@@ -202,25 +205,25 @@ export interface ClientRow extends RowDataPacket, Client { }
 
 // Price Update Types
 export interface UpdateCategoryPricesDTO {
-    percentage: number;
+  percentage: number;
 }
 
 export interface PriceUpdateResult {
-    affectedProducts: number;
-    categoryId: number;
-    percentage: number;
+  affectedProducts: number;
+  categoryId: number;
+  percentage: number;
 }
 
 export interface PricePreviewResult {
-    categoryId: number;
-    categoryIds: number[];
-    percentage: number;
-    affectedProducts: {
-        id: number;
-        name: string;
-        currentPrice: number;
-        newPrice: number;
-    }[];
-    totalCurrentPrice: number;
-    totalNewPrice: number;
+  categoryId: number;
+  categoryIds: number[];
+  percentage: number;
+  affectedProducts: {
+    id: number;
+    name: string;
+    currentPrice: number;
+    newPrice: number;
+  }[];
+  totalCurrentPrice: number;
+  totalNewPrice: number;
 }

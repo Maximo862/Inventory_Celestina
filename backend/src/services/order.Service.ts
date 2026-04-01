@@ -12,7 +12,7 @@ export class OrderService {
     this.productRepo = new ProductRepository();
   }
 
-  async create(data: CreateOrderDTO) {
+  async create(data: CreateOrderDTO, branchId: number) {
     // Validaciones
     if (!data.type || (data.type !== 'entry' && data.type !== 'exit')) {
       throw new ValidationError('Order type must be "entry" or "exit"');
@@ -33,7 +33,7 @@ export class OrderService {
       }
     }
 
-    // Si es salida, validar stock
+    // Si es salida, validar stock (solo productos de la misma sucursal)
     if (data.type === 'exit' && data.document_type === "remito") {
       const productTotals: Record<number, number> = {};
 
@@ -47,7 +47,8 @@ export class OrderService {
       if (data.type === 'exit' && data.document_type === 'remito') {
         for (const idProduct in productTotals) {
           const productId = Number(idProduct)
-          const product = await this.productRepo.findById(productId);
+          // Buscar solo productos de la misma sucursal
+          const product = await this.productRepo.findById(productId, branchId);
 
           if (!product) {
             throw new NotFoundError('Product', productId);
@@ -64,23 +65,25 @@ export class OrderService {
       }
     }
 
-    // Si es entrada, verificar que los productos existan
+    // Si es entrada, verificar que los productos existan (de la misma sucursal)
     if (data.type === 'entry') {
       for (const item of data.items) {
-        const product = await this.productRepo.findById(item.product_id);
+        const product = await this.productRepo.findById(item.product_id, branchId);
         if (!product) {
           throw new NotFoundError('Product', item.product_id);
         }
       }
     }
 
-    // Crear orden
-    const orderId = await this.orderRepo.create(data);
+    // Crear orden con branchId
+    const orderId = await this.orderRepo.create(data, branchId);
+    // Para findByIdWithItems no filtramos por branch para poder ver la orden
     return this.orderRepo.findByIdWithItems(orderId);
   }
 
-  async getById(id: number) {
-    const order = await this.orderRepo.findByIdWithItems(id);
+  async getById(id: number, branchId: number) {
+    // Verificar que la orden pertenece a la sucursal
+    const order = await this.orderRepo.findByIdWithItems(id, branchId);
 
     if (!order) {
       throw new NotFoundError('Order', id);
@@ -93,6 +96,7 @@ export class OrderService {
     pagination: PaginationParams,
     filters?: { type?: 'entry' | 'exit'; search?: string }
   ): Promise<PaginatedResult<Order>> {
+    // Sin filtro de branch - se ven todas las órdenes globalmente
     const { orders, total } = await this.orderRepo.findAll(pagination, filters);
 
     return {
@@ -106,27 +110,28 @@ export class OrderService {
     };
   }
 
-  async update(id: number, data: UpdateOrderDTO) {
-    // Verificar que existe
-    await this.getById(id);
+  async update(id: number, data: UpdateOrderDTO, branchId: number) {
+    // Verificar que existe y pertenece a la sucursal
+    await this.getById(id, branchId);
 
-    const updated = await this.orderRepo.update(id, data);
+    const updated = await this.orderRepo.update(id, data, branchId);
 
     if (!updated) {
       throw new ValidationError('No changes were made');
     }
 
-    return this.getById(id);
+    return this.getById(id, branchId);
   }
 
-  async delete(id: number) {
-    // Verificar que existe
-    await this.getById(id);
+  async delete(id: number, branchId: number) {
+    // Verificar que existe y pertenece a la sucursal
+    await this.getById(id, branchId);
 
-    await this.orderRepo.delete(id);
+    await this.orderRepo.delete(id, branchId);
   }
 
   async getStats() {
+    // Stats globales (sin filtro de branch)
     return this.orderRepo.getStats();
   }
 }

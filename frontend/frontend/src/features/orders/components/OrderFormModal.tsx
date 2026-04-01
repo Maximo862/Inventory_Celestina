@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { FormLayout } from "@/components/FormLayout";
 import { Button } from "@/components/Button";
-import { useClients } from "@/features/clients/context/ClientContext";
 import { useProducts } from "@/features/products/context/ProductContext";
 import { ProductSearchInput } from "@/components/ProductSearchInput";
 import { ClientSearchInput } from "@/components/ClientSearchInput";
@@ -29,7 +28,6 @@ export function OrderFormModal({
   onClose,
   onSubmit,
 }: OrderFormModalProps) {
-  const { clients } = useClients()!;
   const { products } = useProducts()!;
 
   const [type, setType] = useState<"entry" | "exit">("entry");
@@ -178,11 +176,10 @@ export function OrderFormModal({
                 <button
                   type="button"
                   onClick={() => setDocumentType("proforma")}
-                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex flex-col items-center gap-1 ${
-                    documentType === "proforma"
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex flex-col items-center gap-1 ${documentType === "proforma"
                       ? "bg-[#F59E0B]/10 border-[#F59E0B] text-[#F59E0B]"
                       : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
-                  }`}
+                    }`}
                 >
                   <span className="text-2xl">📋</span>
                   Presupuesto
@@ -190,19 +187,18 @@ export function OrderFormModal({
                 <button
                   type="button"
                   onClick={() => setDocumentType("remito")}
-                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex flex-col items-center gap-1 ${
-                    documentType === "remito"
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex flex-col items-center gap-1 ${documentType === "remito"
                       ? "bg-[#4FA3D1]/10 border-[#4FA3D1] text-[#4FA3D1]"
                       : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
-                  }`}
+                    }`}
                 >
                   <span className="text-2xl">📦</span>
                   Remito
                 </button>
               </div>
               <p className="mt-2 text-sm text-[#64748B]">
-                {documentType === "proforma" 
-                  ? "Presupuesto sin movimiento de stock" 
+                {documentType === "proforma"
+                  ? "Presupuesto sin movimiento de stock"
                   : "Remito que registra entrada/salida de inventario"}
               </p>
             </div>
@@ -215,8 +211,7 @@ export function OrderFormModal({
                 <button
                   type="button"
                   onClick={() => setType("entry")}
-                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
-                      type === "entry"
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${type === "entry"
                       ? "bg-[#16A34A]/10 border-[#16A34A] text-[#16A34A]"
                       : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                     }`}
@@ -226,8 +221,7 @@ export function OrderFormModal({
                 <button
                   type="button"
                   onClick={() => setType("exit")}
-                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${
-                      type === "exit"
+                  className={`p-4 rounded-xl border-2 text-lg font-bold transition-all flex items-center justify-center gap-2 ${type === "exit"
                       ? "bg-[#DC2626]/10 border-[#DC2626] text-[#DC2626]"
                       : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                     }`}
