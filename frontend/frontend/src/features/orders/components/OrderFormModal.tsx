@@ -4,6 +4,7 @@ import { Button } from "@/components/Button";
 import { useClients } from "@/features/clients/context/ClientContext";
 import { useProducts } from "@/features/products/context/ProductContext";
 import { ProductSearchInput } from "@/components/ProductSearchInput";
+import { ClientSearchInput } from "@/components/ClientSearchInput";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 import type { Order, CreateOrderDTO, UpdateOrderDTO, DocumentType } from "@/types/types";
@@ -245,19 +246,11 @@ export function OrderFormModal({
           >
             Cliente (opcional)
           </label>
-          <select
-            id="client"
+          <ClientSearchInput
             value={clientId}
-            onChange={(e) => setClientId(e.target.value)}
-            className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
-          >
-            <option value="">Sin cliente</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
+            onChange={setClientId}
+            placeholder="Buscar cliente..."
+          />
         </div>
 
         <div>

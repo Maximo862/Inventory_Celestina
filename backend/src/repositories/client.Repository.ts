@@ -140,4 +140,16 @@ export class ClientRepository {
 
         return result.affectedRows > 0;
     }
+
+    async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+        const searchTerm = `%${query}%`;
+        const [rows] = await pool.query<{ id: number; name: string }[]>(
+            `SELECT id, name FROM clients 
+             WHERE name LIKE ? OR cuil LIKE ? OR email LIKE ? OR phone LIKE ?
+             ORDER BY name LIMIT ?`,
+            [searchTerm, searchTerm, searchTerm, searchTerm, limit]
+        );
+
+        return rows;
+    }
 }

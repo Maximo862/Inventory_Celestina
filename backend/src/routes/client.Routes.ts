@@ -7,6 +7,7 @@ const clientRouter = Router();
 const controller = new ClientController();
 
 clientRouter.get('/', authRequired, requireRole(['admin', 'employee']), controller.getAll);
+clientRouter.get('/search', authRequired, requireRole(['admin', 'employee']), controller.search);
 clientRouter.get('/:id', authRequired, requireRole(['admin', 'employee']), controller.getById);
 clientRouter.post('/', authRequired, requireRole('admin'),controller.create);
 clientRouter.patch('/:id', authRequired, requireRole('admin'),controller.update);

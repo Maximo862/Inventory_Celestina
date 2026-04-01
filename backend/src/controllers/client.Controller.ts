@@ -77,4 +77,17 @@ export class ClientController {
             next(err);
         }
     };
+
+    search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const query = req.query.query as string;
+            const limit = parseInt(req.query.limit as string) || 10;
+
+            const results = await this.service.search(query, limit);
+
+            res.status(200).json(results);
+        } catch (err) {
+            next(err);
+        }
+    };
 }

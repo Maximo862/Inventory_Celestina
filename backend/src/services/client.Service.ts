@@ -107,4 +107,12 @@ export class ClientService {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
+
+    async search(query: string, limit: number = 10): Promise<{ id: number; name: string }[]> {
+        if (!query || query.trim() === '') {
+            return [];
+        }
+
+        return this.repository.search(query.trim(), limit);
+    }
 }

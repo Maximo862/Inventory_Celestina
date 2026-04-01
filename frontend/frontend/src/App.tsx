@@ -44,8 +44,6 @@ function App() {
 
 export default App;
 
-//Problemas : 2- Select de productos limitado en remitos. 
-
 
 // - Guardar quien creo cada Orden
 // - Factura proforma 
@@ -54,8 +52,6 @@ export default App;
 // - Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
 
 // EXTRAS : 
-
-// - Mirar el tema de la ALERTA DE BAJO STOCK
 
 // Logros de este proyecto :
 

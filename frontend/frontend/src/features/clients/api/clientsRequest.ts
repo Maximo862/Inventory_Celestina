@@ -55,3 +55,6 @@ export const deleteClientRequest = (id: number) =>
     fetchAPI<void>(`/clients/${id}`, {
         method: "DELETE",
     });
+
+export const searchClientsRequest = (query: string, limit: number = 10) =>
+    fetchAPI<{ id: number; name: string }[]>(`/clients/search?query=${encodeURIComponent(query)}&limit=${limit}`);
