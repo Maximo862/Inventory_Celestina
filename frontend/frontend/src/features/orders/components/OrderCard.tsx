@@ -1,6 +1,6 @@
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import { FiEdit2, FiTrash2, FiEye, FiArrowDown, FiArrowUp, FiUser } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiEye, FiArrowDown, FiArrowUp, FiUser, FiMapPin } from "react-icons/fi";
 import type { Order } from "@/types/types";
 import { formatARS } from "@/utils/formatCurrency";
 
@@ -69,6 +69,20 @@ export function OrderCard({
 
           {/* Información adicional */}
           <div className="space-y-2">
+            {/* Sucursal */}
+            {(order as any).branch_name && (
+              <div className="flex items-center gap-2 text-lg">
+                <FiMapPin className="text-[#64748B]" />
+                <span className="font-semibold text-[#64748B]">Sucursal:</span>
+                <span className="text-[#0F172A]">{(order as any).branch_name}</span>
+                {(order as any).branch_address && (
+                  <span className="text-[#64748B] text-sm">
+                    - {(order as any).branch_address}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Cliente */}
             {clientName && (
               <div className="flex items-center gap-2 text-lg">

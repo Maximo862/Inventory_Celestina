@@ -67,13 +67,15 @@ export class OrderRepository {
     async findByIdWithItems(id: number, branchId?: number): Promise<any> {
         // Si se pasa branchId, filtrar por él (para validar propiedad)
         const query = branchId 
-            ? `SELECT o.*, c.name as client_name 
+            ? `SELECT o.*, c.name as client_name, b.name as branch_name, b.address as branch_address
                FROM orders o 
-               LEFT JOIN clients c ON o.client_id = c.id 
+               LEFT JOIN clients c ON o.client_id = c.id
+               LEFT JOIN branches b ON o.branch_id = b.id
                WHERE o.id = ? AND o.branch_id = ?`
-            : `SELECT o.*, c.name as client_name 
+            : `SELECT o.*, c.name as client_name, b.name as branch_name, b.address as branch_address
                FROM orders o 
-               LEFT JOIN clients c ON o.client_id = c.id 
+               LEFT JOIN clients c ON o.client_id = c.id
+               LEFT JOIN branches b ON o.branch_id = b.id
                WHERE o.id = ?`;
 
         const params = branchId ? [id, branchId] : [id];
@@ -126,9 +128,12 @@ export class OrderRepository {
         const ordersQuery = `
       SELECT 
         o.*,
-        c.name as client_name
+        c.name as client_name,
+        b.name as branch_name,
+        b.address as branch_address
       FROM orders o
       LEFT JOIN clients c ON o.client_id = c.id
+      LEFT JOIN branches b ON o.branch_id = b.id
       ${whereSQL}
       ORDER BY o.created_at DESC
       LIMIT ? OFFSET ?
