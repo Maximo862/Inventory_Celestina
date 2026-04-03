@@ -1,6 +1,6 @@
 import { OrderRepository } from '../repositories/order.Repository';
 import { ProductRepository } from '../repositories/product.Repository';
-import { ValidationError, NotFoundError, InsufficientStockError } from '../utils/appError';
+import { ValidationError, NotFoundError, InsufficientStockError, ForbiddenError } from '../utils/appError';
 import type { CreateOrderDTO, UpdateOrderDTO, PaginatedResult, Order, PaginationParams } from '../types/types';
 
 export class OrderService {
@@ -81,9 +81,9 @@ export class OrderService {
     return this.orderRepo.findByIdWithItems(orderId);
   }
 
-  async getById(id: number, branchId: number) {
+  async getById(id: number) {
     // Verificar que la orden pertenece a la sucursal
-    const order = await this.orderRepo.findByIdWithItems(id, branchId);
+    const order = await this.orderRepo.findByIdWithItems(id);
 
     if (!order) {
       throw new NotFoundError('Order', id);
@@ -111,8 +111,16 @@ export class OrderService {
   }
 
   async update(id: number, data: UpdateOrderDTO, branchId: number) {
-    // Verificar que existe y pertenece a la sucursal
-    await this.getById(id, branchId);
+    const order = await this.orderRepo.getBasicById(id);
+
+    if (!order) {
+      throw new NotFoundError('Order', id);
+    }
+
+    // validar sucursal
+    if (order.branch_id !== branchId) {
+      throw new ForbiddenError('No podés modificar órdenes de otra sucursal');
+    }
 
     const updated = await this.orderRepo.update(id, data, branchId);
 
@@ -120,12 +128,19 @@ export class OrderService {
       throw new ValidationError('No changes were made');
     }
 
-    return this.getById(id, branchId);
+    return this.orderRepo.findByIdWithItems(id);
   }
 
   async delete(id: number, branchId: number) {
-    // Verificar que existe y pertenece a la sucursal
-    await this.getById(id, branchId);
+    const order = await this.orderRepo.getBasicById(id);
+
+    if (!order) {
+      throw new NotFoundError('Order', id);
+    }
+
+    if (order.branch_id !== branchId) {
+      throw new ForbiddenError('No podés eliminar órdenes de otra sucursal');
+    }
 
     await this.orderRepo.delete(id, branchId);
   }

@@ -32,7 +32,6 @@ export class ProductController {
             };
 
             const branchId = req.user!.branch_id;
-            console.log("ACA MIRA : ", req.user)
             const result = await this.service.getAll({ page, limit }, branchId, filters, sortParams);
 
             res.status(200).json(result);

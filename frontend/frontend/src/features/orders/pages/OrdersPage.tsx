@@ -390,8 +390,8 @@ export function OrdersPage() {
                               key={pageNumber}
                               onClick={() => handlePageClick(pageNumber)}
                               className={`px-4 py-2 rounded-lg text-lg font-semibold transition-colors ${currentPage === pageNumber
-                                  ? "bg-[#4FA3D1] text-white"
-                                  : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                                ? "bg-[#4FA3D1] text-white"
+                                : "bg-white text-[#0F172A] border-2 border-[#E2E8F0] hover:bg-[#F8FAFC]"
                                 }`}
                             >
                               {pageNumber}

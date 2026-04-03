@@ -36,9 +36,8 @@ export class OrderController {
     getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const id = Number(req.params.id);
-            const branchId = req.user!.branch_id;
 
-            const order = await this.service.getById(id, branchId);
+            const order = await this.service.getById(id);
 
             res.status(200).json(order);
         } catch (err) {

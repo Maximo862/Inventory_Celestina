@@ -64,23 +64,14 @@ export class OrderRepository {
     }
 
     // Obtener orden con items y detalles
-    async findByIdWithItems(id: number, branchId?: number): Promise<any> {
-        // Si se pasa branchId, filtrar por él (para validar propiedad)
-        const query = branchId 
-            ? `SELECT o.*, c.name as client_name, b.name as branch_name, b.address as branch_address
-               FROM orders o 
-               LEFT JOIN clients c ON o.client_id = c.id
-               LEFT JOIN branches b ON o.branch_id = b.id
-               WHERE o.id = ? AND o.branch_id = ?`
-            : `SELECT o.*, c.name as client_name, b.name as branch_name, b.address as branch_address
+    async findByIdWithItems(id: number): Promise<any> {
+        const query = `SELECT o.*, c.name as client_name, b.name as branch_name, b.address as branch_address
                FROM orders o 
                LEFT JOIN clients c ON o.client_id = c.id
                LEFT JOIN branches b ON o.branch_id = b.id
                WHERE o.id = ?`;
 
-        const params = branchId ? [id, branchId] : [id];
-
-        const [orders] = await pool.query<OrderRow[]>(query, params);
+        const [orders] = await pool.query<OrderRow[]>(query, [id]);
 
         if (orders.length === 0) return null;
 
@@ -96,6 +87,15 @@ export class OrderRepository {
             ...orders[0],
             items
         };
+    }
+
+    async getBasicById(id: number): Promise<OrderRow | null> {
+        const [rows] = await pool.query<OrderRow[]>(
+            'SELECT * FROM orders WHERE id = ?',
+            [id]
+        );
+
+        return rows[0] || null;
     }
 
     // Listar órdenes - SIN filtro de branch (se ven globalmente)

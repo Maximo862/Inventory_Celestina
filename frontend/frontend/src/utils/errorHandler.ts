@@ -36,6 +36,8 @@ export function handleError(error: any, action: string, itemName?: string) {
     toast.error(`${error.message}`);
   } else if (error.code === "INSUFFICIENT_STOCK") {
     toast.error(`${error.message}`);
+  } else if (error.code === "FORBIDDEN") {
+    toast.error(`${error.message}`);
   } else if (error.statusCode === 400) {
     toast.error("Datos inválidos");
   } else if (error.statusCode === 403) {

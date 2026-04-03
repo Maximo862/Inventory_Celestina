@@ -45,3 +45,9 @@ export class InsufficientStockError extends AppError {
         );
     }
 }
+
+export class ForbiddenError extends AppError {
+    constructor(message: string = 'No tienes permiso para realizar esta acción') {
+        super(message, 403, 'FORBIDDEN');
+    }
+}
