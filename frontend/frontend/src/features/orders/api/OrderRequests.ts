@@ -8,9 +8,9 @@ import type {
   PaginationParams,
 } from "@/types/types";
 
-// Obtener todas las órdenes con filtro opcional
+// Obtener todas las órdenes con filtros
 export const getAllOrdersRequest = (
-  params?: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+  params?: PaginationParams & { type?: 'entry' | 'exit'; search?: string; branch_id?: number }
 ) => {
   const queryParams = new URLSearchParams();
 
@@ -23,6 +23,10 @@ export const getAllOrdersRequest = (
 
   if (params?.search) {
     queryParams.append("search", params.search);
+  }
+
+  if (params?.branch_id) {
+    queryParams.append("branch_id", params.branch_id.toString());
   }
 
   return fetchAPI<PaginatedResponse<Order>>(

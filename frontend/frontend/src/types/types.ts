@@ -192,3 +192,15 @@ export interface PriceUpdateResult {
   categoryId: number;
   percentage: number;
 }
+
+// ============================================
+// BRANCH TYPES
+// ============================================
+export interface Branch {
+  id: number;
+  name: string;
+  address: string;
+  phone?: string;
+  created_at?: string;
+  updated_at?: string;
+}

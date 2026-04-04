@@ -9,9 +9,10 @@ import { OrderFormModal } from "../components/OrderFormModal";
 import { OrderDetailModal } from "../components/OrderDetailModal";
 import { useOrders } from "../context/OrderContext";
 import { useOrderActions } from "../hooks/useOrderActions";
-import { FiPlus, FiFileText, FiChevronLeft, FiChevronRight, FiFolder, FiArrowDown, FiArrowUp, FiCalendar, FiDollarSign } from "react-icons/fi";
+import { getBranchesRequest } from "@/features/branches/api/BranchRequests";
+import { FiPlus, FiFileText, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
-import type { Order, OrderWithDetails } from "@/types/types";
+import type { Order, OrderWithDetails, Branch } from "@/types/types";
 
 type FilterOption = "all" | "entry" | "exit";
 type SortOption = "date-desc" | "date-asc" | "amount-desc" | "amount-asc";
@@ -20,6 +21,9 @@ export function OrdersPage() {
   const { orders, loading, pagination, loadOrders } = useOrders();
   const { createOrder, updateOrder, deleteOrder, getOrderById } =
     useOrderActions();
+
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [selectedBranchId, setSelectedBranchId] = useState<number | "">("");
 
   const [formModal, setFormModal] = useState<{
     isOpen: boolean;
@@ -51,7 +55,14 @@ export function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterType, setFilterType] = useState<FilterOption>("all");
-  const isFiltering = searchTerm !== "" || filterType !== "all";
+  const isFiltering = searchTerm !== "" || filterType !== "all" || selectedBranchId !== "";
+
+  // ← CARGAR branches al inicio
+  useEffect(() => {
+    getBranchesRequest()
+      .then(setBranches)
+      .catch(console.error);
+  }, []);
 
   // ← ESTADOS: Ordenamiento (CLIENT-SIDE) y paginación
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
@@ -69,15 +80,16 @@ export function OrdersPage() {
     return () => clearTimeout(timeout);
   }, [searchTerm]);
 
-  // ← CARGAR orders cuando cambian: página, búsqueda o filtro
+  // ← CARGAR orders cuando cambian: página, búsqueda, tipo o branch
   useEffect(() => {
     loadOrders({
       page: currentPage,
       limit: itemsPerPage,
       ...(debouncedSearch && { search: debouncedSearch }),
       ...(filterType !== "all" && { type: filterType }),
+      ...(selectedBranchId !== "" && { branch_id: selectedBranchId }),
     });
-  }, [currentPage, debouncedSearch, filterType]);
+  }, [currentPage, debouncedSearch, filterType, selectedBranchId]);
 
   // Crear mapa de nombres de clientes
   const clientMap = useMemo(() => {
@@ -145,6 +157,7 @@ export function OrdersPage() {
       limit: itemsPerPage,
       ...(debouncedSearch && { search: debouncedSearch }),
       ...(filterType !== "all" && { type: filterType }),
+      ...(selectedBranchId !== "" && { branch_id: selectedBranchId }),
     });
   };
 
@@ -173,6 +186,7 @@ export function OrdersPage() {
         limit: itemsPerPage,
         ...(debouncedSearch && { search: debouncedSearch }),
         ...(filterType !== "all" && { type: filterType }),
+        ...(selectedBranchId !== "" && { branch_id: selectedBranchId }),
       });
     } finally {
       setIsDeleting(false);
@@ -257,7 +271,7 @@ export function OrdersPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* ← FILTRO POR TIPO (SERVER-SIDE) */}
               <div>
                 <label className="block text-[#0F172A] text-lg font-semibold mb-2">
@@ -270,9 +284,31 @@ export function OrdersPage() {
                   }
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
                 >
-                  <option value="all"><FiFolder /> Todos los documentos</option>
-                  <option value="entry"><FiArrowDown /> Solo entradas</option>
-                  <option value="exit"><FiArrowUp /> Solo salidas</option>
+                  <option value="all">Todos los documentos</option>
+                  <option value="entry">Solo entradas</option>
+                  <option value="exit">Solo salidas</option>
+                </select>
+              </div>
+
+              {/* ← FILTRO POR SUCURSAL (SERVER-SIDE) */}
+              <div>
+                <label className="block text-[#0F172A] text-lg font-semibold mb-2">
+                  Filtrar por sucursal
+                </label>
+                <select
+                  value={selectedBranchId}
+                  onChange={(e) => {
+                    setSelectedBranchId(e.target.value === "" ? "" : Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
+                >
+                  <option value="">Todas las sucursales</option>
+                  {branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -286,10 +322,10 @@ export function OrdersPage() {
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   className="w-full bg-white text-[#0F172A] text-lg rounded-lg p-4 border-2 border-[#E2E8F0] focus:border-[#4FA3D1] focus:outline-none focus:ring-4 focus:ring-[#4FA3D1]/20 transition duration-200"
                 >
-                  <option value="date-desc"><FiCalendar /> Más reciente primero</option>
-                  <option value="date-asc"><FiCalendar /> Más antiguo primero</option>
-                  <option value="amount-desc"><FiDollarSign /> Monto (mayor → menor)</option>
-                  <option value="amount-asc"><FiDollarSign /> Monto (menor → mayor)</option>
+                  <option value="date-desc">Más reciente primero</option>
+                  <option value="date-asc">Más antiguo primero</option>
+                  <option value="amount-desc">Monto (mayor → menor)</option>
+                  <option value="amount-asc">Monto (menor → mayor)</option>
                 </select>
               </div>
             </div>
@@ -300,13 +336,14 @@ export function OrdersPage() {
                   Mostrando {sortedOrders.length} de {pagination.total} documentos
                   totales (Página {currentPage} de {pagination.totalPages})
                 </p>
-                {(debouncedSearch || filterType !== "all" || sortBy !== "date-desc") && (
+                {(debouncedSearch || filterType !== "all" || sortBy !== "date-desc" || selectedBranchId !== "") && (
                   <button
                     onClick={() => {
                       setSearchTerm("");
                       setDebouncedSearch("");
                       setFilterType("all");
                       setSortBy("date-desc");
+                      setSelectedBranchId("");
                       setCurrentPage(1);
                     }}
                     className="text-[#4FA3D1] hover:text-[#3D8AB5] font-semibold text-lg"
@@ -331,6 +368,7 @@ export function OrdersPage() {
                   setDebouncedSearch("");
                   setFilterType("all");
                   setSortBy("date-desc");
+                  setSelectedBranchId("");
                   setCurrentPage(1);
                 }}
               >

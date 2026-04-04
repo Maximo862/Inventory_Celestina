@@ -15,10 +15,10 @@ interface OrderContextType {
   loading: boolean;
   pagination: PaginationInfo | null;
   loadOrders: (
-    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string; branch_id?: number }
   ) => Promise<void>;
   refreshOrders: (
-    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string; branch_id?: number }
   ) => Promise<void>;
 }
 
@@ -37,7 +37,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   }, [authLoading, user]);
 
   async function loadOrders(
-    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string; branch_id?: number }
   ) {
     try {
       setLoading(true);
@@ -52,7 +52,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function refreshOrders(
-    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string }
+    params: PaginationParams & { type?: 'entry' | 'exit'; search?: string; branch_id?: number }
   ) {
     await loadOrders(params);
   }

@@ -94,9 +94,8 @@ export class OrderService {
 
   async getAll(
     pagination: PaginationParams,
-    filters?: { type?: 'entry' | 'exit'; search?: string }
+    filters?: { type?: 'entry' | 'exit'; search?: string; branch_id?: number }
   ): Promise<PaginatedResult<Order>> {
-    // Sin filtro de branch - se ven todas las órdenes globalmente
     const { orders, total } = await this.orderRepo.findAll(pagination, filters);
 
     return {

@@ -98,16 +98,20 @@ export class OrderRepository {
         return rows[0] || null;
     }
 
-    // Listar órdenes - SIN filtro de branch (se ven globalmente)
+    // Listar órdenes con filtro opcional por branch
     async findAll(
         pagination: PaginationParams,
-        filters?: { type?: 'entry' | 'exit'; search?: string }
+        filters?: { type?: 'entry' | 'exit'; search?: string; branch_id?: number }
     ): Promise<{ orders: OrderRow[], total: number }> {
         const offset = (pagination.page - 1) * pagination.limit;
 
-        // ← Construir WHERE dinámicamente según filtros
         const whereClauses: string[] = [];
         const params: any[] = [];
+
+        if (filters?.branch_id) {
+            whereClauses.push('o.branch_id = ?');
+            params.push(filters.branch_id);
+        }
 
         if (filters?.type) {
             whereClauses.push('o.type = ?');
@@ -115,7 +119,6 @@ export class OrderRepository {
         }
 
         if (filters?.search) {
-            // ← Buscar por nombre de cliente o notas
             whereClauses.push('(c.name LIKE ? OR o.notes LIKE ?)');
             params.push(`%${filters.search}%`, `%${filters.search}%`);
         }

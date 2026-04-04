@@ -8,22 +8,31 @@ export class OrderController {
         this.service = new OrderService();
     }
 
-    // Obtener todas las órdenes con paginación y filtro opcional por tipo
+    // Obtener todas las órdenes con paginación y filtros
     getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
 
-            // ← Extraer filtros opcionales
             const type = req.query.type as 'entry' | 'exit' | undefined;
             const search = req.query.search as string | undefined;
+            
+            let branch_id: number | undefined;
+            if (req.query.branch_id) {
+                const parsed = parseInt(req.query.branch_id as string);
+                if (isNaN(parsed)) {
+                    res.status(400).json({ message: 'branch_id must be a number' });
+                    return;
+                }
+                branch_id = parsed;
+            }
 
             const filters = {
                 ...(type && { type }),
-                ...(search && { search })
+                ...(search && { search }),
+                ...(branch_id && { branch_id })
             };
 
-            // Sin filtro de branch - se ven globalmente
             const result = await this.service.getAll({ page, limit }, filters);
 
             res.status(200).json(result);
