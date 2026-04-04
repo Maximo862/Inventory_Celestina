@@ -45,10 +45,8 @@ function App() {
 export default App;
 
 
-// - Guardar quien creo cada Orden
-// - Factura proforma 
-// - Multisucursal
 // - AFIP
+// - Guardar quien creo cada Orden 
 // - Que los remitos no se puedan eliminar SINO ANULAR Y CON MOTIVO
 // - Poner el ojito, cuando estas poniendo la contraseña. 
 

@@ -7,6 +7,7 @@ import { formatARS } from "@/utils/formatCurrency";
 interface OrderCardProps {
   order: Order;
   clientName?: string;
+  currentUserBranchId?: number;
   onView: () => void;
   onEdit: () => void;
   onDelete: (id: number, type: string) => void;
@@ -15,6 +16,7 @@ interface OrderCardProps {
 export function OrderCard({
   order,
   clientName,
+  currentUserBranchId,
   onView,
   onEdit,
   onDelete,
@@ -29,6 +31,9 @@ export function OrderCard({
     minute: "2-digit",
   });
 
+  const orderBranchId = (order as any).branch_id;
+  const canEdit = currentUserBranchId === undefined || currentUserBranchId === null || orderBranchId === currentUserBranchId;
+
   return (
     <Card className="hover:shadow-xl transition-shadow">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -42,7 +47,7 @@ export function OrderCard({
                 ? "bg-[#F59E0B]/10 border-[#F59E0B]/30 text-[#F59E0B]" 
                 : "bg-[#4FA3D1]/10 border-[#4FA3D1]/30 text-[#4FA3D1]"
             }`}>
-              {isProforma ? "📋" : "📦"} {isProforma ? "Presupuesto" : "Remito"}
+              {isProforma ? "Presupuesto" : "Remito"}
             </span>
 
             {/* Badge de operación */}
@@ -124,27 +129,31 @@ export function OrderCard({
             Ver detalle
           </Button>
 
-          <Button
-            variant="primary"
-            size="md"
-            onClick={onEdit}
-            className="w-full flex items-center justify-center gap-2"
-          >
-            <FiEdit2 className="text-xl" />
-            Editar
-          </Button>
+          {canEdit && (
+            <>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={onEdit}
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <FiEdit2 className="text-xl" />
+                Editar
+              </Button>
 
-          <Button
-            variant="danger"
-            size="md"
-            onClick={() =>
-              onDelete(order.id, isEntry ? "entrada" : "salida")
-            }
-            className="w-full flex items-center justify-center gap-2"
-          >
-            <FiTrash2 className="text-xl" />
-            Eliminar
-          </Button>
+              <Button
+                variant="danger"
+                size="md"
+                onClick={() =>
+                  onDelete(order.id, isEntry ? "entrada" : "salida")
+                }
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <FiTrash2 className="text-xl" />
+                Eliminar
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Card>

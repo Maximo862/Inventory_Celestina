@@ -3,6 +3,7 @@ export interface User {
   email: string;
   password: string;
   role: "employee" | "admin";
+  branch_id?: number;
   created_at?: string;
 }
 

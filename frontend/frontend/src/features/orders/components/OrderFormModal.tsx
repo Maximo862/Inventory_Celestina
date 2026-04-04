@@ -4,7 +4,7 @@ import { Button } from "@/components/Button";
 import { useProducts } from "@/features/products/context/ProductContext";
 import { ProductSearchInput } from "@/components/ProductSearchInput";
 import { ClientSearchInput } from "@/components/ClientSearchInput";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiFileText, FiPackage } from "react-icons/fi";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 import type { Order, CreateOrderDTO, UpdateOrderDTO, DocumentType } from "@/types/types";
 import { formatARS } from "@/utils/formatCurrency";
@@ -181,7 +181,7 @@ export function OrderFormModal({
                       : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                     }`}
                 >
-                  <span className="text-2xl">📋</span>
+                  <FiFileText className="text-2xl" />
                   Presupuesto
                 </button>
                 <button
@@ -192,7 +192,7 @@ export function OrderFormModal({
                       : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]"
                     }`}
                 >
-                  <span className="text-2xl">📦</span>
+                  <FiPackage className="text-2xl" />
                   Remito
                 </button>
               </div>

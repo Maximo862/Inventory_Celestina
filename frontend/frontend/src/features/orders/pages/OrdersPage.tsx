@@ -9,6 +9,7 @@ import { OrderFormModal } from "../components/OrderFormModal";
 import { OrderDetailModal } from "../components/OrderDetailModal";
 import { useOrders } from "../context/OrderContext";
 import { useOrderActions } from "../hooks/useOrderActions";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { getBranchesRequest } from "@/features/branches/api/BranchRequests";
 import { FiPlus, FiFileText, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
@@ -21,6 +22,9 @@ export function OrdersPage() {
   const { orders, loading, pagination, loadOrders } = useOrders();
   const { createOrder, updateOrder, deleteOrder, getOrderById } =
     useOrderActions();
+  const { user } = useAuth();
+
+  const currentUserBranchId = user?.branch_id;
 
   const [branches, setBranches] = useState<Branch[]>([]);
   const [selectedBranchId, setSelectedBranchId] = useState<number | "">("");
@@ -383,6 +387,7 @@ export function OrdersPage() {
                     key={order.id}
                     order={order}
                     clientName={clientMap.get(order.id)}
+                    currentUserBranchId={currentUserBranchId}
                     onView={() => handleView(order)}
                     onEdit={() => handleEdit(order)}
                     onDelete={handleDeleteClick}
