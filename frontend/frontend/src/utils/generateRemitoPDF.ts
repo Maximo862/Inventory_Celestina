@@ -1,12 +1,11 @@
 import { jsPDF } from "jspdf";
 import type { OrderWithDetails } from "@/types/types";
 
-const EMPRESA_NOMBRE = "La Celestina";
-const EMPRESA_DIRECCION = "Fermin Durand 543, Pigue";
-
 export function generateRemitoPDF(order: OrderWithDetails) {
+  const EMPRESA_NOMBRE = (order as any).branch_name;
+  const EMPRESA_DIRECCION = (order as any).branch_address;
   const doc = new jsPDF();
-  
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
   const contentWidth = pageWidth - margin * 2;
@@ -64,7 +63,7 @@ export function generateRemitoPDF(order: OrderWithDetails) {
 
   const colProducto = margin;
   const colCantidad = margin + contentWidth * 0.7;
-  
+
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.text("Producto", colProducto, y);
@@ -74,10 +73,10 @@ export function generateRemitoPDF(order: OrderWithDetails) {
 
   doc.setFont("helvetica", "normal");
   order.items.forEach((item) => {
-    const productName = item.product_name.length > 40 
-      ? item.product_name.substring(0, 37) + "..." 
+    const productName = item.product_name.length > 40
+      ? item.product_name.substring(0, 37) + "..."
       : item.product_name;
-    
+
     doc.text(productName, colProducto, y);
     doc.text(String(item.quantity), colCantidad, y);
     y += 7;
